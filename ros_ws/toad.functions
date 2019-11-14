@@ -1,0 +1,93 @@
+#!/bin/bash
+# super sophisticated control script for nearly everything - functions
+# written by Marcel Ebbrecht <marcel.ebbrecht@googlemail.com>
+
+### IMPORTANT: Copy to toad.settings, configure and set CONFIGURED to 1 ###
+# preamble
+LANG=C
+PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+
+# functions
+# hello world
+function superSophisticatedHello {
+    echo
+    echo "Welcome to our super sophisticated control script"
+    echo
+}
+
+# help message
+function toadHelpMain {
+    echo "usage: toad.sh help"
+    echo "               system help"
+    echo "               car help"
+    echo "               init"
+}
+
+# help message for system mode
+function toadHelpSystem {
+    echo "usage: toad.sh system help"
+    echo
+    echo "       toad.sh system sshkeys [cron]"
+    echo "       Overwrites current users authorized keys from"
+    echo "       branch given in settings ($BRANCHBUILD)."
+    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "       toad.sh system rebuild [cron]"
+    echo "       Rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "       toad.sh system resetbuild [cron]"
+    echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "       toad.sh system run [nogui]"
+    echo "       Starts simulation, add nogui argument to disable gazebo client."
+}
+
+# help message for car mode
+function toadHelpCar {
+    echo
+    echo "       toad.sh car sshkeys [cron]"
+    echo "       Overwrites current users authorized keys from"
+    echo "       branch given in settings ($BRANCHBUILD)."
+    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "       toad.sh car rebuild [cron]"
+    echo "       Rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "       toad.sh car resetbuild [cron]"
+    echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "       toad.sh car run"
+    echo "       Starts software on car."
+}
+
+# get number of active display session
+function getActiveDisplay {
+    DISPLAY=""
+    while read session; do
+        set -- $session; tty=$2; display=$3
+        if [ "$display" != "-" ]; then
+            [ "$DISPLAY" == "" ] && DISPLAY="$display"
+            [ "$tty" == "$(cat /sys/class/tty/tty0/active)" ] && DISPLAY="$display";
+        fi
+    done <<< "$(w -hs)"
+    echo "$DISPLAY"
+}
+
+# ask user for confirmation
+# 1: message to print
+function toadConfirmationRequest {
+    MESSAGE="$1"
+    echo $MESSAGE
+    echo
+    echo "Please press enter to proceed or Ctrl+C to cancel"
+    read
+}
+
+# get active branch
+function getActiveBranch {
+    echo $(git branch | grep "*" | cut -d " " -f 2-)
+}
