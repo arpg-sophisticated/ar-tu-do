@@ -80,12 +80,13 @@ case $1 in
             resetbuild)
                 if [[ "$3" != "cron" ]]; then
                     toadConfirmationRequest "This will delete and rebuild"
+                    toadConfirmationRequest "WARNING: This will reset branch and remove any changes"
                 fi
                 echo "Starting rebuild, please wait ..."
                 echo
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHBUILD
-                #git reset --hard
+                git reset --hard
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -103,7 +104,7 @@ case $1 in
                 fi
                 source $PATHROS
                 source $PATHSETUP
-                roslaunch launch/gazebo.launch
+                roslaunch launch/gazebo.launch $NOGUI
             ;;
             *)
                 toadHelpSystem
@@ -141,7 +142,7 @@ case $1 in
                 echo
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHCAR
-                #git reset --hard
+                git reset --hard
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -153,6 +154,7 @@ case $1 in
             resetbuild)
                 if [[ "$3" != "cron" ]]; then
                     toadConfirmationRequest "This will delete and rebuild"
+                    toadConfirmationRequest "WARNING: This will reset branch and remove any changes"
                 fi
                 echo "Starting rebuild, please wait ..."
                 echo
