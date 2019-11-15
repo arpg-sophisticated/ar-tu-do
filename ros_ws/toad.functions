@@ -20,7 +20,7 @@ function toadHelpMain {
     echo "usage: toad.sh help"
     echo "               system help"
     echo "               car help"
-    echo "               init"
+    echo "               init help"
 }
 
 # help message for system mode
@@ -64,6 +64,21 @@ function toadHelpCar {
     echo "       Starts software on car."
 }
 
+# help message for initializing the system
+function toadHelpInit {
+    echo "usage: toad.sh init help"
+    echo
+    echo "       toad.sh init system [force]"
+    echo "       This will install everything you need on system side."
+    echo "       Please ensure, that you're allowed to sudo."
+    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "       toad.sh init ros [force]"
+    echo "       This will install everything you need on ros side."
+    echo "       Please ensure, that you're allowed to sudo."
+    echo "       Add force argument to suppress compatibility check"
+}
+
 # get number of active display session
 function getActiveDisplay {
     DISPLAY=""
@@ -85,6 +100,15 @@ function toadConfirmationRequest {
     echo
     echo "Please press enter to proceed or Ctrl+C to cancel"
     read
+}
+
+# print system properties for init
+function toadInitParameters {
+    echo "Distribution:        $DISTRIBUTION"
+    echo "Codename:            $CODENAME"
+    echo "Version:             $VERSION"
+    echo "Forced installation: $FORCED"
+    echo
 }
 
 # get active branch
