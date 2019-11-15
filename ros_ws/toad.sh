@@ -207,67 +207,253 @@ case $1 in
             fi
             FORCED="no"
         fi
+        
+        #
+        #read RESULT
+        #while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+        #    toadConfirmationEnter "This will install all required system packages"
+        #    read RESULT
+        #done
+        #echo $RESULT
+#exit
+
         case $2 in
             system)
                 toadInitParameters
+                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
                 toadConfirmationRequest "This will install all required system packages"
                 if [[ $VERSION == '16.04' ]]; then
-                    sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-                    sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-                    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-                    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-                    sudo apt-get update -qq
-                    sudo apt-get upgrade -y
-                    sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
-                    sudo apt-get install -y libignition-math2-dev
-                    sudo rosdep init
-                    source $PATHROS
-                    sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-                    sudo python -m pip uninstall -y pip
-                    sudo apt-get install -y python-pip
-                    sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
-                    sudo python2 -m pip install --upgrade pip --force
-                    sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit
-                    cd ../.. && git clone http://github.com/kctess5/range_libc
-                    cd ../range_libc/pywrapper && ./compile.sh
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Update packages and upgrade system"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+                        sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+                        sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+                        wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+                        sudo apt-get update -qq
+                        sudo apt-get upgrade -y
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we install OS Packages"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+                        sudo apt-get install -y libignition-math2-dev
+                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we init ROS"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo rosdep init
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we reset pip and install python packages"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        source $PATHROS
+                        sudo python -m pip uninstall -y pip
+                        sudo apt-get install -y python-pip
+                        sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
+                        sudo python2 -m pip install --upgrade pip --force
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit 
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we install range_libc"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        cd ../.. && git clone http://github.com/kctess5/range_libc
+                        cd ../range_libc/pywrapper && ./compile.sh
+                    else
+                        echo "Skipping"
+                    fi
                 fi
                 if [[ $VERSION == '18.04' ]]; then
-                    sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-                    sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-                    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-                    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-                    sudo apt-get update -qq
-                    sudo apt-get upgrade -y
-                    sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
-                    sudo apt-get install -y libignition-math2-dev
-                    sudo rosdep init
-                    source $PATHROS
-                    sudo apt-get install -y python-visual python-rosinstall python-rosinstall-generator python-wstool build-essential
-                    sudo python -m pip uninstall -y pip
-                    sudo apt-get install -y python-pip
-                    sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
-                    sudo python2 -m pip install --upgrade pip --force
-                    sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit
-                    cd ../.. && git clone http://github.com/kctess5/range_libc
-                    cd ../range_libc/pywrapper && ./compile.sh
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Update packages and upgrade system"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+                        sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+                        sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+                        wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+                        sudo apt-get update -qq
+                        sudo apt-get upgrade -y
+                    fi
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we reset pip and install python packages"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+                        sudo apt-get install -y libignition-math2-dev
+                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we init ROS"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo rosdep init
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we reset pip and install python packages"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        source $PATHROS
+                        sudo python -m pip uninstall -y pip
+                        sudo apt-get install -y python-pip
+                        sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
+                        sudo python2 -m pip install --upgrade pip --force
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython
+                    else
+                        echo "Skipping"
+                    fi
+
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "Now we install range_libc"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        cd ../.. && git clone http://github.com/kctess5/range_libc
+                        cd ../range_libc/pywrapper && ./compile.sh
+                    else
+                        echo "Skipping"
+                    fi
                 fi
             ;;
             ros)
                 toadInitParameters
+                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
                 toadConfirmationRequest "This will install all required ros packages"
                 if [[ $VERSION == '16.04' ]]; then
-                    cd .. && git submodule init
-                    cd .. && git submodule update --recursive
-                    cd .. && rosdep update
-                    rosdep install -y --from-paths src --ignore-src --rosdistro kinetic 
+                    cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
+                    cd $WORKDIR/.. && git submodule init
+                    cd $WORKDIR/.. && git submodule update --recursive
+                    cd $WORKDIR/.. && rosdep update
+                    cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro kinetic 
                     catkin_make
                 fi
                 if [[ $VERSION == '18.04' ]]; then
-                    cd .. && git submodule init
-                    cd .. && git submodule update --recursive
-                    cd .. && rosdep update
-                    rosdep install -y --from-paths src --ignore-src --rosdistro kinetic 
+                    cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
+                    cd $WORKDIR/.. && git submodule init
+                    cd $WORKDIR/.. && git submodule update --recursive
+                    cd $WORKDIR/.. && rosdep update
+                    cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro melodic 
                     catkin_make
+                fi
+            ;;
+            ide)
+                toadInitParameters
+                toadConfirmationRequest "This will install all required ide packages"
+                if [[ $VERSION == '16.04' ]]; then
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "This will install Visual Studio Code"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+                        sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+                        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+                        sudo apt-get install apt-transport-https
+                        sudo apt-get update
+                        sudo apt-get install code
+                        rm packages.microsoft.gpg
+                        echo
+                        echo
+                        toadConfirmationRequest "To install plugin, follow instructions from" "https://marketplace.visualstudio.com/items?itemName=ms-iot.vscode-ros"
+                    else
+                        echo "Skipping"
+                    fi
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "This will install Netbeans"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+                        sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+                        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+                        sudo apt-get install apt-transport-https
+                        sudo apt-get update
+                        sudo apt-get install code
+                        echo
+                        echo
+                        toadConfirmationRequest "To install plugin, follow instructions from" "http://plugins.netbeans.org/plugin/60486/netbeans-ros-pack"
+                    else
+                        echo "Skipping"
+                    fi
+                fi
+                if [[ $VERSION == '18.04' ]]; then
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "This will install Visual Studio Code"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+                        sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+                        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+                        sudo apt-get install apt-transport-https
+                        sudo apt-get update
+                        sudo apt-get install code
+                        rm packages.microsoft.gpg
+                        echo
+                        echo
+                        toadConfirmationRequest "To install plugin, follow instructions from" "https://marketplace.visualstudio.com/items?itemName=ms-iot.vscode-ros"
+                    else
+                        echo "Skipping"
+                    fi
+                    RESULT=""
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+                        toadConfirmationEnter "This will install Netbeans"
+                        read RESULT
+                    done
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo apt-get install netbeans
+                        echo
+                        echo
+                        toadConfirmationRequest "To install plugin, follow instructions from" "http://plugins.netbeans.org/plugin/60486/netbeans-ros-pack"
+                    else
+                        echo "Skipping"
+                    fi
                 fi
             ;;
             *)
