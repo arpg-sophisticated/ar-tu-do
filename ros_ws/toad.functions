@@ -7,6 +7,9 @@
 LANG=C
 PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 
+# local variables
+WORKDIR=$(pwd)
+
 # functions
 # hello world
 function superSophisticatedHello {
@@ -68,6 +71,8 @@ function toadHelpCar {
 function toadHelpInit {
     echo "usage: toad.sh init help"
     echo
+    echo "       This stuff is hardly untested, please report results or patches" 
+    echo
     echo "       toad.sh init system [force]"
     echo "       This will install everything you need on system side."
     echo "       Please ensure, that you're allowed to sudo."
@@ -77,6 +82,9 @@ function toadHelpInit {
     echo "       This will install everything you need on ros side."
     echo "       Please ensure, that you're allowed to sudo."
     echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "       toad.sh init ide"
+    echo "       This will install IDEs and provide information about plugins"
 }
 
 # get number of active display session
@@ -94,12 +102,36 @@ function getActiveDisplay {
 
 # ask user for confirmation
 # 1: message to print
+# 2: 2nd line of message
 function toadConfirmationRequest {
     MESSAGE="$1"
+    NEXTLINE="$2"
     echo $MESSAGE
+    if [[ $NEXTLINE =~ [0-9A-Za-z] ]]; then
+        echo $NEXTLINE
+    fi
     echo
     echo "Please press enter to proceed or Ctrl+C to cancel"
     read
+}
+
+# ask user for confirmation
+# 1: message to print
+# 2: 2nd line of message
+function toadConfirmationEnter {
+    RESULT=""
+    MESSAGE="$1"
+    NEXTLINE="$2"
+    echo $MESSAGE
+    if [[ $NEXTLINE =~ [0-9A-Za-z] ]]; then
+        echo $NEXTLINE
+    fi
+    echo
+    echo "Please press:"
+    echo "    s to skip"
+    echo "    p to process commands"
+    echo
+    echo "followed by enter to proceed or Ctrl+C to cancel"
 }
 
 # print system properties for init

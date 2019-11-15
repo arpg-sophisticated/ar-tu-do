@@ -71,6 +71,8 @@ This will run the software on the car.
 
 ## toad.sh init
 
+**WARNING:** This stuff is hardly untested and may damage your system. Please report results and problems or supply patches to marcel.ebbrecht@googlemail.com.
+
 This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04.
 
 ### toad.sh init system [force]
@@ -91,3 +93,9 @@ Please ensure, that you're allowed to sudo.
 
 Arguments:
 * force - this will ommit the check of the correct system and force installation
+
+### toad.sh init ide
+
+This will install IDEs and provide informations how to get the plugins for ROS
+* Visual Studio Code
+* Netbeans
