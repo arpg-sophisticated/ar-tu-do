@@ -73,14 +73,14 @@ This will run the software on the car.
 
 This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04.
 
-## toad.sh init system [force]
+### toad.sh init system [force]
 
 This will install everything you need on system side. Please ensure, that you're allowed to sudo.
 
 Arguments:
 * force - this will ommit the check of the correct system and force installation
 
-## toad.sh init ros [force]
+### toad.sh init ros [force]
 
 This will install all needed stuff regarding the software, like:
 * Libraries
