@@ -183,7 +183,7 @@ case $1 in
         echo "To be implemented"
     ;;
     *)
-        toadHelp
+        toadHelpMain
         echo
         exit 1
     ;;
