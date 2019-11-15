@@ -1,0 +1,28 @@
+#!/bin/bash
+# super sophisticated control script for nearly everything - settings
+# written by Marcel Ebbrecht <marcel.ebbrecht@googlemail.com>
+
+### IMPORTANT: Copy to toad.settings, configure and set CONFIGURED to 1 ###
+
+# preamble
+LANG=C
+PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+
+# settings
+# branch for system
+BRANCHBUILD="development"
+
+# branch for ssh keys
+BRANCHSSH="master"
+
+# branch for car
+BRANCHCAR="master"
+
+# path for ros to source
+PATHROS="/opt/ros/melodic/setup.bash"
+
+# path for bash setup to source
+PATHSETUP="./devel/setup.bash"
+
+# set to 1 after configuring
+CONFIGURED="0"
