@@ -99,13 +99,22 @@ case $1 in
             run)
                 toadConfirmationRequest "Please ensure a running X Server"
                 export DISPLAY=$(getActiveDisplay)
-                NOGUI=""
-                if [[ "$3" == "nogui" ]]; then
-                    NOGUI="gui:=false"
+                ARGUMENTS=""
+                if [[ "$3" =~ "nogui" ]]; then
+                    ARGUMENTS="gui:=false "
+                fi
+                if [[ "$3" =~ "fast" ]]; then
+                    ARGUMENTS="$ARGUMENTS fast:=true "
+                fi
+                if [[ "$3" =~ "drive" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                fi
+                if [[ "$3" =~ "manual" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
                 source $PATHROS
                 source $PATHSETUP
-                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $NOGUI
+                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
             ;;
             *)
                 toadHelpSystem

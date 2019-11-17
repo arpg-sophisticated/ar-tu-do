@@ -43,8 +43,12 @@ function toadHelpSystem {
     echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
     echo "       Add cron argument to suppress confirmation request"
     echo
-    echo "       toad.sh system run [nogui]"
-    echo "       Starts simulation, add nogui argument to disable gazebo client."
+    echo "       toad.sh system run [nogui,fast,drive,manual]"
+    echo "       Starts simulation, add"
+    echo "           nogui  - disable gazebo client"
+    echo "           fast   - for fast mode to be true"
+    echo "           drive  - to enforce autonomous driving"
+    echo "           manual - to enforce manual driving"
 }
 
 # help message for car mode
@@ -89,6 +93,10 @@ function toadHelpInit {
 
 # get number of active display session
 function getActiveDisplay {
+    if [[ $(env | grep "DISPLAY=:") =~ [-2-9] ]]; then
+        echo $(env | grep "DISPLAY=:" | cut -d "=" -f 2);
+        exit
+    fi
     DISPLAY=""
     while read session; do
         set -- $session; tty=$2; display=$3
