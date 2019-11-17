@@ -18,6 +18,12 @@ BRANCHSSH="master"
 # branch for car
 BRANCHCAR="master"
 
+# launchfile for simulation
+LAUNCHBUILD="gazebo.launch"
+
+# launchfile for car
+LAUNCHCAR="car_wallfollowing.launch"
+
 # path for ros to source
 PATHROS="/opt/ros/melodic/setup.bash"
 
