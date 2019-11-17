@@ -24,5 +24,8 @@ PATHROS="/opt/ros/melodic/setup.bash"
 # path for bash setup to source
 PATHSETUP="./devel/setup.bash"
 
+# use gpu for lidar (true|false)
+USEGPU="false"
+
 # set to 1 after configuring
 CONFIGURED="0"

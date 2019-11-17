@@ -105,7 +105,7 @@ case $1 in
                 fi
                 source $PATHROS
                 source $PATHSETUP
-                roslaunch launch/$LAUNCHBUILD $NOGUI
+                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $NOGUI
             ;;
             *)
                 toadHelpSystem
