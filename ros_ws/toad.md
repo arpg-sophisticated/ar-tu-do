@@ -12,7 +12,7 @@ to get some help about the usage.
 
 For sure, you need a properly configured system with Ubuntu 16.04 or 18.04 running. Also you need 3D support enabled.
 
-**Important: To run the simulation via ssh on the remote system's X session, you'll need gdm3 (and therefore a, no, ONE gdm-x-session process running), so that the system can guess the DISPLAY to use correctly.**
+**Important: To run the simulation via ssh on the remote system's X session, you'll need gdm3 and a gnome session running (and therefore a, no, ONE gdm-x-session process running), so that the system can guess the DISPLAY to use correctly. Sorry folks, Ubunutu/Wayland/??? massacre.**
 
 This was tested with Ubuntu 18.04 from local machine and remote system. If the can't recognize the DISPLAY correctly, please send me the output of ```w -sh```, the output of ```env``` and the output of the script.
 
