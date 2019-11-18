@@ -106,3 +106,18 @@ Arguments:
 This will install IDEs and provide informations how to get the plugins for ROS
 * Visual Studio Code
 * Netbeans
+
+## toad.sh slack
+
+This is for sending messages to slack channels configured in settings.
+
+### toad.sh status
+
+Sends a preconfigured status message (look at the code).
+
+### toad.sh custom 'MESSAGE'
+
+Sends a custom message given in parantheses.
+
+Arguments:
+* MESSAGE - the message to send. Must be a string in parantheses.

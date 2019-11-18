@@ -35,3 +35,23 @@ USEGPU="false"
 
 # set to 1 after configuring
 CONFIGURED="0"
+
+# set 1 for slack configured and usable
+SLACK="0"
+
+# slack api token
+# https://api.slack.com/custom-integrations/legacy-tokens
+SLACKTOKEN="PLACEHERE"
+
+# slack channel name
+SLACKCHANNEL="nameofchannel"
+
+# sending on actions (1 to send, 0 to ignore)
+SLACKSYSTEMSSH="0"
+SLACKSYSTEMREBUILD="0"
+SLACKSYSTEMRESETBUILD="0"
+SLACKSYSTEMRUN="0"
+SLACKCARSSH="0"
+SLACKCARREBUILD="0"
+SLACKCARRESETBUILD="0"
+SLACKCARRUN="0"

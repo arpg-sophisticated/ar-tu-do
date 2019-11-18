@@ -61,6 +61,9 @@ case $1 in
                     cat ../ssh/*.pub > ~/.ssh/authorized_keys
                 echo
                 git checkout $OLDBRANCH
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMSSH -ge 1 ]]; then
+                    sendSlackMessage ssh
+                fi
             ;;
             rebuild)
                 if [[ "$3" != "cron" ]]; then
@@ -77,6 +80,9 @@ case $1 in
                 catkin_make
                 echo
                 git checkout $OLDBRANCH
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMREBUILD -ge 1 ]]; then
+                    sendSlackMessage rebuild
+                fi
             ;;
             resetbuild)
                 if [[ "$3" != "cron" ]]; then
@@ -95,6 +101,9 @@ case $1 in
                 catkin_make
                 echo
                 git checkout $OLDBRANCH
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRESETBUILD -ge 1 ]]; then
+                    sendSlackMessage resetbuild
+                fi
             ;;
             run)
                 toadConfirmationRequest "Please ensure a running X Server"
@@ -115,6 +124,9 @@ case $1 in
                 source $PATHROS
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRUN -ge 1 ]]; then
+                    sendSlackMessage custom "Starting simulation with following arguments: $ARGUMENTS"
+                fi
             ;;
             *)
                 toadHelpSystem
@@ -144,6 +156,9 @@ case $1 in
                     cat ../ssh/*.pub > ~/.ssh/authorized_keys
                 echo
                 git checkout $OLDBRANCH
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARSSH -ge 1 ]]; then
+                    sendSlackMessage ssh
+                fi
             ;;
             rebuild)
                 if [[ "$3" != "cron" ]]; then
@@ -161,6 +176,9 @@ case $1 in
                 catkin_make
                 echo
                 git checkout $OLDBRANCH
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARREBUILD -ge 1 ]]; then
+                    sendSlackMessage rebuild
+                fi
             ;;
             resetbuild)
                 if [[ "$3" != "cron" ]]; then
@@ -179,11 +197,17 @@ case $1 in
                 catkin_make
                 echo
                 git checkout $OLDBRANCH
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRESETBUILD -ge 1 ]]; then
+                    sendSlackMessage resetbuild
+                fi
             ;;
             run)
                 source $PATHROS
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHCAR
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
+                    sendSlackMessage custom "Watch you feet, I'm on the road with following arguments: $ARGUMENTS"
+                fi
             ;;
             *)
                 toadHelpCar
@@ -216,15 +240,6 @@ case $1 in
             fi
             FORCED="no"
         fi
-        
-        #
-        #read RESULT
-        #while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-        #    toadConfirmationEnter "This will install all required system packages"
-        #    read RESULT
-        #done
-        #echo $RESULT
-#exit
 
         case $2 in
             system)
@@ -283,7 +298,7 @@ case $1 in
                         sudo apt-get install -y python-pip
                         sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
                         sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit 
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
                     else
                         echo "Skipping"
                     fi
@@ -349,7 +364,7 @@ case $1 in
                         sudo apt-get install -y python-pip
                         sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
                         sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython slack-cli
                     else
                         echo "Skipping"
                     fi
@@ -467,6 +482,34 @@ case $1 in
             ;;
             *)
                 toadHelpInit
+            ;;
+        esac
+    ;;
+    slack)
+        # exit when no second parameter is given
+        if [[ $# -le 1 ]]; then
+            toadHelpSlack
+            echo
+            exit 1
+        fi
+        case $2 in
+            status)
+                sendSlackMessage status
+            ;;
+            custom)
+                sendSlackMessage custom "$3"
+            ;;
+            rebuild)
+                sendSlackMessage rebuild
+            ;;
+            resetbuild)
+                sendSlackMessage resetbuild
+            ;;
+            ssh)
+                sendSlackMessage ssh
+            ;;
+            *)
+                toadHelpSlack
             ;;
         esac
     ;;
