@@ -116,7 +116,7 @@ function getActiveDisplay {
             [ "$DISPLAY" == "" ] && DISPLAY="$display"
             [ "$tty" == "$(cat /sys/class/tty/tty0/active)" ] && DISPLAY="$display";
         fi
-    done <<< "$(w -hs)"
+    done <<< "$(w -hs | grep gdm | grep session)"
     echo "$DISPLAY"
 }
 

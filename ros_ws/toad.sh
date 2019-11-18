@@ -109,7 +109,13 @@ case $1 in
                 fi
             ;;
             run)
-                toadConfirmationRequest "Please ensure a running X Server"
+                toadConfirmationRequest "Please ensure a running and logged in X Session with GDM3"
+                if [[ $(ps aux | grep gdm | grep session | grep -v grep | grep $(whoami) | wc -l) -le 0 ]]; then
+                    echo
+                    echo "No running gdm-x-session process found, exiting"
+                    echo
+                    exit 1
+                fi
                 export DISPLAY=$(getActiveDisplay)
                 ARGUMENTS=""
                 if [[ "$3" =~ "nogui" ]]; then
