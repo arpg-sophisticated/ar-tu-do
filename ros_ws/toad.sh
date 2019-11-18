@@ -62,6 +62,7 @@ case $1 in
                 echo
                 git checkout $OLDBRANCH
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMSSH -ge 1 ]]; then
+                    echo
                     sendSlackMessage ssh
                 fi
             ;;
@@ -81,6 +82,7 @@ case $1 in
                 echo
                 git checkout $OLDBRANCH
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMREBUILD -ge 1 ]]; then
+                    echo
                     sendSlackMessage rebuild
                 fi
             ;;
@@ -102,6 +104,7 @@ case $1 in
                 echo
                 git checkout $OLDBRANCH
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRESETBUILD -ge 1 ]]; then
+                    echo
                     sendSlackMessage resetbuild
                 fi
             ;;
@@ -125,6 +128,7 @@ case $1 in
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRUN -ge 1 ]]; then
+                    echo
                     sendSlackMessage custom "Starting simulation with following arguments: $ARGUMENTS"
                 fi
             ;;
@@ -157,6 +161,7 @@ case $1 in
                 echo
                 git checkout $OLDBRANCH
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARSSH -ge 1 ]]; then
+                    echo
                     sendSlackMessage ssh
                 fi
             ;;
@@ -177,6 +182,7 @@ case $1 in
                 echo
                 git checkout $OLDBRANCH
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARREBUILD -ge 1 ]]; then
+                    echo
                     sendSlackMessage rebuild
                 fi
             ;;
@@ -198,6 +204,7 @@ case $1 in
                 echo
                 git checkout $OLDBRANCH
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRESETBUILD -ge 1 ]]; then
+                    echo
                     sendSlackMessage resetbuild
                 fi
             ;;
@@ -206,6 +213,7 @@ case $1 in
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHCAR
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
+                    echo
                     sendSlackMessage custom "Watch you feet, I'm on the road with following arguments: $ARGUMENTS"
                 fi
             ;;
