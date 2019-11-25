@@ -304,11 +304,15 @@ case $1 in
                         toadConfirmationEnter "Now we install OS Packages"
                         read RESULT
                     done
-                    if [[ $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' && $CI == 'no' ]]; then
                         sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-                    else
+		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
+			sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-ros-base gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+			sudo apt-get install -y libignition-math2-dev
+			sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
+		    else
                         echo "Skipping"
                     fi
 
@@ -385,11 +389,15 @@ case $1 in
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
                     done
-                    if [[ $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' && $CI == 'no' ]]; then
                         sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-                    else
+		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
+		    	sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-ros-base gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+			sudo apt-get install -y libignition-math2-dev
+                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
+		    else
                         echo "Skipping"
                     fi
 
