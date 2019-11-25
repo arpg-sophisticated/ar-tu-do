@@ -23,6 +23,7 @@ function toadHelpMain {
     echo "usage: toad.sh help"
     echo "               system help"
     echo "               car help"
+    echo "               slack help"
     echo "               init help"
 }
 
@@ -43,8 +44,12 @@ function toadHelpSystem {
     echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
     echo "       Add cron argument to suppress confirmation request"
     echo
-    echo "       toad.sh system run [nogui]"
-    echo "       Starts simulation, add nogui argument to disable gazebo client."
+    echo "       toad.sh system run [nogui,fast,drive,manual]"
+    echo "       Starts simulation, add"
+    echo "           nogui  - disable gazebo client"
+    echo "           fast   - for fast mode to be true"
+    echo "           drive  - to enforce autonomous driving"
+    echo "           manual - to enforce manual driving"
 }
 
 # help message for car mode
@@ -87,8 +92,23 @@ function toadHelpInit {
     echo "       This will install IDEs and provide information about plugins"
 }
 
+# help message for slack interaction
+function toadHelpSlack {
+    echo "usage: toad.sh slack help"
+    echo
+    echo "       toad.sh slack status"
+    echo "       Sends status message to preconfigured channel"
+    echo
+    echo "       toad.sh slack custom 'MESSAGE'"
+    echo "       Sends custom message MESSAGE to preconfigured channel"
+}
+
 # get number of active display session
 function getActiveDisplay {
+    if [[ $(env | grep "DISPLAY=:") =~ [0-9] ]]; then
+        echo $(env | grep "DISPLAY=:" | cut -d "=" -f 2);
+        exit
+    fi
     DISPLAY=""
     while read session; do
         set -- $session; tty=$2; display=$3
@@ -96,7 +116,7 @@ function getActiveDisplay {
             [ "$DISPLAY" == "" ] && DISPLAY="$display"
             [ "$tty" == "$(cat /sys/class/tty/tty0/active)" ] && DISPLAY="$display";
         fi
-    done <<< "$(w -hs)"
+    done <<< "$(w -hs | grep gdm | grep session)"
     echo "$DISPLAY"
 }
 
@@ -146,4 +166,106 @@ function toadInitParameters {
 # get active branch
 function getActiveBranch {
     echo $(git branch | grep "*" | cut -d " " -f 2-)
+}
+
+# send message to slack channel
+# 1: type: resetbuild,rebuild,ssh,status,custom
+# 2: message: only needed for custom mode
+function sendSlackMessage {
+    if [[ $SLACK -le 0 ]]; then
+        echo "Slack not configured, not sending a status message"
+        echo
+    else
+        case $1 in
+            resetbuild)
+                echo "Sending resetbuild message to Slack (Channel: $SLACKCHANNEL)"
+                echo
+                echo "Date: $(date)" > /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "System $(hostname) resetted and rebuilt project" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Done my dark lord!">> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "--" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
+                rm /tmp/slackstatus.txt
+            ;;
+            rebuild)
+                echo "Sending rebuild message to Slack (Channel: $SLACKCHANNEL)"
+                echo
+                echo "Date: $(date)" > /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "System $(hostname) rebuilt project" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Done my dark lord!">> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "--" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
+                rm /tmp/slackstatus.txt
+            ;;
+            ssh)
+                echo "Sending ssh update message to Slack (Channel: $SLACKCHANNEL)"
+                echo
+                echo "Date: $(date)" > /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "System $(hostname) rebuild ssh keys" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Done my dark lord!">> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "--" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
+                rm /tmp/slackstatus.txt
+            ;;
+            status)
+                echo "Sending status message to Slack (Channel: $SLACKCHANNEL)"
+                echo
+                echo "Date: $(date)" > /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "System $(hostname) is up and running" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Network:" >> /tmp/slackstatus.txt
+                ifconfig >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Wireless:" >> /tmp/slackstatus.txt
+                iwconfig 2>/dev/null >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt                
+                echo "Services:" >> /tmp/slackstatus.txt
+                netstat -nlt | grep -v 127.0.0. | grep -v '::1' | grep tcp >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Disks:" >> /tmp/slackstatus.txt
+                df | grep -v tmpfs | grep -v loop | grep -v udev >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "Ready to serve my dark lord!">> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                echo "--" >> /tmp/slackstatus.txt
+                echo >> /tmp/slackstatus.txt
+                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
+                rm /tmp/slackstatus.txt
+            ;;
+            custom)
+                if [[ $2 =~ [0-9A-Za-z] ]]; then
+                    echo "Sending custom message to Slack (Channel: $SLACKCHANNEL)"
+                    echo
+                    echo "Date: $(date)" > /tmp/slackstatus.txt
+                    echo >> /tmp/slackstatus.txt
+                    echo "System $(hostname) custom message" >> /tmp/slackstatus.txt
+                    echo >> /tmp/slackstatus.txt
+                    echo $2 >> /tmp/slackstatus.txt
+                    echo >> /tmp/slackstatus.txt
+                    echo "Done my dark lord!">> /tmp/slackstatus.txt
+                    echo >> /tmp/slackstatus.txt
+                    echo "--" >> /tmp/slackstatus.txt
+                    echo >> /tmp/slackstatus.txt
+                    slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
+                    rm /tmp/slackstatus.txt
+                else
+                    echo "Sending empty messages is lame... not sending"
+                    echo
+                fi
+            ;;
+        esac
+    fi
 }

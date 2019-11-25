@@ -8,6 +8,16 @@ To use it, copy toad.example to toad.settings and configure that file as needed.
 
 to get some help about the usage.
 
+## Prequisites
+
+For sure, you need a properly configured system with Ubuntu 16.04 or 18.04 running. Also you need 3D support enabled.
+
+**Important: To run the simulation via ssh on the remote system's X session, you'll need gdm3 and a gnome session running (and therefore a, no, ONE gdm-x-session process running), so that the system can guess the DISPLAY to use correctly. Sorry folks, Ubunutu/Wayland/??? massacre.**
+
+**It could work with other display managers if you issue 'export DISPLAY=:0' prior starting the simulation.
+
+This was tested with Ubuntu 18.04 from local machine and remote system. If the can't recognize the DISPLAY correctly, please send me the output of ```w -sh```, the output of ```env``` and the output of the script.
+
 ## toad.sh system
 
 Commands to use on a normal computer or on the build server. Branch is configured in BRANCHBUILD.
@@ -33,12 +43,19 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh system run [nogui]
+### toad.sh system run [nogui,fast,drive,manual]
 
+    echo "           nogui  - disable gazebo client"
+    echo "           fast   - for fast mode to be true"
+    echo "           drive  - to enforce autonomous driving"
+    echo "           manual - to enforce manual driving"
 This will run the gazebo simuation.
 
 Arguments:
 * nogui - this disables the local gazebo client (more stable and performant on our systems)
+* fast - enforce fast mode
+* drive - enforce autonomous driving
+* manual -  enforce manual driving
 
 ## toad.sh car
 
@@ -99,3 +116,18 @@ Arguments:
 This will install IDEs and provide informations how to get the plugins for ROS
 * Visual Studio Code
 * Netbeans
+
+## toad.sh slack
+
+This is for sending messages to slack channels configured in settings.
+
+### toad.sh status
+
+Sends a preconfigured status message (look at the code).
+
+### toad.sh custom 'MESSAGE'
+
+Sends a custom message given in parantheses.
+
+Arguments:
+* MESSAGE - the message to send. Must be a string in parantheses.
