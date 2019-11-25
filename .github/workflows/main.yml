@@ -19,6 +19,7 @@ jobs:
         ./toad.sh init ros ci
     - name: Run Tests
       run: |
+        cd ros_ws/
         source /opt/ros/${ROS_DISTRO}/setup.bash
         catkin_make run_tests && catkin_tes_results
   build_kinetic:
@@ -37,5 +38,6 @@ jobs:
         ./toad.sh init ros ci
     - name: Run Tests
       run: |
+        cd ros_ws/
         source /opt/ros/${ROS_DISTRO}/setup.bash
         catkin_make run_tests && catkin_tes_results
