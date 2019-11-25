@@ -309,7 +309,7 @@ case $1 in
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
-			sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-kinetic-ros-base gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+			sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-kinetic-ros-base ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
 			sudo apt-get install -y libignition-math2-dev
 			sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    else
@@ -394,7 +394,7 @@ case $1 in
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
-		    	sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-ros-base gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+		    	sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-ros-base ros-melodic-gazebo-ros-control
 			sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    else
