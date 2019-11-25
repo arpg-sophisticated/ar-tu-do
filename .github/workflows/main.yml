@@ -1,6 +1,8 @@
 name: CI
 
 on: [push]
+env:
+  ROS_DISTRO: melodic
 
 jobs:
   build:
@@ -16,3 +18,7 @@ jobs:
         sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
         ./toad.sh init system ci
         ./toad.sh init ros ci
+    - name: Run Tests
+      run: |
+        source /opt/ros/${ROS_DISTRO}/setup.bash
+        catkin_make run_tests && catkin_tes_results
