@@ -450,6 +450,7 @@ case $1 in
                     toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
                     toadConfirmationRequest "This will install all required ros packages"
                 fi
+		source $PATHROS
                 if [[ $VERSION == '16.04' ]]; then
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
