@@ -14,5 +14,5 @@ jobs:
         cd ros_ws/
         cp toad.example toad.settings
         sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
-        ./toad.sh init system
-        ./toad.sh init ros
+        ./toad.sh init system ci
+        ./toad.sh init ros ci
