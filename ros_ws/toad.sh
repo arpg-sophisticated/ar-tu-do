@@ -225,15 +225,20 @@ case $1 in
         case $2 in
             system)
                 toadInitParameters
-                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                toadConfirmationRequest "This will install all required system packages"
+                if [[ $CI != "yes" ]]; then
+                  toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                  toadConfirmationRequest "This will install all required system packages"
+                fi
                 if [[ $VERSION == '16.04' ]]; then
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
                         sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
@@ -245,11 +250,14 @@ case $1 in
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we install OS Packages"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
@@ -258,22 +266,28 @@ case $1 in
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we init ROS"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         sudo rosdep init
                     else
                         echo "Skipping"
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         source $PATHROS
                         sudo python -m pip uninstall -y pip
                         sudo apt-get install -y python-pip
@@ -285,11 +299,14 @@ case $1 in
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we install range_libc"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         cd ../.. && git clone http://github.com/kctess5/range_libc
                         cd ../range_libc/pywrapper && ./compile.sh
                     else
@@ -298,11 +315,14 @@ case $1 in
                 fi
                 if [[ $VERSION == '18.04' ]]; then
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
                         sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
@@ -311,11 +331,14 @@ case $1 in
                         sudo apt-get upgrade -y
                     fi
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
@@ -324,22 +347,28 @@ case $1 in
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we init ROS"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         sudo rosdep init
                     else
                         echo "Skipping"
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         source $PATHROS
                         sudo python -m pip uninstall -y pip
                         sudo apt-get install -y python-pip
@@ -351,11 +380,14 @@ case $1 in
                     fi
 
                     RESULT=""
-                    while [[ $CI != "yes" && $RESULT != 's' && $RESULT != 'p' ]]; do
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
+                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we install range_libc"
                         read RESULT
                     done
-                    if [[ $CI != "no" && $RESULT == 'p' ]]; then
+                    if [[ $RESULT == 'p' ]]; then
                         WS_DIR=$(pwd)
                         cd ../.. && git clone http://github.com/kctess5/range_libc
                         cd ../range_libc/pywrapper && ./compile.sh
@@ -367,8 +399,10 @@ case $1 in
             ;;
             ros)
                 toadInitParameters
-                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                toadConfirmationRequest "This will install all required ros packages"
+                if [[ $CI != 'yes' ]]; then
+                    toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                    toadConfirmationRequest "This will install all required ros packages"
+                fi
                 if [[ $VERSION == '16.04' ]]; then
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
