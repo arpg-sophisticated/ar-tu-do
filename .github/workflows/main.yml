@@ -36,8 +36,11 @@ jobs:
         sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
         ./toad.sh init system ci
         ./toad.sh init ros ci
+    - name: Check formatting
+      run: ./../scripts/travis/check-format.sh 
     - name: Run Tests
       run: |
         cd ros_ws/
         source /opt/ros/${ROS_DISTRO}/setup.bash
         catkin_make run_tests && catkin_test_results
+        ./../scripts/travis/check-consistency.sh
