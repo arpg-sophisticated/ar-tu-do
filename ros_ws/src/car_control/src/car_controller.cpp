@@ -4,8 +4,8 @@
 #include <boost/algorithm/clamp.hpp>
 
 CarController::CarController()
-    : m_drive_param_lock { true }
-    , m_emergency_stop_lock { true }
+    : m_drive_param_lock{ true }
+    , m_emergency_stop_lock{ true }
 {
     this->m_drive_parameters_subscriber =
         this->m_node_handle.subscribe<drive_msgs::drive_param>(TOPIC_DRIVE_PARAM, 1,
