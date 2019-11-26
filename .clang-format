@@ -1,4 +1,4 @@
-BasedOnStyle: google 
+BasedOnStyle: llvm 
 SortIncludes: false
 IncludeBlocks: Preserve
 AccessModifierOffset: 0

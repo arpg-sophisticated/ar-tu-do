@@ -21,7 +21,7 @@ namespace simulation
     constexpr const char* WHEEL_RIGHT_FRONT_VELOCITY = "/racer/right_wheel_front_velocity_controller/command";
     constexpr const char* LEFT_STEERING_POSITION = "/racer/left_steering_hinge_position_controller/command";
     constexpr const char* RIGHT_STEERING_POSITION = "/racer/right_steering_hinge_position_controller/command";
-};
+}; // namespace simulation
 
 /**
  * @brief Class to convert Drive Parameter Messages into single messages
