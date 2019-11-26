@@ -1,7 +1,6 @@
-BasedOnStyle: llvm 
+BasedOnStyle: google 
 SortIncludes: false
 IncludeBlocks: Preserve
-FixNamespaceComments: false
 AccessModifierOffset: 0
 AlignAfterOpenBracket: Align
 AlignEscapedNewlinesLeft: false
