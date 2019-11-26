@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install dependencies
       run: |
-        sudo apt-get install clang-format-6.0
+        sudo apt-get install clang-format-6.0 libllvm6.0 clang-format
         cd ros_ws/
         cp toad.example toad.settings
         sed -i -e "s/melodic/${ROS_DISTRO}/g" toad.settings
