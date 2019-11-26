@@ -1,10 +1,10 @@
 #include "wall.h"
 
 Wall::Wall(float angle1, float angle2, float range1, float range2)
-    : m_angle1{ angle1 }
-    , m_angle2{ angle2 }
-    , m_range1{ range1 }
-    , m_range2{ range2 }
+    : m_angle1 { angle1 }
+    , m_angle2 { angle2 }
+    , m_range1 { range1 }
+    , m_range2 { range2 }
 {
 }
 

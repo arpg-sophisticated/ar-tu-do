@@ -13,7 +13,7 @@ jobs:
       run: |
         sudo apt-get remove -y clang-6.0 libclang-common-6.0-dev libclang1-6.0 libllvm6.0
         sudo apt-get autoremove
-        sudo apt-get install clang-format-6.0 libllvm6.0 clang-format
+        sudo apt-get install clang-format
         cd ros_ws/
         cp toad.example toad.settings
         sed -i -e "s/melodic/${ROS_DISTRO}/g" toad.settings

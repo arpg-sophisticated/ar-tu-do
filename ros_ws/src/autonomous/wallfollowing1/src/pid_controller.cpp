@@ -1,11 +1,11 @@
 #include "pid_controller.h"
 
 PIDController::PIDController(float p, float i, float d)
-    : m_p{ p }
-    , m_i{ i }
-    , m_d{ d }
-    , m_previous_error{ 0 }
-    , m_integral{ 0 }
+    : m_p { p }
+    , m_i { i }
+    , m_d { d }
+    , m_previous_error { 0 }
+    , m_integral { 0 }
 {
 }
 

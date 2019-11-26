@@ -1,7 +1,7 @@
 #include "drive_parameters_multiplexer.h"
 
 DriveParametersMultiplexer::DriveParametersMultiplexer()
-    : m_drive_mode{ DriveMode::LOCKED }
+    : m_drive_mode { DriveMode::LOCKED }
 {
     this->m_drive_parameters_publisher = this->m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAM, 1);
     this->m_last_updated_source = NULL;
