@@ -36,15 +36,12 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install dependencies
       run: |
-        sudo apt-get install clang-format
         cd ros_ws/
         cp toad.example toad.settings
         sed -i -e "s/melodic/${ROS_DISTRO}/g" toad.settings
         sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
         ./toad.sh init system ci
         ./toad.sh init ros ci
-    - name: Check formatting
-      run: ./scripts/travis/check-format.sh 
     - name: Run Tests
       run: |
         cd ros_ws/
