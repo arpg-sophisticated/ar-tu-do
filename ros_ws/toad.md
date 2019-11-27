@@ -113,7 +113,7 @@ This will install all needed stuff regarding the software, like:
 Please ensure, that you're allowed to sudo.
 
 Arguments:
-* force - this will ommit the check of the correct system and force installation
+* force - this will ommit the check of the correct system and force installation in Ubuntu 18.04 mode
 
 ### toad.sh init ide
 
