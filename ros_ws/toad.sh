@@ -96,6 +96,7 @@ case $1 in
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHBUILD
                 git reset --hard
+                git pull
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -201,7 +202,8 @@ case $1 in
                 echo
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHCAR
-                #git reset --hard
+                git reset --hard
+                git pull
                 echo
                 rm -fr ./build
                 source $PATHROS
