@@ -110,9 +110,11 @@ def calculate_velocity(event):
 
 def calculate_acceleration():
     global car_acceleration, max_car_acceleration, min_car_acceleration, car_velocity_old, time_old
-    time_now = time.time()
+    time_now = rospy.Time.now()
     if car_velocity is not None and car_velocity_old is not None and time_old is not None:
-        car_acceleration = (car_velocity - car_velocity_old) / (time_now - time_old)
+        delta_time = time_now - time_old
+        if delta_time.to_nsec() != 0:
+            car_acceleration = (car_velocity - car_velocity_old) / delta_time.to_sec()
     time_old = time_now
     car_velocity_old = car_velocity
     if car_acceleration is not None and car_acceleration > max_car_acceleration:
