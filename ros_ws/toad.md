@@ -1,4 +1,4 @@
-# About toad.sh 
+# About toad.sh
 
 This CLI tool contains the most important commands for userfull tasks. It must be called from inside its directory due relative paths.
 
