@@ -96,6 +96,7 @@ case $1 in
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHBUILD
                 git reset --hard
+                git pull
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -201,7 +202,8 @@ case $1 in
                 echo
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHCAR
-                #git reset --hard
+                git reset --hard
+                git pull
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -328,8 +330,7 @@ case $1 in
                     else
                         echo "Skipping"
                     fi
-                fi
-                if [[ $VERSION == '18.04' ]]; then
+                else
                     RESULT=""
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
@@ -407,8 +408,7 @@ case $1 in
                     cd $WORKDIR/.. && rosdep update
                     cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro kinetic 
                     catkin_make
-                fi
-                if [[ $VERSION == '18.04' ]]; then
+                else
                     cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
@@ -458,8 +458,7 @@ case $1 in
                     else
                         echo "Skipping"
                     fi
-                fi
-                if [[ $VERSION == '18.04' ]]; then
+                else
                     RESULT=""
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "This will install Visual Studio Code"
@@ -493,6 +492,20 @@ case $1 in
                         echo "Skipping"
                     fi
                 fi
+            ;;
+            env)
+                toadInitParameters
+                toadConfirmationRequest "This will update your environment settings"
+                if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
+                    source $PATHSETUP
+                else
+                    source $PATHROS
+                    source $PATHSETUP
+                fi
+                echo "Done:"
+                echo
+                env | grep ROS
             ;;
             *)
                 toadHelpInit

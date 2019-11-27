@@ -78,6 +78,10 @@ function toadHelpInit {
     echo
     echo "       This stuff is hardly untested, please report results or patches" 
     echo
+    echo "       toad.sh init env [force]"
+    echo "       Setups the environment relative to the current directory"
+    echo "       Add force argument to suppress compatibility check"
+    echo
     echo "       toad.sh init system [force]"
     echo "       This will install everything you need on system side."
     echo "       Please ensure, that you're allowed to sudo."
@@ -88,8 +92,9 @@ function toadHelpInit {
     echo "       Please ensure, that you're allowed to sudo."
     echo "       Add force argument to suppress compatibility check"
     echo
-    echo "       toad.sh init ide"
+    echo "       toad.sh init ide [force]"
     echo "       This will install IDEs and provide information about plugins"
+    echo "       Add force argument to suppress compatibility check"
 }
 
 # help message for slack interaction
