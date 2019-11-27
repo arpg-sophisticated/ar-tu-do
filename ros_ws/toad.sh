@@ -501,9 +501,13 @@ case $1 in
                 if [[ $VERSION == '16.04' ]]; then
                     source $PATHROS
                     source $PATHSETUP
+		    export ROS_HOSTNAME="0.0.0.0"
+		    export ROS_MASTER_URI="http://localhost:11311"
                 else
                     source $PATHROS
                     source $PATHSETUP
+		    export ROS_HOSTNAME="0.0.0.0"
+		    export ROS_MASTER_URI="http://localhost:11311"
                 fi
                 echo "Done:"
                 echo
