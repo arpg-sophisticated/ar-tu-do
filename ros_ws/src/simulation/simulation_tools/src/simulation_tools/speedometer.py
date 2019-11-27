@@ -5,9 +5,17 @@ from gazebo_msgs.msg import ModelState, ModelStates, LinkState, LinkStates
 
 from track import track, Point
 
+import time
+
 wheel_velocity = None
 car_velocity = None
 max_car_velocity = 0
+
+car_acceleration = None
+max_car_acceleration = 0
+min_car_acceleration = 0
+car_velocity_old = None
+time_old = None
 
 model_states_message = None
 link_states_message = None
@@ -53,7 +61,7 @@ def calculate_wheel_velocity():
 
 
 def show_info():
-    if car_velocity is None or max_car_velocity is None or wheel_velocity is None:
+    if car_velocity is None or max_car_velocity is None or wheel_velocity is None or car_acceleration is None:
         return
 
     position = Point(
@@ -61,18 +69,23 @@ def show_info():
         model_states_message.pose[1].position.y)
 
     rospy.loginfo(
-        "car: {0:.2f} m/s, max: {1:.2f} m/s, wheels: {2:.2f} m/s, slip: ".format(
+        "car: {0:.2f} m/s, max: {1:.2f} m/s, wheels: {2:.2f} m/s, slip:".format(
             car_velocity,
             max_car_velocity,
             wheel_velocity) +
-        "{0:.2f}, ".format(
+        "{0:.2f}\n".format(
             wheel_velocity -
             car_velocity).rjust(7) +
+        "accel: {0: 2f}m/s^2, max: {1: 2f}m/s^2, min: {2: 2f}m/s^2\n".format(
+            car_acceleration,
+            max_car_acceleration,
+            min_car_acceleration) +
         str(
                 track.localize(position)) +
-        ", world: ({0:.2f}, {1:.2f})".format(
+        ", world: ({0:.2f}, {1:.2f})\n".format(
             position.x,
-            position.y))
+            position.y) +
+        "-------------------------------------------")
 
 
 idle = True
@@ -85,6 +98,7 @@ def calculate_velocity(event):
 
     calculate_car_velocity()
     calculate_wheel_velocity()
+    calculate_acceleration()
 
     if abs(car_velocity) < 0.01 and abs(wheel_velocity) < 0.01:
         if idle:
@@ -92,6 +106,19 @@ def calculate_velocity(event):
         else:
             idle = True
     show_info()
+
+
+def calculate_acceleration():
+    global car_acceleration, max_car_acceleration, min_car_acceleration, car_velocity_old, time_old
+    time_now = time.time()
+    if car_velocity is not None and car_velocity_old is not None and time_old is not None:
+        car_acceleration = (car_velocity - car_velocity_old) / (time_now - time_old)
+    time_old = time_now
+    car_velocity_old = car_velocity
+    if car_acceleration is not None and car_acceleration > max_car_acceleration:
+        max_car_acceleration = car_acceleration
+    elif car_acceleration is not None and car_acceleration < min_car_acceleration:
+        min_car_acceleration = car_acceleration
 
 
 rospy.init_node('speedometer', anonymous=True)
