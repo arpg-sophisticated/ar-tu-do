@@ -494,6 +494,18 @@ case $1 in
                     fi
                 fi
             ;;
+            env)
+                toadInitParameters
+                toadConfirmationRequest "This will update your environment settings"
+                if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
+                    source $PATHSETUP
+                fi
+                if [[ $VERSION == '18.04' ]]; then
+                    source $PATHROS
+                    source $PATHSETUP
+                fi
+            ;;
             *)
                 toadHelpInit
             ;;

@@ -92,6 +92,10 @@ This will run the software on the car.
 
 This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04.
 
+### toad.sh init env
+
+This will initialize the environment based on the current working directory.
+
 ### toad.sh init system [force]
 
 This will install everything you need on system side. Please ensure, that you're allowed to sudo.
