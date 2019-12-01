@@ -184,6 +184,7 @@ def handle_scan(laser_scan, delta_time):
 
     barrier_start = int(points.shape[0] * (0.5 - parameters.barrier_size_realtive))  # nopep8
     barrier_end = int(points.shape[0] * (0.5 + parameters.barrier_size_realtive))  # nopep8
+    # Why max and not min?
     barrier = np.max(points[barrier_start: barrier_end, 1])
 
     follow_walls(left_circle, right_circle, barrier, delta_time)
