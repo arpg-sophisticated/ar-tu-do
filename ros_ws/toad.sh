@@ -131,6 +131,9 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
+                if [[ "$3" =~ "obstacle" ]]; then
+                    ARGUMENTS="$ARGUMENTS world:=racetrack_obstacle "
+                fi
                 source $PATHROS
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
