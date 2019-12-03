@@ -11,7 +11,7 @@
             <!-- Default physics profile with no changes -->
         </physics>
         <physics name="fast_simulation" type="ode" default="false">
-            <real_time_update_rate>3000</real_time_update_rate>
+            <real_time_update_rate>0</real_time_update_rate>
         </physics>
 
         <include>
@@ -30,10 +30,10 @@
                 <visual name="visual">
                 <geometry>
                     <!-- Relative path defined in package.xml -->
-                    <mesh><uri>model://track_obstacle.dae</uri></mesh>
+                    <mesh><uri>model://track_decorated_2.dae</uri></mesh>
                 </geometry>
                 </visual>
-                <collision name="ground-collision">
+                <collision name="collision">
                     <geometry>
                         <plane>
                             <normal>0 0 1</normal>
@@ -49,6 +49,14 @@
                         </friction>
                     </surface>
                 </collision>
+            </link>
+            <link name="obstacle">
+                <visual name="visual">
+                    <geometry>
+                        <!-- Relative path defined in package.xml -->
+                        <mesh><uri>model://obstacle.dae</uri></mesh>
+                    </geometry>
+                </visual>
             </link>
             <link name="walls-collision-link">
                 <collision name="walls-collision">
@@ -75,7 +83,7 @@
                 <collision name="decoration-collision">
                     <geometry>
                         <!-- Relative path defined in package.xml -->
-                        <mesh><uri>model://decoration_colliders.dae</uri></mesh>
+                        <mesh><uri>model://decoration_colliders_2.dae</uri></mesh>
                     </geometry>
                     <surface>
                         <friction>
