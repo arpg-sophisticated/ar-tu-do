@@ -40,3 +40,13 @@ def show_circle_in_rviz(circle, wall, id):
     end_angle = circle.get_angle(Point(wall[-1, 0], wall[-1, 1]))
     points = circle.create_array(start_angle, end_angle)
     show_line_in_rviz(id, points, color=ColorRGBA(0, 1, 1, 1))
+
+
+def delete_marker(id):
+    message = Marker()
+    message.header.frame_id = RVIZ_FRAME
+    message.header.stamp = rospy.Time.now()
+    message.ns = RVIZ_NAMESPACE
+    message.id = id
+    message.type = Marker.DELETE
+    marker_publisher.publish(message)

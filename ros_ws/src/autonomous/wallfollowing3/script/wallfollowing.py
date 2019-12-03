@@ -5,7 +5,7 @@ from std_msgs.msg import ColorRGBA
 from sensor_msgs.msg import LaserScan
 from drive_msgs.msg import drive_param
 
-from rviz_geometry import show_circle_in_rviz, show_line_in_rviz
+from rviz_geometry import show_circle_in_rviz, show_line_in_rviz, delete_marker
 
 from circle import Circle, Point
 
@@ -70,6 +70,15 @@ def drive(angle, velocity):
     message.angle = angle
     message.velocity = velocity
     drive_parameters_publisher.publish(message)
+
+
+def get_scans_in_angular_range(laser_scan, angle_start, angle_end):
+    ranges = np.array(laser_scan.ranges)
+    filterd_ranges = ranges[int((laser_scan.angle_max+angle_start)/laser_scan.angle_increment):int((laser_scan.angle_max+angle_end)/laser_scan.angle_increment)]
+    inf_mask = np.isinf(filterd_ranges)
+    if inf_mask.any():
+        filterd_ranges = filterd_ranges[~inf_mask]
+    return filterd_ranges
 
 
 def get_scan_as_cartesian(laser_scan):
@@ -176,6 +185,36 @@ def handle_scan(laser_scan, delta_time):
 
     left_circle = Circle.fit(left_wall)
     right_circle = Circle.fit(right_wall)
+
+    ranges_in_front = get_scans_in_angular_range(laser_scan, -0.01,0.01)
+    if len(ranges_in_front) != 0:
+        min_range_in_front = min(ranges_in_front)
+    else:
+        min_range_in_front = 30
+
+    max_y = None
+    if min_range_in_front < 30:
+        if left_circle.radius > right_circle.radius and right_circle.center.x < 0:
+            max_y = np.max(left_wall[:, 1])
+            upper_wall = np.array([point for point in right_wall if point[1] >= max_y])
+            right_wall = np.array([point for point in right_wall if point[1] < max_y])
+            right_circle = Circle.fit(right_wall)
+        elif left_circle.radius < right_circle.radius and right_circle.center.x > 0:
+            max_y = np.max(right_wall[:, 1])
+            upper_wall = np.array([point for point in left_wall if point[1] >= max_y])
+            left_wall = np.array([point for point in left_wall if point[1] < max_y])
+            left_circle = Circle.fit(left_wall)
+
+    if max_y is not None and len(upper_wall) > 0:
+        print(max_y)
+        upper_circle = Circle.fit(upper_wall)
+        show_line_in_rviz(
+            6, [Point(-2, max_y), Point(2, max_y)], color=ColorRGBA(0.2, 0.5, 0.8, 1))
+        show_circle_in_rviz(upper_circle, upper_wall, 7)
+    else:
+        delete_marker(6)
+        delete_marker(7)
+
 
     barrier_start = int(points.shape[0] * (0.5 - parameters.barrier_size_realtive))  # nopep8
     barrier_end = int(points.shape[0] * (0.5 + parameters.barrier_size_realtive))  # nopep8
