@@ -60,9 +60,8 @@
                 </visual>
                 <collision name="obstacle-collision">
                     <geometry>
-                        <box>
-                            <size>0.3 0.3 0.3</size>
-                        </box>
+                        <!-- Relative path defined in package.xml -->
+                        <mesh><uri>model://obstacle.dae</uri></mesh>
                     </geometry>
                     <surface>
                         <friction>
