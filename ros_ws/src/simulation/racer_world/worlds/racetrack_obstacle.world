@@ -50,7 +50,7 @@
                     </surface>
                 </collision>
             </link>
-            <link name="obstacle">
+            <link name="obstacle-collision-link">
                 <pose>5 -0.35 0  0 0 0</pose>
                 <visual name="visual">
                     <geometry>
@@ -73,6 +73,11 @@
                         </friction>
                     </surface>
                 </collision>
+                <sensor name='obstacle-contact-sensor' type='contact'>
+                    <contact>
+                        <collision>obstacle-collision</collision>
+                    </contact>
+                </sensor>
             </link>
             <link name="walls-collision-link">
                 <collision name="walls-collision">

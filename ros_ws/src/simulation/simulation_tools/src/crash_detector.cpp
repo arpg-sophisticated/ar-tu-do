@@ -9,6 +9,8 @@ CrashDetector::CrashDetector()
         this->m_gazebo_node->Subscribe(TOPIC_GAZEBO_SENSOR_WALLS, &CrashDetector::gazeboTopicCallback, this);
     this->m_decoration_sensor_subscriber =
         this->m_gazebo_node->Subscribe(TOPIC_GAZEBO_SENSOR_DECORATION, &CrashDetector::gazeboTopicCallback, this);
+    this->m_obstacle_sensor_subscriber =
+        this->m_gazebo_node->Subscribe(TOPIC_GAZEBO_SENSOR_OBSTACLE, &CrashDetector::gazeboTopicCallback, this);
 }
 
 void CrashDetector::gazeboTopicCallback(ConstContactsPtr& gazebo_message)
