@@ -51,7 +51,7 @@
                 </collision>
             </link>
             <link name="obstacle-collision-link">
-                <pose>5 -0.35 0  0 0 0</pose>
+                <pose>5 -0.15 0.15  0 0 0</pose>
                 <visual name="visual">
                     <geometry>
                         <!-- Relative path defined in package.xml -->
