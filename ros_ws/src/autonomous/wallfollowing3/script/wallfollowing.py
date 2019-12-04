@@ -194,12 +194,13 @@ def handle_scan(laser_scan, delta_time):
 
     max_y = None
     if min_range_in_front < 30:
-        if left_circle.radius > right_circle.radius and right_circle.center.x < 0:
+        radius_proportions = left_circle.radius/right_circle.radius
+        if radius_proportions > 1.5 and right_circle.center.x < 0:
             max_y = np.max(left_wall[:, 1])
             upper_wall = np.array([point for point in right_wall if point[1] >= max_y])
             right_wall = np.array([point for point in right_wall if point[1] < max_y])
             right_circle = Circle.fit(right_wall)
-        elif left_circle.radius < right_circle.radius and right_circle.center.x > 0:
+        elif radius_proportions < 0.67 and right_circle.center.x > 0:
             max_y = np.max(right_wall[:, 1])
             upper_wall = np.array([point for point in left_wall if point[1] >= max_y])
             left_wall = np.array([point for point in left_wall if point[1] < max_y])
