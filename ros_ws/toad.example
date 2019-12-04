@@ -24,6 +24,9 @@ LAUNCHBUILD="gazebo.launch"
 # launchfile for car
 LAUNCHCAR="car_wallfollowing.launch"
 
+# racetrack with obstacle
+LAUNCHTRACKOBSTACLE="racetrack_obstacle"
+
 # path for ros to source
 PATHROS="/opt/ros/melodic/setup.bash"
 

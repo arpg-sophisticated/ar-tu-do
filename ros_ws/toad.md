@@ -45,10 +45,6 @@ Arguments:
 
 ### toad.sh system run [nogui,fast,drive,manual]
 
-    echo "           nogui  - disable gazebo client"
-    echo "           fast   - for fast mode to be true"
-    echo "           drive  - to enforce autonomous driving"
-    echo "           manual - to enforce manual driving"
 This will run the gazebo simuation.
 
 Arguments:
@@ -56,6 +52,7 @@ Arguments:
 * fast - enforce fast mode
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
+* obstacle -  use track with obstacle
 
 ## toad.sh car
 

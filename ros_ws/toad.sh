@@ -132,7 +132,7 @@ case $1 in
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
                 if [[ "$3" =~ "obstacle" ]]; then
-                    ARGUMENTS="$ARGUMENTS world:=racetrack_obstacle "
+                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACKOBSTACLE "
                 fi
                 source $PATHROS
                 source $PATHSETUP
