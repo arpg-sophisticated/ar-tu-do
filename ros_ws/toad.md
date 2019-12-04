@@ -43,7 +43,7 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh system run [nogui,fast,drive,manual]
+### toad.sh system run [nogui,fast,drive,manual,obstacle]
 
 This will run the gazebo simuation.
 
