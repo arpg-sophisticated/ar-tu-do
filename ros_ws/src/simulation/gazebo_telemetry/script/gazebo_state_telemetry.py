@@ -99,11 +99,11 @@ def calculate_acceleration():
 
 def publish_state_telemetry():
     msg = gazebo_state_telemetry()
-    msg.car_acceleration = car_acceleration
-    msg.car_speed = car_velocity
-    msg.wheel_speed = wheel_velocity
-    msg.point_x = model_states_message.pose[1].position.x
-    msg.point_y = model_states_message.pose[1].position.y
+    msg.car_acceleration = float(car_acceleration) if car_acceleration is not None else 0.0
+    msg.car_speed = float(car_velocity) if car_velocity is not None else 0.0
+    msg.wheel_speed = float(wheel_velocity) if wheel_velocity is not None else 0.0
+    msg.point_x = float(model_states_message.pose[1].position.x)
+    msg.point_y = float(model_states_message.pose[1].position.y)
     gazebo_telemetry_publisher.publish(msg)
 
 
