@@ -1,5 +1,6 @@
 #pragma once
 
+#include "car_config.h"
 #include "drive_mode.h"
 #include <ros/ros.h>
 
@@ -54,21 +55,33 @@ class CarController
 
     /**
      * @brief takes a speed and angle, converts and forwards them to gazebo/focbox
+     * @param raw_speed the speed in m/s
      */
-    void publishDriveParameters(double raw_speed, double raw_angle);
+    void publishDriveParameters(float raw_speed, float raw_angle);
 
     /**
      * @brief takes speed and publishes it to gazebo/focbox
+     * @param speed the speed in m/s which is converted to rpm and then sent to the focbox
      */
-    void publishSpeed(double speed);
+    void publishSpeed(float speed);
 
     /**
      * @brief takes angle and publishes it to gazebo/focbox
      */
-    void publishAngle(double angle);
+    void publishAngle(float angle);
 
     /**
      * @brief publishes a brake message that stops the car
      */
     void stop();
+
+    /**
+     * @brief converts m/s in revolutions per minute
+     * @param speed speed in m/s
+     * @return revolutions per minute
+     */
+    int convertSpeedToRpm(float speed)
+    {
+        return speed * car_config::TRANSMISSION / car_config::ERPM_TO_SPEED;
+    }
 };
