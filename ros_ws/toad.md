@@ -90,7 +90,7 @@ This will run the software on the car.
 
 **WARNING:** This stuff is hardly untested and may damage your system. Please report results and problems or supply patches to marcel.ebbrecht@googlemail.com.
 
-This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04. It is unusable on the car.
+This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04.
 
 ### toad.sh init env
 
