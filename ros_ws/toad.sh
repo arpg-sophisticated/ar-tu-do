@@ -222,13 +222,34 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
-		export ROS_HOSTNAME="0.0.0.0"
-		export ROS_MASTER_URI="http://localhost:11311"
+		export ROS_IP="$CARIP"
+		export ROS_HOSTNAME="$CARIP"
+		export ROS_MASTER_URI="http://$CARIP:11311"
                 roslaunch launch/$LAUNCHCAR
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
-                    sendSlackMessage custom "Watch you feet, I'm on the road with following arguments: $ARGUMENTS"
+                    sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
+            ;;
+            remote)
+                source $PATHROS
+                source $PATHSETUP
+		export ROS_IP="$CARIP"
+		export ROS_HOSTNAME="$CARIP"
+		export ROS_MASTER_URI="http://$CARIP:11311"
+                roslaunch launch/$LAUNCHCAR show_rviz:=0
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
+                    echo
+                    sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
+                fi
+            ;;
+            control)
+                source $PATHROS
+                source $PATHSETUP
+		export ROS_IP="$CARIP"
+		export ROS_HOSTNAME="$CARIP"
+		export ROS_MASTER_URI="http://$CARIP:11311"
+                rviz -d src/car_control/launch/car.rviz
             ;;
             *)
                 toadHelpCar

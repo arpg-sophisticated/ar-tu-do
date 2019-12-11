@@ -71,6 +71,12 @@ function toadHelpCar {
     echo
     echo "       toad.sh car run"
     echo "       Starts software on car."
+    echo
+    echo "       toad.sh car remote"
+    echo "       Starts software on car without rviz."
+    echo
+    echo "       toad.sh car control"
+    echo "       Starts rviz connecting to the car."
 }
 
 # help message for initializing the system

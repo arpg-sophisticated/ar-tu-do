@@ -81,13 +81,21 @@ Arguments:
 
 ### toad.sh car run
 
-This will run the software on the car.
+This will run all the software on the car.
+
+### toad.sh car remote
+
+This will run all the software on the car, but without rviz.
+
+### toad.sh car control
+
+This will run rviz software on your machine connecting to the car.
 
 ## toad.sh init
 
 **WARNING:** This stuff is hardly untested and may damage your system. Please report results and problems or supply patches to marcel.ebbrecht@googlemail.com.
 
-This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04.
+This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04. It is unusable on the car.
 
 ### toad.sh init env
 
