@@ -81,7 +81,15 @@ Arguments:
 
 ### toad.sh car run
 
-This will run the software on the car.
+This will run all the software on the car.
+
+### toad.sh car remote
+
+This will run all the software on the car, but without rviz.
+
+### toad.sh car control
+
+This will run rviz software on your machine connecting to the car.
 
 ## toad.sh init
 
