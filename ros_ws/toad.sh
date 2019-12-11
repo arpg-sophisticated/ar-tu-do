@@ -131,6 +131,9 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
+                if [[ "$3" =~ "obstacle" ]]; then
+                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACKOBSTACLE "
+                fi
                 source $PATHROS
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
@@ -219,6 +222,8 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
+		export ROS_HOSTNAME="0.0.0.0"
+		export ROS_MASTER_URI="http://localhost:11311"
                 roslaunch launch/$LAUNCHCAR
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
@@ -503,9 +508,13 @@ case $1 in
                 if [[ $VERSION == '16.04' ]]; then
                     source $PATHROS
                     source $PATHSETUP
+		    export ROS_HOSTNAME="0.0.0.0"
+		    export ROS_MASTER_URI="http://localhost:11311"
                 else
                     source $PATHROS
                     source $PATHSETUP
+		    export ROS_HOSTNAME="0.0.0.0"
+		    export ROS_MASTER_URI="http://localhost:11311"
                 fi
                 echo "Done:"
                 echo
