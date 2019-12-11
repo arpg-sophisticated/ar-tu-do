@@ -268,6 +268,7 @@ case $1 in
                 toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
                 toadConfirmationRequest "This will install all required system packages"
                 if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
                     RESULT=""
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
@@ -331,11 +332,12 @@ case $1 in
                     done
                     if [[ $RESULT == 'p' ]]; then
                         cd ../.. && git clone http://github.com/kctess5/range_libc
-                        cd ../range_libc/pywrapper && ./compile.sh
+                        cd ../../range_libc/pywrapper && ./compile.sh
                     else
                         echo "Skipping"
                     fi
                 else
+                    source $PATHROS
                     RESULT=""
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
@@ -396,7 +398,7 @@ case $1 in
                     done
                     if [[ $RESULT == 'p' ]]; then
                         cd ../.. && git clone http://github.com/kctess5/range_libc
-                        cd ../range_libc/pywrapper && ./compile.sh
+                        cd ../../range_libc/pywrapper && ./compile.sh
                     else
                         echo "Skipping"
                     fi
@@ -407,6 +409,7 @@ case $1 in
                 toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
                 toadConfirmationRequest "This will install all required ros packages"
                 if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
                     cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
@@ -414,6 +417,7 @@ case $1 in
                     cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro kinetic 
                     catkin_make
                 else
+                    source $PATHROS
                     cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
