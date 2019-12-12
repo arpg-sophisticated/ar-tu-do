@@ -449,6 +449,16 @@ case $1 in
                     catkin_make
                 fi
             ;;
+            camstream)
+                toadInitParameters
+                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                toadConfirmationRequest "This will install all required packages for camera streaming server and client"
+                if [[ $VERSION == '16.04' ]]; then
+                    apt-get install mplayer mencoder ffmpeg netcat
+                else
+                    apt-get install mplayer mencoder ffmpeg netcat
+                fi
+            ;;
             ide)
                 toadInitParameters
                 toadConfirmationRequest "This will install all required ide packages"
