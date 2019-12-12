@@ -284,5 +284,5 @@ function sendSlackMessage {
 
 # get address of given interface
 function getAddressByInterface {
-    ifconfig wlp4s0 | grep inet | grep netmask | awk {'print $2'}
+    ifconfig $1 | grep inet | grep netmask | awk {'print $2'}
 }

@@ -222,7 +222,7 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
-                MAINIPADDRESS=getAddressByInterface $CARINTERFACE
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
 		export ROS_IP=$MAINIPADDRESS
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
@@ -235,7 +235,7 @@ case $1 in
             remote)
                 source $PATHROS
                 source $PATHSETUP
-                MAINIPADDRESS=getAddressByInterface $CARINTERFACE
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
 		export ROS_IP=$MAINIPADDRESS
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
