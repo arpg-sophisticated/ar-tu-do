@@ -314,7 +314,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
                     else
@@ -380,7 +380,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
                     else
@@ -531,13 +531,17 @@ case $1 in
                 if [[ $VERSION == '16.04' ]]; then
                     source $PATHROS
                     source $PATHSETUP
-		    export ROS_HOSTNAME="0.0.0.0"
-		    export ROS_MASTER_URI="http://localhost:11311"
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 else
                     source $PATHROS
                     source $PATHSETUP
-		    export ROS_HOSTNAME="0.0.0.0"
-		    export ROS_MASTER_URI="http://localhost:11311"
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 fi
                 echo "Done:"
                 echo
