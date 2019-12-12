@@ -222,9 +222,10 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
-		export ROS_IP="$CARIP"
-		export ROS_HOSTNAME="$CARIP"
-		export ROS_MASTER_URI="http://$CARIP:11311"
+                MAINIPADDRESS=getAddressByInterface($CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 roslaunch launch/$LAUNCHCAR
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
@@ -234,9 +235,10 @@ case $1 in
             remote)
                 source $PATHROS
                 source $PATHSETUP
-		export ROS_IP="$CARIP"
-		export ROS_HOSTNAME="$CARIP"
-		export ROS_MASTER_URI="http://$CARIP:11311"
+                MAINIPADDRESS=getAddressByInterface($CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 roslaunch launch/$LAUNCHCAR show_rviz:=0
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
