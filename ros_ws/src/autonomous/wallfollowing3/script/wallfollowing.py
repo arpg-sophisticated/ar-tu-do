@@ -4,6 +4,7 @@ import rospy
 from std_msgs.msg import ColorRGBA
 from sensor_msgs.msg import LaserScan
 from drive_msgs.msg import drive_param
+from drive_msgs.msg import gazebo_state_telemetry
 
 from rviz_geometry import show_circle_in_rviz, show_line_in_rviz, delete_marker
 
@@ -17,9 +18,20 @@ from dynamic_reconfigure.server import Server
 from wallfollowing2.cfg import wallfollowing2Config
 
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
+TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 TOPIC_LASER_SCAN = "/scan"
 
+CAR_ACCELERATION = 5
+CAR_DECCELERATION = 4
+
+CURVE_TYPE_RIGHT = 0
+CURVE_TYPE_LEFT = 1
+
 last_speed = 0
+current_speed = 0
+
+
+
 
 
 class Parameters():
@@ -118,19 +130,51 @@ def find_left_right_border(points, margin_relative=0.1):
     return margin + np.argmax(distances) + 1
 
 
-def follow_walls(left_circle, right_circle, barrier, delta_time):
+def calc_max_speed(distance, current_speed, target_speed, acceleration, decceleration):
+    return math.sqrt((2 * distance * acceleration * decceleration + current_speed**2 * decceleration + target_speed**2 * acceleration) / (acceleration + decceleration))
+
+
+def calc_braking_distance(distance, current_speed, target_speed, acceleration, decceleration):
+    return (2 * distance * acceleration + current_speed**2 - target_speed**2) / (2 * acceleration + 2 * decceleration)
+
+
+def calc_max_curve_speed(friction, radius):
+    return math.sqrt(friction*9.81*radius)
+
+
+def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_distance, barrier, delta_time):
     global last_speed
 
-    prediction_distance = parameters.corner_cutting + \
-        parameters.straight_smoothing * last_speed
-
+    prediction_distance = min(0.25 + last_speed * 0.35, 3)
     predicted_car_position = Point(0, prediction_distance)
     left_point = left_circle.get_closest_point(predicted_car_position)
     right_point = right_circle.get_closest_point(predicted_car_position)
 
-    target_position = Point(
-        (left_point.x + right_point.x) / 2,
-        (left_point.y + right_point.y) / 2)
+    if curve_type == CURVE_TYPE_LEFT:
+        track_width = abs(left_point.x - right_point.x)
+        target_position = Point(
+            (left_point.x + right_point.x) / 2,
+            (left_point.y + right_point.y) / 2)
+        if predicted_car_position.y > remaining_distance and remaining_distance is not None and upper_circle is not None:
+            upper_point = upper_circle.get_closest_point(predicted_car_position)
+            target_position = Point(
+                (upper_point.x - track_width / 2),
+                (left_point.y + right_point.y) / 2)
+    elif curve_type == CURVE_TYPE_RIGHT:
+        track_width = abs(left_point.x - right_point.x)
+        target_position = Point(
+            (left_point.x + right_point.x) / 2,
+            (left_point.y + right_point.y) / 2)
+        if predicted_car_position.y > remaining_distance and remaining_distance is not None and upper_circle is not None:
+            upper_point = upper_circle.get_closest_point(predicted_car_position)
+            target_position = Point(
+                (upper_point.x + track_width / 2),
+                (left_point.y + right_point.y) / 2)
+    else:
+        target_position = Point(
+            (left_point.x + right_point.x) / 2,
+            (left_point.y + right_point.y) / 2)
+
     error = (target_position.x - predicted_car_position.x) / \
         prediction_distance
     if math.isnan(error) or math.isinf(error):
@@ -140,21 +184,21 @@ def follow_walls(left_circle, right_circle, barrier, delta_time):
         error, delta_time)
 
     radius = min(left_circle.radius, right_circle.radius)
-    speed_limit_radius = map(parameters.radius_lower, parameters.radius_upper, 0, 1, radius)  # nopep8
-    speed_limit_error = max(0, 1 + parameters.steering_slow_down_dead_zone - abs(error) * parameters.steering_slow_down)  # nopep8
-    speed_limit_acceleration = last_speed + parameters.max_acceleration * delta_time
-    speed_limit_barrier = map(parameters.barrier_lower_limit, parameters.barrier_upper_limit, 0, 1, barrier) ** parameters.barrier_exponent  # nopep8
 
-    relative_speed = min(
-        speed_limit_error,
-        speed_limit_radius,
-        speed_limit_acceleration,
-        speed_limit_barrier
-    )
-    last_speed = relative_speed
-    speed = map(0, 1, parameters.min_throttle, parameters.max_throttle, relative_speed)  # nopep8
-    steering_angle = steering_angle * map(parameters.high_speed_steering_limit_dead_zone, 1, 1, parameters.high_speed_steering_limit, relative_speed)  # nopep8
-    speed = convertRpmToSpeed(speed*20000)
+    speed = calc_max_curve_speed(0.5, radius)
+    if remaining_distance is not None and upper_circle is not None:
+        safety_margin = 0.25
+        if remaining_distance < 5:
+            safety_margin = 0.05 * remaining_distance
+        target_speed = calc_max_curve_speed(0.5, upper_circle.radius)
+        last_speed = target_speed
+        braking_distance = calc_braking_distance(remaining_distance, current_speed, target_speed, CAR_ACCELERATION, CAR_DECCELERATION) + safety_margin
+        if remaining_distance > braking_distance:
+            speed = min(calc_max_speed(remaining_distance, current_speed, target_speed, CAR_ACCELERATION, CAR_DECCELERATION), speed)
+        else:
+            speed = target_speed
+
+    steering_angle = steering_angle * map(parameters.high_speed_steering_limit_dead_zone, 1, 1, parameters.high_speed_steering_limit, speed/25)  # nopep8
     drive(steering_angle, speed)
 
     show_line_in_rviz(2, [left_point, right_point],
@@ -186,28 +230,31 @@ def handle_scan(laser_scan, delta_time):
     left_circle = Circle.fit(left_wall)
     right_circle = Circle.fit(right_wall)
 
-    ranges_in_front = get_scans_in_angular_range(laser_scan, -0.01,0.01)
+    ranges_in_front = get_scans_in_angular_range(laser_scan, -0.01, 0.01)
     if len(ranges_in_front) != 0:
         min_range_in_front = min(ranges_in_front)
     else:
         min_range_in_front = 30
 
+    upper_circle = None
     max_y = None
+    curve_type = None
     if min_range_in_front < 30:
         radius_proportions = left_circle.radius/right_circle.radius
-        if radius_proportions > 1.5 and right_circle.center.x < 0:
+        if radius_proportions > 1.3 and right_circle.center.x < 0:
             max_y = np.max(left_wall[:, 1])
-            upper_wall = np.array([point for point in right_wall if point[1] >= max_y])
+            upper_wall = np.array([point for point in right_wall if point[1] >= max_y-1])
             right_wall = np.array([point for point in right_wall if point[1] < max_y])
             right_circle = Circle.fit(right_wall)
-        elif radius_proportions < 0.67 and right_circle.center.x > 0:
+            curve_type = CURVE_TYPE_LEFT
+        elif radius_proportions < 0.78 and right_circle.center.x > 0:
             max_y = np.max(right_wall[:, 1])
-            upper_wall = np.array([point for point in left_wall if point[1] >= max_y])
+            upper_wall = np.array([point for point in left_wall if point[1] >= max_y-1])
             left_wall = np.array([point for point in left_wall if point[1] < max_y])
             left_circle = Circle.fit(left_wall)
+            curve_type = CURVE_TYPE_RIGHT
 
     if max_y is not None and len(upper_wall) > 0:
-        print(max_y)
         upper_circle = Circle.fit(upper_wall)
         show_line_in_rviz(
             6, [Point(-2, max_y), Point(2, max_y)], color=ColorRGBA(0.2, 0.5, 0.8, 1))
@@ -222,7 +269,7 @@ def handle_scan(laser_scan, delta_time):
     # Why max and not min?
     barrier = np.max(points[barrier_start: barrier_end, 1])
 
-    follow_walls(left_circle, right_circle, barrier, delta_time)
+    follow_walls(left_circle, right_circle, upper_circle, curve_type, max_y, barrier, delta_time)
 
     show_circle_in_rviz(left_circle, left_wall, 0)
     show_circle_in_rviz(right_circle, right_wall, 1)
@@ -242,6 +289,11 @@ def laser_callback(scan_message):
     last_scan = scan_time
 
 
+def speed_callback(speed_message):
+    global current_speed
+    current_speed = speed_message.wheel_speed
+
+
 def dynamic_configuration_callback(config, level):
     global parameters
     parameters = Parameters(config)
@@ -256,6 +308,7 @@ parameters = None
 pid = PIDController(1, 1, 1)
 
 rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
+rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, speed_callback)
 drive_parameters_publisher = rospy.Publisher(
     TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 
