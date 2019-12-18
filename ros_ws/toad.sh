@@ -150,7 +150,7 @@ case $1 in
     car)
         # exit when no second parameter is given
         if [[ $# -le 1 ]]; then
-            toadHelpSystem
+            toadHelpCar
             echo
             exit 1
         fi
