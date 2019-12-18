@@ -43,12 +43,8 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh system run [nogui,fast,drive,manual]
+### toad.sh system run [nogui,fast,drive,manual,obstacle]
 
-    echo "           nogui  - disable gazebo client"
-    echo "           fast   - for fast mode to be true"
-    echo "           drive  - to enforce autonomous driving"
-    echo "           manual - to enforce manual driving"
 This will run the gazebo simuation.
 
 Arguments:
@@ -56,6 +52,7 @@ Arguments:
 * fast - enforce fast mode
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
+* obstacle -  use track with obstacle
 
 ## toad.sh car
 
@@ -84,13 +81,25 @@ Arguments:
 
 ### toad.sh car run
 
-This will run the software on the car.
+This will run all the software on the car.
+
+### toad.sh car remote
+
+This will run all the software on the car, but without rviz.
+
+### toad.sh car control
+
+This will run rviz software on your machine connecting to the car.
 
 ## toad.sh init
 
 **WARNING:** This stuff is hardly untested and may damage your system. Please report results and problems or supply patches to marcel.ebbrecht@googlemail.com.
 
-This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04.
+This could be used to initialize the whole system. Please checkout the repo before. This should only be used on Ubuntu 16.04 or 18.04. It is unusable on the car.
+
+### toad.sh init env
+
+This will initialize the environment based on the current working directory.
 
 ### toad.sh init system [force]
 
@@ -109,13 +118,17 @@ This will install all needed stuff regarding the software, like:
 Please ensure, that you're allowed to sudo.
 
 Arguments:
-* force - this will ommit the check of the correct system and force installation
+* force - this will ommit the check of the correct system and force installation in Ubuntu 18.04 mode
 
 ### toad.sh init ide
 
 This will install IDEs and provide informations how to get the plugins for ROS
 * Visual Studio Code
 * Netbeans
+
+### toad.sh init camstream
+
+This will install all packages required for camera streaming server and client.
 
 ## toad.sh slack
 

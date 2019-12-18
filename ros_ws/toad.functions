@@ -44,12 +44,13 @@ function toadHelpSystem {
     echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
     echo "       Add cron argument to suppress confirmation request"
     echo
-    echo "       toad.sh system run [nogui,fast,drive,manual]"
+    echo "       toad.sh system run [nogui,fast,drive,manual,obstacle]"
     echo "       Starts simulation, add"
-    echo "           nogui  - disable gazebo client"
-    echo "           fast   - for fast mode to be true"
-    echo "           drive  - to enforce autonomous driving"
-    echo "           manual - to enforce manual driving"
+    echo "           nogui    - disable gazebo client"
+    echo "           fast     - for fast mode to be true"
+    echo "           drive    - to enforce autonomous driving"
+    echo "           manual   - to enforce manual driving"
+    echo "           obstacle - for an obstacle to appear on the track"
 }
 
 # help message for car mode
@@ -70,6 +71,12 @@ function toadHelpCar {
     echo
     echo "       toad.sh car run"
     echo "       Starts software on car."
+    echo
+    echo "       toad.sh car remote"
+    echo "       Starts software on car without rviz."
+    echo
+    echo "       toad.sh car control"
+    echo "       Starts rviz connecting to the car."
 }
 
 # help message for initializing the system
@@ -77,6 +84,10 @@ function toadHelpInit {
     echo "usage: toad.sh init help"
     echo
     echo "       This stuff is hardly untested, please report results or patches" 
+    echo
+    echo "       toad.sh init env [force]"
+    echo "       Setups the environment relative to the current directory"
+    echo "       Add force argument to suppress compatibility check"
     echo
     echo "       toad.sh init system [force]"
     echo "       This will install everything you need on system side."
@@ -88,8 +99,13 @@ function toadHelpInit {
     echo "       Please ensure, that you're allowed to sudo."
     echo "       Add force argument to suppress compatibility check"
     echo
-    echo "       toad.sh init ide"
+    echo "       toad.sh init ide [force]"
     echo "       This will install IDEs and provide information about plugins"
+    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "       toad.sh init camstream [force]"
+    echo "       This will install all packages required for camera streaming"
+    echo "       Add force argument to suppress compatibility check"
 }
 
 # help message for slack interaction
@@ -268,4 +284,9 @@ function sendSlackMessage {
             ;;
         esac
     fi
+}
+
+# get address of given interface
+function getAddressByInterface {
+    ifconfig $1 | grep inet | grep netmask | awk {'print $2'}
 }

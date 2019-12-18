@@ -96,6 +96,7 @@ case $1 in
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHBUILD
                 git reset --hard
+                git pull
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -130,6 +131,9 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
+                if [[ "$3" =~ "obstacle" ]]; then
+                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACKOBSTACLE "
+                fi
                 source $PATHROS
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
@@ -146,7 +150,7 @@ case $1 in
     car)
         # exit when no second parameter is given
         if [[ $# -le 1 ]]; then
-            toadHelpSystem
+            toadHelpCar
             echo
             exit 1
         fi
@@ -201,7 +205,8 @@ case $1 in
                 echo
                 OLDBRANCH=$(getActiveBranch)
                 git checkout $BRANCHCAR
-                #git reset --hard
+                git reset --hard
+                git pull
                 echo
                 rm -fr ./build
                 source $PATHROS
@@ -217,11 +222,36 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 roslaunch launch/$LAUNCHCAR
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
-                    sendSlackMessage custom "Watch you feet, I'm on the road with following arguments: $ARGUMENTS"
+                    sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
+            ;;
+            remote)
+                source $PATHROS
+                source $PATHSETUP
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
+                roslaunch launch/$LAUNCHCAR show_rviz:=0
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
+                    echo
+                    sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
+                fi
+            ;;
+            control)
+                source $PATHROS
+                source $PATHSETUP
+		export ROS_IP="$CARIP"
+		export ROS_HOSTNAME="$CARIP"
+		export ROS_MASTER_URI="http://$CARIP:11311"
+                rviz -d src/car_control/launch/car.rviz
             ;;
             *)
                 toadHelpCar
@@ -277,6 +307,7 @@ case $1 in
                   toadConfirmationRequest "This will install all required system packages"
                 fi
                 if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
                     RESULT=""
                     if [[ $CI == 'yes' ]]; then
                         RESULT="p"
@@ -304,8 +335,13 @@ case $1 in
                         toadConfirmationEnter "Now we install OS Packages"
                         read RESULT
                     done
+<<<<<<< HEAD
                     if [[ $RESULT == 'p' && $CI == 'no' ]]; then
                         sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+=======
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin
+>>>>>>> development
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
@@ -359,12 +395,12 @@ case $1 in
                     done
                     if [[ $RESULT == 'p' ]]; then
                         cd ../.. && git clone http://github.com/kctess5/range_libc
-                        cd ../range_libc/pywrapper && ./compile.sh
+                        cd ../../range_libc/pywrapper && ./compile.sh
                     else
                         echo "Skipping"
                     fi
-                fi
-                if [[ $VERSION == '18.04' ]]; then
+                else
+                    source $PATHROS
                     RESULT=""
                     if [[ $CI == 'yes' ]]; then
                         RESULT="p"
@@ -389,8 +425,13 @@ case $1 in
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
                     done
+<<<<<<< HEAD
                     if [[ $RESULT == 'p' && $CI == 'no' ]]; then
                         sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+=======
+                    if [[ $RESULT == 'p' ]]; then
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin
+>>>>>>> development
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
@@ -460,6 +501,7 @@ case $1 in
                 fi
 		source $PATHROS
                 if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
                     cd $WORKDIR/.. && rosdep update
@@ -472,6 +514,16 @@ case $1 in
                     cd $WORKDIR/.. && rosdep update
                     cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro melodic 
                     catkin_make
+                fi
+            ;;
+            camstream)
+                toadInitParameters
+                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                toadConfirmationRequest "This will install all required packages for camera streaming server and client"
+                if [[ $VERSION == '16.04' ]]; then
+                    apt-get install mplayer mencoder ffmpeg netcat
+                else
+                    apt-get install mplayer mencoder ffmpeg netcat
                 fi
             ;;
             ide)
@@ -515,8 +567,7 @@ case $1 in
                     else
                         echo "Skipping"
                     fi
-                fi
-                if [[ $VERSION == '18.04' ]]; then
+                else
                     RESULT=""
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "This will install Visual Studio Code"
@@ -550,6 +601,28 @@ case $1 in
                         echo "Skipping"
                     fi
                 fi
+            ;;
+            env)
+                toadInitParameters
+                toadConfirmationRequest "This will update your environment settings"
+                if [[ $VERSION == '16.04' ]]; then
+                    source $PATHROS
+                    source $PATHSETUP
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
+                else
+                    source $PATHROS
+                    source $PATHSETUP
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
+                fi
+                echo "Done:"
+                echo
+                env | grep ROS
             ;;
             *)
                 toadHelpInit
