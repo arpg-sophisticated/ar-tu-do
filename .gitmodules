@@ -7,3 +7,7 @@
 [submodule "ros_ws/src/external_packages/razor_imu_9dof"]
 	path = ros_ws/src/external_packages/razor_imu_9dof
 	url = https://github.com/KristofRobot/razor_imu_9dof.git
+[submodule "ros_ws/src/external_packages/imu_tools"]
+	path = ros_ws/src/external_packages/imu_tools
+	url = https://github.com/ccny-ros-pkg/imu_tools.git
+	branch = melodic
