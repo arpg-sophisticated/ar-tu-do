@@ -102,6 +102,10 @@ function toadHelpInit {
     echo "       toad.sh init ide [force]"
     echo "       This will install IDEs and provide information about plugins"
     echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "       toad.sh init camstream [force]"
+    echo "       This will install all packages required for camera streaming"
+    echo "       Add force argument to suppress compatibility check"
 }
 
 # help message for slack interaction
@@ -280,4 +284,9 @@ function sendSlackMessage {
             ;;
         esac
     fi
+}
+
+# get address of given interface
+function getAddressByInterface {
+    ifconfig $1 | grep inet | grep netmask | awk {'print $2'}
 }

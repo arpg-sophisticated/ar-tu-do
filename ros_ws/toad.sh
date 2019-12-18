@@ -150,7 +150,7 @@ case $1 in
     car)
         # exit when no second parameter is given
         if [[ $# -le 1 ]]; then
-            toadHelpSystem
+            toadHelpCar
             echo
             exit 1
         fi
@@ -222,9 +222,10 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
-		export ROS_IP="$CARIP"
-		export ROS_HOSTNAME="$CARIP"
-		export ROS_MASTER_URI="http://$CARIP:11311"
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 roslaunch launch/$LAUNCHCAR
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
@@ -234,9 +235,10 @@ case $1 in
             remote)
                 source $PATHROS
                 source $PATHSETUP
-		export ROS_IP="$CARIP"
-		export ROS_HOSTNAME="$CARIP"
-		export ROS_MASTER_URI="http://$CARIP:11311"
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 roslaunch launch/$LAUNCHCAR show_rviz:=0
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
@@ -312,7 +314,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
                     else
@@ -378,7 +380,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
                     else
@@ -445,6 +447,16 @@ case $1 in
                     cd $WORKDIR/.. && rosdep update
                     cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro melodic 
                     catkin_make
+                fi
+            ;;
+            camstream)
+                toadInitParameters
+                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                toadConfirmationRequest "This will install all required packages for camera streaming server and client"
+                if [[ $VERSION == '16.04' ]]; then
+                    apt-get install mplayer mencoder ffmpeg netcat
+                else
+                    apt-get install mplayer mencoder ffmpeg netcat
                 fi
             ;;
             ide)
@@ -529,13 +541,17 @@ case $1 in
                 if [[ $VERSION == '16.04' ]]; then
                     source $PATHROS
                     source $PATHSETUP
-		    export ROS_HOSTNAME="0.0.0.0"
-		    export ROS_MASTER_URI="http://localhost:11311"
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 else
                     source $PATHROS
                     source $PATHSETUP
-		    export ROS_HOSTNAME="0.0.0.0"
-		    export ROS_MASTER_URI="http://localhost:11311"
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 fi
                 echo "Done:"
                 echo
