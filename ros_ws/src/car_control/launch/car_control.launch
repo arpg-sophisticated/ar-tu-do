@@ -36,5 +36,6 @@ Launches all necessary nodes that listen for drive_parameters and translate them
       name="drive_parameters_multiplexer"
       output="screen"
       required="true" />
-	
+    
+    <node pkg="tf" type="static_transform_publisher" name="imu_to_base" args="0 0 0 0 0 0 base_link base_imu_link 10"/>	
 </launch>
