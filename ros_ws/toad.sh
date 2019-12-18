@@ -131,8 +131,8 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
-                if [[ "$3" =~ "obstacle" ]]; then
-                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACKOBSTACLE "
+                if [[ "$3" =~ "customTrack" ]]; then
+                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACK "
                 fi
                 source $PATHROS
                 source $PATHSETUP
