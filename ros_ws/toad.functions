@@ -50,7 +50,7 @@ function toadHelpSystem {
     echo "           fast        - for fast mode to be true"
     echo "           drive       - to enforce autonomous driving"
     echo "           manual      - to enforce manual driving"
-    echo "           customTrack - start simulation with custom track as configured in toad.settings
+    echo "           customTrack - start simulation with custom track as configured in toad.settings"
 }
 
 # help message for car mode

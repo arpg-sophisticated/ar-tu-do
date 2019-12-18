@@ -41,7 +41,7 @@ LAUNCHCAR="car_wallfollowing.launch"
 # - track_empty
 # - track_levine
 # - track_porto
-LAUNCHTRACK="track_levine"
+LAUNCHTRACK="racetrack_obstacle"
 
 # path for ros to source
 PATHROS="/opt/ros/melodic/setup.bash"
