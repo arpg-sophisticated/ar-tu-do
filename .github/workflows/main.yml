@@ -1,0 +1,50 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build_melodic:
+    runs-on: ubuntu-18.04
+    env:
+      ROS_DISTRO: melodic
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: |
+        sudo apt-get remove -y clang-6.0 libclang-common-6.0-dev libclang1-6.0 libllvm6.0
+        sudo apt-get autoremove
+        sudo apt-get install clang-format
+        cd ros_ws/
+        cp toad.example toad.settings
+        sed -i -e "s/melodic/${ROS_DISTRO}/g" toad.settings
+        sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
+        ./toad.sh init system ci
+        ./toad.sh init ros ci
+    - name: Check formatting
+      run: ./scripts/travis/check-format.sh 
+    - name: Run Tests
+      run: |
+        cd ros_ws/
+        source /opt/ros/${ROS_DISTRO}/setup.bash
+        catkin_make run_tests && catkin_test_results
+        ./../scripts/travis/check-consistency.sh
+  build_kinetic:
+    runs-on: ubuntu-16.04
+    env:
+      ROS_DISTRO: kinetic 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: |
+        cd ros_ws/
+        cp toad.example toad.settings
+        sed -i -e "s/melodic/${ROS_DISTRO}/g" toad.settings
+        sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
+        ./toad.sh init system ci
+        ./toad.sh init ros ci
+    - name: Run Tests
+      run: |
+        cd ros_ws/
+        source /opt/ros/${ROS_DISTRO}/setup.bash
+        catkin_make run_tests && catkin_test_results
+        ./../scripts/travis/check-consistency.sh
