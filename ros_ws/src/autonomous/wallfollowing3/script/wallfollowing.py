@@ -14,6 +14,8 @@ import math
 
 import numpy as np
 
+import time
+
 from dynamic_reconfigure.server import Server
 from wallfollowing2.cfg import wallfollowing2Config
 
@@ -24,14 +26,20 @@ TOPIC_LASER_SCAN = "/scan"
 CAR_ACCELERATION = 5
 CAR_DECCELERATION = 4
 
+FRICTION = 0.5
+
+MAX_STEERING_ANGLE = 1.2
+CAR_LENGTH = 40
+
 CURVE_TYPE_RIGHT = 0
 CURVE_TYPE_LEFT = 1
 
+last_angle = 0
 last_speed = 0
 current_speed = 0
 
-
-
+total_scan_time = 0
+total_scan_count = 0
 
 
 class Parameters():
@@ -139,41 +147,50 @@ def calc_braking_distance(distance, current_speed, target_speed, acceleration, d
 
 
 def calc_max_curve_speed(friction, radius):
-    return math.sqrt(friction*9.81*radius)
+    return math.sqrt(friction * 9.81 * radius)
 
 
-def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_distance, barrier, delta_time):
-    global last_speed
+def calc_steering_radius(steering_angle):
+    return CAR_LENGTH / math.sin(steering_angle * MAX_STEERING_ANGLE)
 
-    prediction_distance = min(0.25 + last_speed * 0.35, 3)
-    predicted_car_position = Point(0, prediction_distance)
+
+def calc_predicted_car_position():
+    prediction_distance = min(0.25 + last_speed * 0.35, 2)
+    return Point(0, prediction_distance), prediction_distance
+
+
+def calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, remaining_distance):
     left_point = left_circle.get_closest_point(predicted_car_position)
     right_point = right_circle.get_closest_point(predicted_car_position)
+    central_point = Point((left_point.x + right_point.x) / 2, (left_point.y + right_point.y) / 2)
+    track_width = abs(left_point.x - right_point.x)
 
     if curve_type == CURVE_TYPE_LEFT:
-        track_width = abs(left_point.x - right_point.x)
-        target_position = Point(
-            (left_point.x + right_point.x) / 2,
-            (left_point.y + right_point.y) / 2)
+        target_position = central_point
         if predicted_car_position.y > remaining_distance and remaining_distance is not None and upper_circle is not None:
             upper_point = upper_circle.get_closest_point(predicted_car_position)
             target_position = Point(
                 (upper_point.x - track_width / 2),
                 (left_point.y + right_point.y) / 2)
     elif curve_type == CURVE_TYPE_RIGHT:
-        track_width = abs(left_point.x - right_point.x)
-        target_position = Point(
-            (left_point.x + right_point.x) / 2,
-            (left_point.y + right_point.y) / 2)
+        target_position = central_point
         if predicted_car_position.y > remaining_distance and remaining_distance is not None and upper_circle is not None:
             upper_point = upper_circle.get_closest_point(predicted_car_position)
             target_position = Point(
                 (upper_point.x + track_width / 2),
                 (left_point.y + right_point.y) / 2)
     else:
-        target_position = Point(
-            (left_point.x + right_point.x) / 2,
-            (left_point.y + right_point.y) / 2)
+        target_position = central_point
+
+    show_line_in_rviz(2, [left_point, right_point],
+                      color=ColorRGBA(1, 1, 1, 0.3), line_width=0.005)
+    return target_position
+
+
+def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_distance, barrier, delta_time):
+    global last_speed
+    predicted_car_position, prediction_distance = calc_predicted_car_position()
+    target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, remaining_distance)
 
     error = (target_position.x - predicted_car_position.x) / \
         prediction_distance
@@ -185,12 +202,12 @@ def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_
 
     radius = min(left_circle.radius, right_circle.radius)
 
-    speed = calc_max_curve_speed(0.5, radius)
+    speed = calc_max_curve_speed(FRICTION, radius)
     if remaining_distance is not None and upper_circle is not None:
         safety_margin = 0.25
         if remaining_distance < 5:
             safety_margin = 0.05 * remaining_distance
-        target_speed = calc_max_curve_speed(0.5, upper_circle.radius)
+        target_speed = calc_max_curve_speed(FRICTION, upper_circle.radius)
         last_speed = target_speed
         braking_distance = calc_braking_distance(remaining_distance, current_speed, target_speed, CAR_ACCELERATION, CAR_DECCELERATION) + safety_margin
         if remaining_distance > braking_distance:
@@ -201,8 +218,6 @@ def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_
     steering_angle = steering_angle * map(parameters.high_speed_steering_limit_dead_zone, 1, 1, parameters.high_speed_steering_limit, speed/25)  # nopep8
     drive(steering_angle, speed)
 
-    show_line_in_rviz(2, [left_point, right_point],
-                      color=ColorRGBA(1, 1, 1, 0.3), line_width=0.005)
     show_line_in_rviz(3, [Point(0, 0), predicted_car_position],
                       color=ColorRGBA(1, 1, 1, 0.3), line_width=0.005)
     show_line_in_rviz(4, [predicted_car_position,
@@ -279,14 +294,19 @@ last_scan = None
 
 
 def laser_callback(scan_message):
-    global last_scan
-
+    global last_scan, total_scan_count, total_scan_time
+    t_start = time.time()
     scan_time = scan_message.header.stamp.to_sec()
     if last_scan is not None and abs(scan_time - last_scan) > 0.0001 and scan_time > last_scan:  # nopep8
         delta_time = scan_time - last_scan
         handle_scan(scan_message, delta_time)
 
     last_scan = scan_time
+    # t_delta = time.time() - t_start
+    # total_scan_time += t_delta
+    # total_scan_count += 1
+    # if total_scan_count % 40 == 0:
+    #     print "mean_scan_time:", total_scan_time / float(total_scan_count) * 1000.0, "ms", "scan_time:", delta_time, "s"
 
 
 def speed_callback(speed_message):
