@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+<!-- Launches all necessary nodes that let the car drive autonomously. 
+
+Driving parameters tweaked for the physical car.
+TODO: The updated parameters will go here, for now they are the default parameters
+-->
+
+
+    <!-- wall_following node -->
+    <node
+      respawn="true"
+      pkg="wallfollowing2"
+      type="wallfollowing.py"
+      name="wallfollowing"
+      output="screen" >
+    </node>
+
+    <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /wallfollowing $(find wallfollowing2)/cfg/physical.yaml" />
+</launch>
