@@ -4,7 +4,7 @@
     <!-- wall_following node -->
     <node
       respawn="true"
-      pkg="wallfollowing2"
+      pkg="wallfollowing3"
       type="wallfollowing.py"
       name="wallfollowing"
       output="screen" >
