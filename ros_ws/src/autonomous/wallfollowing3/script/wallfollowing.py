@@ -26,10 +26,10 @@ TOPIC_LASER_SCAN = "/scan"
 CAR_ACCELERATION = 5
 CAR_DECCELERATION = 4
 
-FRICTION = 0.5
+FRICTION = 0.45
 
-MAX_STEERING_ANGLE = 1.2
-CAR_LENGTH = 40
+MAX_STEERING_ANGLE = 30 * (math.pi / 180)
+CAR_LENGTH = 0.325
 
 CURVE_TYPE_RIGHT = 0
 CURVE_TYPE_LEFT = 1
@@ -154,6 +154,17 @@ def calc_steering_radius(steering_angle):
     return CAR_LENGTH / math.sin(steering_angle * MAX_STEERING_ANGLE)
 
 
+def calc_max_steering_angle():
+    if current_speed == 0:
+        return 1
+    intermediate_result = (FRICTION * 9.81 * CAR_LENGTH) / (current_speed**2)
+    if intermediate_result >= 1:
+        return 1
+    angle_rad = math.asin(intermediate_result)
+    print "angle_rad:", angle_rad, "mapped:", map(0, MAX_STEERING_ANGLE, 0, 1, angle_rad)
+    return map(0, MAX_STEERING_ANGLE, 0, 1, angle_rad)
+
+
 def calc_predicted_car_position():
     prediction_distance = min(0.25 + last_speed * 0.35, 2)
     return Point(0, prediction_distance), prediction_distance
@@ -216,6 +227,11 @@ def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_
             speed = target_speed
 
     steering_angle = steering_angle * map(parameters.high_speed_steering_limit_dead_zone, 1, 1, parameters.high_speed_steering_limit, speed/25)  # nopep8
+    max_steering_angle = calc_max_steering_angle() + speed/25
+    if steering_angle < 0:
+        steering_angle = max(-max_steering_angle, steering_angle)
+    else:
+        steering_angle = min(steering_angle, max_steering_angle)
     drive(steering_angle, speed)
 
     show_line_in_rviz(3, [Point(0, 0), predicted_car_position],
