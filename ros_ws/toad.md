@@ -126,6 +126,10 @@ This will install IDEs and provide informations how to get the plugins for ROS
 * Visual Studio Code
 * Netbeans
 
+### toad.sh init camstream
+
+This will install all packages required for camera streaming server and client.
+
 ## toad.sh slack
 
 This is for sending messages to slack channels configured in settings.

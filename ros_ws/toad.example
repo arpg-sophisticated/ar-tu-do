@@ -52,8 +52,11 @@ PATHSETUP="./devel/setup.bash"
 # use gpu for lidar (true|false)
 USEGPU="false"
 
-# IP address of car
-CARIP="0.0.0.0"
+# IP address of car for remote rviz
+CARIP="192.168.42.10"
+
+# main network interface of the car, used for determining address
+CARINTERFACE="wlan0"
 
 # set to 1 after configuring
 CONFIGURED="0"
