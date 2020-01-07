@@ -26,22 +26,19 @@ LAUNCHCAR="car_wallfollowing.launch"
 
 # custom racetrack
 # - racecar
-# - racecar_ar
 # - racecar_cones
 # - racecar_parking_1
 # - racecar_tunnel
-# - racecar_walker
-# - racer_empty
 # - racetrack
 # - racetrack_decorated
 # - racetrack_decorated_2
 # - racetrack_decorated_2_big
 # - racetrack_obstacle
 # - track_barca
-# - track_empty
 # - track_levine
 # - track_porto
-LAUNCHTRACK="racetrack_obstacle"
+# - walker_racecourse
+LAUNCHTRACK="racetrack_decorated_2"
 
 # path for ros to source
 PATHROS="/opt/ros/melodic/setup.bash"
