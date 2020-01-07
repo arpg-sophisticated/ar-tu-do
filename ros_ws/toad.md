@@ -43,16 +43,15 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh system run [nogui,fast,drive,manual,customTrack]
+### toad.sh system run [nogui,fast,drive,manual]
 
-This will run the gazebo simuation.
+This will run the gazebo simuation on the track which is specified in toad.settings.
 
 Arguments:
 * nogui - this disables the local gazebo client (more stable and performant on our systems)
 * fast - enforce fast mode
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
-* customTrack -  start simulation with custom track as configured in toad.settings
 
 ## toad.sh car
 

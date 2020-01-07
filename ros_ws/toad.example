@@ -24,7 +24,7 @@ LAUNCHBUILD="gazebo.launch"
 # launchfile for car
 LAUNCHCAR="car_wallfollowing.launch"
 
-# custom racetrack
+# choose racetrack
 # - racecar
 # - racecar_cones
 # - racecar_parking_1

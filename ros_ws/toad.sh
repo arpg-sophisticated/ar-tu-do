@@ -118,7 +118,7 @@ case $1 in
                     exit 1
                 fi
                 export DISPLAY=$(getActiveDisplay)
-                ARGUMENTS=""
+                ARGUMENTS="world:=$LAUNCHTRACK"
                 if [[ "$3" =~ "nogui" ]]; then
                     ARGUMENTS="gui:=false "
                 fi
@@ -130,9 +130,6 @@ case $1 in
                 fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
-                fi
-                if [[ "$3" =~ "customTrack" ]]; then
-                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACK "
                 fi
                 source $PATHROS
                 source $PATHSETUP
