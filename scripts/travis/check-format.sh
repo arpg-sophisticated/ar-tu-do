@@ -3,9 +3,9 @@ workspace_path=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../ros_ws
 FOUND_PROBLEMS=false
 
 # Check C++ code
-for FILE in $(find "$workspace_path" -path '*ros_ws/src/external_packages' -prune -o \( -name '*.h' -or -name '*.cpp' \) -print)
+for FILE in $(find "$workspace_path/src/" -path '*ros_ws/src/external_packages' -prune -o \( -name '*.h' -or -name '*.cpp' \) -print)
 do
-    if clang-format-3.8 -i -style=file -output-replacements-xml $FILE | grep -c "<replacement " > /dev/null ; then
+    if clang-format -i -style=file -output-replacements-xml $FILE | grep -c "<replacement " > /dev/null ; then
         echo "Formatting problem in:" $FILE
         FOUND_PROBLEMS=true
     fi

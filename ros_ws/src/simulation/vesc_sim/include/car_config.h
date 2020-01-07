@@ -89,4 +89,4 @@ namespace car_config
      * @unit radian/s * minute = radians
      */
     constexpr double ERPM_TO_RAD_PER_SEC = MOTOR_POLES * 2 * PI / 60;
-};
+}; // namespace car_config
