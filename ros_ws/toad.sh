@@ -120,7 +120,7 @@ case $1 in
                 export DISPLAY=$(getActiveDisplay)
                 ARGUMENTS="world:=$LAUNCHTRACK"
                 if [[ "$3" =~ "nogui" ]]; then
-                    ARGUMENTS="gui:=false "
+                    ARGUMENTS="$ARGUMENTS gui:=false "
                 fi
                 if [[ "$3" =~ "fast" ]]; then
                     ARGUMENTS="$ARGUMENTS fast:=true "
