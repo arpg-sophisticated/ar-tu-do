@@ -43,7 +43,7 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh system run [nogui,fast,drive,manual,obstacle]
+### toad.sh system run [nogui,fast,drive,manual,customtrack]
 
 This will run the gazebo simuation.
 
@@ -52,7 +52,7 @@ Arguments:
 * fast - enforce fast mode
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
-* obstacle -  use track with obstacle
+* customtrack -  start simulation with custom track as configured in toad.settings
 
 ## toad.sh car
 
@@ -79,13 +79,21 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh car run
+### toad.sh car run [drive,manual]
 
 This will run all the software on the car.
 
-### toad.sh car remote
+Arguments:
+* drive - enforce autonomous driving
+* manual -  enforce manual driving
+
+### toad.sh car remote [drive,manual]
 
 This will run all the software on the car, but without rviz.
+
+Arguments:
+* drive - enforce autonomous driving
+* manual -  enforce manual driving
 
 ### toad.sh car control
 
