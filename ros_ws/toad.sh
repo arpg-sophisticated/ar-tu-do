@@ -223,7 +223,14 @@ case $1 in
 		export ROS_IP=$MAINIPADDRESS
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
-                roslaunch launch/$LAUNCHCAR
+                ARGUMENTS=""
+                if [[ "$3" =~ "drive" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                fi
+                if [[ "$3" =~ "manual" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=1 "
+                fi
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Watch you feet, I'm on the road"
@@ -236,7 +243,14 @@ case $1 in
 		export ROS_IP=$MAINIPADDRESS
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
-                roslaunch launch/$LAUNCHCAR show_rviz:=0
+                ARGUMENTS="show_rviz:=0"
+                if [[ "$3" =~ "drive" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                fi
+                if [[ "$3" =~ "manual" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=1 "
+                fi
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
