@@ -132,7 +132,11 @@ case $1 in
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
                 if [[ "$3" =~ "customtrack" ]]; then
-                    ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACK "
+                    if [[ "$4" =~ [a-z] ]]; then
+                        ARGUMENTS="$ARGUMENTS world:=$4 "
+                    else
+                        ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACK "
+                    fi
                 fi
                 source $PATHROS
                 source $PATHSETUP
