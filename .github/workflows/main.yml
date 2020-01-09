@@ -29,6 +29,7 @@ jobs:
         catkin_make run_tests && catkin_test_results
         ./../scripts/travis/check-consistency.sh
   build_kinetic:
+    if: false
     runs-on: ubuntu-16.04
     env:
       ROS_DISTRO: kinetic 
