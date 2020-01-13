@@ -76,8 +76,8 @@
     </transmission>    
 
     <gazebo reference="${lr}_wheel_${fb}">
-      <mu1>0.8</mu1>
-      <mu2>0.5</mu2>
+      <mu1>0.9</mu1>
+      <mu2>0.7</mu2>
     </gazebo> 
   </xacro:macro>
 
