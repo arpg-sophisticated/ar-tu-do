@@ -18,6 +18,18 @@ For sure, you need a properly configured system with Ubuntu 16.04 or 18.04 runni
 
 This was tested with Ubuntu 18.04 from local machine and remote system. If the can't recognize the DISPLAY correctly, please send me the output of ```w -sh```, the output of ```env``` and the output of the script.
 
+## Important remark on Gazebo
+
+Depending on your system, date and the attitudes of the ubuntupeople and fanboys, that prefer newer over stable versions, you might get a very new gazebo version and, oh wonder, that won't load the simulation. After hours of debugging the simulation it become clear, that anything other than 
+
+9.0.0+dfsg5-3ubuntu1+ppa2
+
+will crash, or just load sometimes or starts never, a.s.o. If you experience problems with gazebo, DOWNGRADE to the above mentioned version by putting
+
+http://packages.ros.org/ros/ubuntu bionic/main amd64 Packages
+
+into your sources.list and do a manual downgrade with aptitude for example.
+
 ## toad.sh system
 
 Commands to use on a normal computer or on the build server. Branch is configured in BRANCHBUILD.
