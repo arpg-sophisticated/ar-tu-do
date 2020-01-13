@@ -17,16 +17,17 @@ import numpy as np
 import time
 
 from dynamic_reconfigure.server import Server
-from wallfollowing2.cfg import wallfollowing2Config
+from wallfollowing3.cfg import wallfollowing3Config
 
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
+TOPIC_CONTROLLED_DRIVE_PARAM = "/commands/controlled_drive_param"
 TOPIC_LASER_SCAN = "/scan"
 
-CAR_ACCELERATION = 5
-CAR_DECCELERATION = 4
+CAR_ACCELERATION = 4.5
+CAR_DECCELERATION = 4.5
 
-FRICTION = 0.45
+FRICTION = 0.5
 
 MAX_STEERING_ANGLE = 30 * (math.pi / 180)
 CAR_LENGTH = 0.325
@@ -34,7 +35,7 @@ CAR_LENGTH = 0.325
 CURVE_TYPE_RIGHT = 0
 CURVE_TYPE_LEFT = 1
 
-last_angle = 0
+last_angle_moving_average = [[], 8]
 last_speed = 0
 current_speed = 0
 
@@ -151,6 +152,8 @@ def calc_max_curve_speed(friction, radius):
 
 
 def calc_steering_radius(steering_angle):
+    if steering_angle == 0:
+        return 10000
     return CAR_LENGTH / math.sin(steering_angle * MAX_STEERING_ANGLE)
 
 
@@ -161,12 +164,40 @@ def calc_max_steering_angle():
     if intermediate_result >= 1:
         return 1
     angle_rad = math.asin(intermediate_result)
-    print "angle_rad:", angle_rad, "mapped:", map(0, MAX_STEERING_ANGLE, 0, 1, angle_rad)
     return map(0, MAX_STEERING_ANGLE, 0, 1, angle_rad)
 
 
-def calc_predicted_car_position():
-    prediction_distance = min(0.25 + last_speed * 0.35, 2)
+def calc_steering_angle(steering_radius):
+    angle_rad = math.asin(CAR_LENGTH / steering_radius)
+    return map(0, MAX_STEERING_ANGLE, 0, 1, angle_rad)
+
+
+# def find_closest_point_to_car(points):
+#     return min([])
+
+
+def calc_angle_moving_average():
+    if len(last_angle_moving_average[0]) == 0:
+        return 0
+    return sum(last_angle_moving_average[0]) / len(last_angle_moving_average[0])
+
+
+def add_angle_moving_average(angle):
+    global last_angle_moving_average
+    if len(last_angle_moving_average[0]) >= last_angle_moving_average[1]:
+        last_angle_moving_average[0] = last_angle_moving_average[0][1:]
+    last_angle_moving_average[0].append(angle)
+
+
+def calc_predicted_car_position(is_in_curve):
+    if is_in_curve:
+        prediction_distance = min(0.1 + last_speed * 0.3, 1.5)
+    else:
+        prediction_distance = min(0.1 + last_speed * 0.35, 2)
+    # steering_radius = calc_steering_radius(calc_angle_moving_average())
+    # circle_section_angle = prediction_distance / steering_radius
+    # print steering_radius, circle_section_angle, Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
+    # return Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
     return Point(0, prediction_distance), prediction_distance
 
 
@@ -175,6 +206,8 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
     right_point = right_circle.get_closest_point(predicted_car_position)
     central_point = Point((left_point.x + right_point.x) / 2, (left_point.y + right_point.y) / 2)
     track_width = abs(left_point.x - right_point.x)
+
+    target_position = central_point
 
     if curve_type == CURVE_TYPE_LEFT:
         target_position = central_point
@@ -190,21 +223,21 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
             target_position = Point(
                 (upper_point.x + track_width / 2),
                 (left_point.y + right_point.y) / 2)
-    else:
-        target_position = central_point
 
     show_line_in_rviz(2, [left_point, right_point],
                       color=ColorRGBA(1, 1, 1, 0.3), line_width=0.005)
     return target_position
 
 
-def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_distance, barrier, delta_time):
+def follow_walls(left_circle, right_circle, upper_circle, points, curve_type, remaining_distance, barrier, delta_time):
     global last_speed
-    predicted_car_position, prediction_distance = calc_predicted_car_position()
+    predicted_car_position, prediction_distance = calc_predicted_car_position(upper_circle is None)
     target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, remaining_distance)
 
+    distance_to_target = math.sqrt(target_position.x**2 + target_position.y**2)
+
     error = (target_position.x - predicted_car_position.x) / \
-        prediction_distance
+        distance_to_target
     if math.isnan(error) or math.isinf(error):
         error = 0
 
@@ -227,11 +260,16 @@ def follow_walls(left_circle, right_circle, upper_circle, curve_type, remaining_
             speed = target_speed
 
     steering_angle = steering_angle * map(parameters.high_speed_steering_limit_dead_zone, 1, 1, parameters.high_speed_steering_limit, speed/25)  # nopep8
-    max_steering_angle = calc_max_steering_angle() + speed/25
-    if steering_angle < 0:
-        steering_angle = max(-max_steering_angle, steering_angle)
-    else:
-        steering_angle = min(steering_angle, max_steering_angle)
+    max_steering_angle = calc_max_steering_angle() # + (speed / 25) * 2
+    # if steering_angle < 0:
+    #     steering_angle = max(-max_steering_angle, steering_angle)
+    # else:
+    #     steering_angle = min(steering_angle, max_steering_angle)
+    add_angle_moving_average(steering_angle)
+    emergency_slowdown = min(1, distance_to_target**2 / prediction_distance**2)
+    if emergency_slowdown > 0.6:
+        emergency_slowdown = 1
+    speed *= emergency_slowdown
     drive(steering_angle, speed)
 
     show_line_in_rviz(3, [Point(0, 0), predicted_car_position],
@@ -258,6 +296,12 @@ def handle_scan(laser_scan, delta_time):
     right_wall = points[:split:4, :]
     left_wall = points[split::4, :]
 
+    min_x_left_wall = min([point[0] for point in left_wall])
+    right_wall = np.array([point for point in right_wall if point[0] > min_x_left_wall])
+
+    max_x_right_wall = max([point[0] for point in right_wall])
+    left_wall = np.array([point for point in left_wall if point[0] < max_x_right_wall])
+
     left_circle = Circle.fit(left_wall)
     right_circle = Circle.fit(right_wall)
 
@@ -274,13 +318,13 @@ def handle_scan(laser_scan, delta_time):
         radius_proportions = left_circle.radius/right_circle.radius
         if radius_proportions > 1.3 and right_circle.center.x < 0:
             max_y = np.max(left_wall[:, 1])
-            upper_wall = np.array([point for point in right_wall if point[1] >= max_y-1])
+            upper_wall = np.array([point for point in right_wall if point[1] >= max_y - 1.5])
             right_wall = np.array([point for point in right_wall if point[1] < max_y])
             right_circle = Circle.fit(right_wall)
             curve_type = CURVE_TYPE_LEFT
         elif radius_proportions < 0.78 and right_circle.center.x > 0:
             max_y = np.max(right_wall[:, 1])
-            upper_wall = np.array([point for point in left_wall if point[1] >= max_y-1])
+            upper_wall = np.array([point for point in left_wall if point[1] >= max_y - 1.5])
             left_wall = np.array([point for point in left_wall if point[1] < max_y])
             left_circle = Circle.fit(left_wall)
             curve_type = CURVE_TYPE_RIGHT
@@ -300,7 +344,7 @@ def handle_scan(laser_scan, delta_time):
     # Why max and not min?
     barrier = np.max(points[barrier_start: barrier_end, 1])
 
-    follow_walls(left_circle, right_circle, upper_circle, curve_type, max_y, barrier, delta_time)
+    follow_walls(left_circle, right_circle, upper_circle, points, curve_type, max_y, barrier, delta_time)
 
     show_circle_in_rviz(left_circle, left_wall, 0)
     show_circle_in_rviz(right_circle, right_wall, 1)
@@ -330,6 +374,12 @@ def speed_callback(speed_message):
     current_speed = speed_message.wheel_speed
 
 
+def controlled_drive_param_callback(drive_param):
+    global current_speed
+    print "speed:", current_speed
+    current_speed = drive_param.velocity
+
+
 def dynamic_configuration_callback(config, level):
     global parameters
     parameters = Parameters(config)
@@ -339,16 +389,17 @@ def dynamic_configuration_callback(config, level):
     return config
 
 
-rospy.init_node('wallfollowing', anonymous=True)
+rospy.init_node('wallfollowing3', anonymous=True)
 parameters = None
 pid = PIDController(1, 1, 1)
 
 rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, speed_callback)
+rospy.Subscriber(TOPIC_CONTROLLED_DRIVE_PARAM, drive_param, controlled_drive_param_callback)
 drive_parameters_publisher = rospy.Publisher(
     TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 
-Server(wallfollowing2Config, dynamic_configuration_callback)
+Server(wallfollowing3Config, dynamic_configuration_callback)
 
 while not rospy.is_shutdown():
     rospy.spin()
