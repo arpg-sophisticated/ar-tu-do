@@ -13,8 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
 )
 find_package(SDL2 REQUIRED)
-string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
-set(LIBS ${SDL2_LIBRARIES})
+#string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
+set(LIBS SDL2::SDL2 ${SDL2_LIBRARIES})
 
 ## Errors and Warnings
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp -Wdouble-promotion -Wformat -Wnonnull -Wmain -Wswitch-bool -Winvalid-memory-model -Wunknown-pragmas -Warray-bounds -Wfloat-equal -Wlogical-op -Wpacked ")
