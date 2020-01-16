@@ -8,7 +8,7 @@ from tf.transformations import quaternion_from_euler
 import math
 import random
 
-from track import track, Point
+from simulation_tools.track import track, Point
 
 
 def set_pose(position, orientation):
