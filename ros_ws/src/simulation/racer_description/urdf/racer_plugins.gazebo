@@ -51,16 +51,16 @@
         <depth_camera>
         </depth_camera>
         <clip>
-          <near>0.01</near>
-          <far>100</far>
+          <near>0.4</near>
+          <far>20</far>
         </clip>
       </camera>
       <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
         <alwaysOn>true</alwaysOn>
         <updateRate>0.0</updateRate>
         <cameraName>racer/camera1</cameraName>
-        <frameName>base_link</frameName>               
-        <!--<frameName>camera</frameName>-->               
+        <!--<frameName>base_link</frameName>-->               
+        <frameName>camera</frameName>               
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth/image_raw</depthImageTopicName>
         <pointCloudTopicName>depth/points</pointCloudTopicName>
