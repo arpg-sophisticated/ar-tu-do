@@ -114,7 +114,6 @@
     </sensor>
   </gazebo>-->
   
-
   <!-- Hokuyo -->
   <xacro:if value="$(arg use_gpu)">
     <xacro:property name="hokuyo_sensor" value="gpu_ray"/>
