@@ -103,7 +103,7 @@
         <mesh filename="package://racer_description/meshes/ZED.dae"/>
       </geometry>
     </visual>
-  </link>s
+  </link>
 
   <joint name="camera_joint" type="fixed">
     <axis xyz="0 1 0" />

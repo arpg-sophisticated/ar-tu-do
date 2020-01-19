@@ -13,15 +13,83 @@
     </plugin>
   </gazebo>
 
-  <!-- Camera -->
+  <!-- ZED -->
   <gazebo reference="camera">
+    <sensor type="depth" name="camera1">
+      <!-- 854x480@100Hz - 87deg - 1.51844 -->
+      <update_rate>100.0</update_rate>
+      
+      <!-- 1280x720@60Hz - 85deg - 1.48353 -->
+      <!--<update_rate>60.0</update_rate>-->
+      
+      <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
+      <!--<update_rate>30.0</update_rate>-->
+      <camera name="head">
+        <!-- 854x480@100Hz - 87deg - 1.51844 -->
+        <horizontal_fov>1.51844</horizontal_fov>
+        
+        <!-- 1280x720@60Hz - 85deg - 1.48353 -->
+        <!--<horizontal_fov>1.48353</horizontal_fov>-->
+        
+        <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
+        <!--<horizontal_fov>1.20428</horizontal_fov>-->
+        <image>
+          <!-- 854x480@100Hz - 87deg - 1.51844 -->
+          <width>854</width>
+          <height>480</height>
+          
+          <!-- 1280x720@60Hz - 85deg - 1.48353 -->
+          <!--<width>1280</width>-->
+          <!--<height>720</height>-->
+          
+          <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
+          <!--<width>1920</width>-->
+          <!--<height>1080</height>-->
+          
+          <format>B8G8R8</format>
+        </image>
+        <depth_camera>
+        </depth_camera>
+        <clip>
+          <near>0.01</near>
+          <far>100</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>racer/camera1</cameraName>
+        <frameName>base_link</frameName>               
+        <!--<frameName>camera</frameName>-->               
+        <imageTopicName>image_raw</imageTopicName>
+        <depthImageTopicName>depth/image_raw</depthImageTopicName>
+        <pointCloudTopicName>depth/points</pointCloudTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>            
+        <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>            
+        <pointCloudCutoff>0.4</pointCloudCutoff>                
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+        <CxPrime>0.0</CxPrime>
+        <Cx>0.0</Cx>
+        <Cy>0.0</Cy>
+        <focalLength>0.0</focalLength>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Camera -->
+<!--  <gazebo reference="camera">
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
           <width>800</width>
-          <height>800</height>
+          <height>600</height>
           <format>R8G8B8</format>
         </image>
         <clip>
@@ -44,7 +112,7 @@
         <distortionT2>0.0</distortionT2>
       </plugin>
     </sensor>
-  </gazebo>
+  </gazebo>-->
 
   <!-- Hokuyo -->
   <xacro:if value="$(arg use_gpu)">
