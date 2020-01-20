@@ -490,7 +490,7 @@ case $1 in
                         sudo apt-get install -y python-pip
                         sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
                         sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython slack-cli
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
                     else
                         echo "Skipping"
                     fi
