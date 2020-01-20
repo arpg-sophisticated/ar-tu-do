@@ -13,11 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
 )
 
+find_package(SDL2 REQUIRED)
+
 # Arch does SDL2 differently than ubuntu. ffs why is it so difficult.
 execute_process(COMMAND bash -c "grep NAME /etc/os-release | cut -d '=' -f2 | head -n1 | sed -e 's/^\"//' -e 's/\"$//'" OUTPUT_VARIABLE linux_dist OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(linux_dist STREQUAL "Arch Linux")
-  find_package(SDL2 REQUIRED)
   set(LIBS SDL2::SDL2 ${SDL2_LIBRARIES})
 else()
   string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
