@@ -2,7 +2,6 @@
 #include "yaml-cpp/yaml.h"
 #include <fstream>
 #include <ros/package.h>
-#include <limits.h>
 
 int main(int argc, char** argv)
 {
