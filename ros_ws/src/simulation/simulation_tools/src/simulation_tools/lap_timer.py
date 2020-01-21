@@ -76,7 +76,12 @@ class Timer():
     def pass_checkpoint(self, next_checkpoint):
         checkpoint_time = rospy.Time.now()
         checkpoint_duration = checkpoint_time - self.checkpoint_start_time
-        rospy.loginfo("checkpoint " + str((self.next_checkpoint-1)%5) + ": " + format_duration(checkpoint_duration))
+        checkpoint_label = str((self.next_checkpoint-1)%len(self.checkpoints))
+        if checkpoint_label == "0":
+            checkpoint_label = str(len(self.checkpoints))
+
+
+        rospy.loginfo("checkpoint " + checkpoint_label + ": " + format_duration(checkpoint_duration))
         self.checkpoint_start_time = checkpoint_time
 
 world_name = rospy.get_param('world_name')
