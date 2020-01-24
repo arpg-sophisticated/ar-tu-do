@@ -77,7 +77,8 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
         }
     }
 
-    this->m_debug_geometry.drawVoxels(0, voxels, voxelResolution, voxelResolution);
+    this->m_debug_geometry.drawVoxels(0, voxels, voxelResolution, voxelResolution,
+                                      1 / 10.0f); // 10 points for maximum score
 }
 
 int main(int argc, char** argv)

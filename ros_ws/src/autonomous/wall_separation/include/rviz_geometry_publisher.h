@@ -16,7 +16,7 @@ class RvizGeometryPublisher
     void drawLine(int id, geometry_msgs::Point point1, geometry_msgs::Point point2, std_msgs::ColorRGBA color,
                   float width);
 
-    void drawVoxels(int id, std::vector<Voxel*> voxels, double width, double height);
+    void drawVoxels(int id, std::vector<Voxel*> voxels, double width, double height, double scoreFactor);
     void drawRect(int id, double x, double y, double width, double height, float intensity);
 
     void clearRects();
