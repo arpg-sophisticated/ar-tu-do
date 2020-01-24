@@ -1,6 +1,7 @@
 #pragma once
 
 #include "std_msgs/ColorRGBA.h"
+#include "voxel.h"
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 
@@ -14,6 +15,11 @@ class RvizGeometryPublisher
 
     void drawLine(int id, geometry_msgs::Point point1, geometry_msgs::Point point2, std_msgs::ColorRGBA color,
                   float width);
+
+    void drawVoxels(int id, std::vector<Voxel*> voxels, double width, double height);
+    void drawRect(int id, double x, double y, double width, double height, float intensity);
+
+    void clearRects();
 
     private:
     ros::Publisher m_marker_publisher;
