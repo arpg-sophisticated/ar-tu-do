@@ -42,23 +42,23 @@ void RvizGeometryPublisher::drawVoxels(int id, std::vector<Voxel*> voxels, doubl
     for (auto voxel : voxels)
     {
         rects.points.push_back(createPoint(voxel->x, voxel->y, 0.0f));
+        float score = voxel->get_score() * scoreFactor;
+        if (score > 1.0f)
+            score = 1.0f;
         std_msgs::ColorRGBA color;
         color.r = 1.0f;
         color.g = 0.0f;
         color.b = 0.0f;
-        color.a = voxel->get_score() * scoreFactor;
+        color.a = score;
         rects.colors.push_back(color);
     }
+
+    rects.pose.orientation.w = 1;
 
     rects.scale.x = width;
     rects.scale.y = height;
     rects.scale.z = 0.02f;
 
-    /*    rects.color.r = 1.0f;
-        rects.color.g = 0.0f;
-        rects.color.b = 0.0f;
-        rects.color.a = 1.0f;
-    */
     rects.action = visualization_msgs::Marker::ADD;
 
     this->m_marker_publisher.publish(rects);
