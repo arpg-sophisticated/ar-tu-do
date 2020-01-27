@@ -35,6 +35,8 @@
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
     <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
+    
+    <node name="wall_separation" pkg="wall_separation" type="wall_separation" />
 
     <group if="$(arg emergency_stop)">
         <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
