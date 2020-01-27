@@ -4,7 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /RobotModel1/Status1
         - /RobotModel1/Links1/left_wheel_back1
         - /RobotModel1/Links1/left_wheel_front1
         - /Camera (Left)1/Visibility1
@@ -34,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: LaserScan (Lidar)
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -152,9 +151,9 @@ Visualization Manager:
       Max Intensity: 0
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: LaserScan
+      Name: LaserScan (Lidar)
       Position Transformer: XYZ
-      Queue Size: 10
+      Queue Size: 2
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
@@ -163,6 +162,36 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: Intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4.973723888397217
+      Min Color: 0; 0; 0
+      Min Intensity: 0.40060657262802124
+      Name: LaserScan (Camera)
+      Position Transformer: XYZ
+      Queue Size: 2
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /scan_camera
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: false
       Value: true
     - Class: rviz/Camera
       Enabled: true
@@ -180,7 +209,8 @@ Visualization Manager:
         EmergencyStop: true
         Grid: true
         Imu: true
-        LaserScan: true
+        LaserScan (Camera): true
+        LaserScan (Lidar): true
         RobotModel: true
         Value: false
         Wallfollowing: true
@@ -203,7 +233,8 @@ Visualization Manager:
         EmergencyStop: true
         Grid: true
         Imu: true
-        LaserScan: true
+        LaserScan (Camera): true
+        LaserScan (Lidar): true
         RobotModel: true
         Value: false
         Wallfollowing: true
@@ -226,7 +257,8 @@ Visualization Manager:
         EmergencyStop: true
         Grid: true
         Imu: true
-        LaserScan: true
+        LaserScan (Camera): true
+        LaserScan (Lidar): true
         RobotModel: true
         Value: false
         Wallfollowing: true
@@ -368,7 +400,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.970891237258911
+      Distance: 5.235725402832031
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -383,10 +415,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9702025651931763
+      Pitch: 0.3347965478897095
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.898409366607666
+      Yaw: 2.410221815109253
     Saved: ~
 Window Geometry:
   Camera (Depth):

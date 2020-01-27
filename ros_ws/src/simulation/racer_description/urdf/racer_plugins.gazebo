@@ -17,7 +17,7 @@
   <gazebo reference="camera">
     <sensor type="depth" name="camera1">
       <!-- 672x376@100Hz - 87deg - 1.51844 -->
-      <update_rate>100.0</update_rate>
+      <update_rate>40.0</update_rate>
       
       <!-- 854x480@100Hz - 87deg - 1.51844 -->
       <!--<update_rate>100.0</update_rate>-->
