@@ -128,7 +128,8 @@
     </collision>
 
     <visual>
-      <origin xyz="0 0 ${wheel_height/2}" rpy="0 0 0"/>
+      <!--<origin xyz="0 0 ${wheel_height/2}" rpy="0 0 0"/>-->
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
       <geometry>
         <mesh filename="package://racer_description/meshes/hokuyo.dae"/>
       </geometry>
