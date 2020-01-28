@@ -131,6 +131,13 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
+                if [[ "$3" =~ "customtrack" ]]; then
+                    if [[ "$4" =~ [a-z] ]]; then
+                        ARGUMENTS="$ARGUMENTS world:=$4 "
+                    else
+                        ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACK "
+                    fi
+                fi
                 source $PATHROS
                 source $PATHSETUP
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
@@ -225,7 +232,13 @@ case $1 in
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 ARGUMENTS=""
                 if [[ "$3" =~ "drive" ]]; then
-                    ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                    if [[ "$LAUNCHCARINSANE" == "1" ]]; then
+                        ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                    else
+			echo
+                        echo "Autonomous mode is disabled in configuration, press enter to proceed without or CRTL+C to exit"
+			read
+		    fi
                 fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
@@ -245,7 +258,13 @@ case $1 in
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 ARGUMENTS="show_rviz:=0"
                 if [[ "$3" =~ "drive" ]]; then
-                    ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                    if [[ "$LAUNCHCARINSANE" == "1" ]]; then
+                        ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                    else
+			echo
+                        echo "Autonomous mode is disabled in configuration, press enter to proceed without or CRTL+C to exit"
+			read
+		    fi
                 fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "

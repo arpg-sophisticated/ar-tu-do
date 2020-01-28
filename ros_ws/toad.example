@@ -24,7 +24,11 @@ LAUNCHBUILD="gazebo.launch"
 # launchfile for car
 LAUNCHCAR="car_wallfollowing.launch"
 
-# choose racetrack
+# IMPORTANT: IF YOU'RE INSANE, SET THIS TO 1, THIS WILL ENABLE 
+# THE POSSIBILITY TO START THE CAR IN AUTONOMOUS MODE DIRECTLY
+LAUNCHCARINSANE="0"
+
+# custom racetrack
 # - racecar
 # - racecar_cones
 # - racecar_parking_1

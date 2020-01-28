@@ -44,12 +44,14 @@ function toadHelpSystem {
     echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
     echo "       Add cron argument to suppress confirmation request"
     echo
-    echo "       toad.sh system run [nogui,fast,drive,manual]"
+    echo "       toad.sh system run [nogui,fast,drive,manual,customtrack] [trackname]"
     echo "       Starts simulation, add"
     echo "           nogui       - disable gazebo client"
     echo "           fast        - for fast mode to be true"
     echo "           drive       - to enforce autonomous driving"
     echo "           manual      - to enforce manual driving"
+    echo "           customtrack - start simulation with custom track as configured in toad.settings"
+    echo "                         you may add a trackname as 4th parameter to override track in settings"
 }
 
 # help message for car mode
