@@ -30,6 +30,8 @@ http://packages.ros.org/ros/ubuntu bionic/main amd64 Packages
 
 into your sources.list and do a manual downgrade with aptitude for example.
 
+**Important: Please mark gazebo9 package after downgrade as manually holded (= in aptitude) and proceed that for it's dependencies. Otherwise your version will be upgraded on next system upgrade!**
+
 ## toad.sh system
 
 Commands to use on a normal computer or on the build server. Branch is configured in BRANCHBUILD.
