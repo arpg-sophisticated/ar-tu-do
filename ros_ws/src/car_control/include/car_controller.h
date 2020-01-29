@@ -14,7 +14,7 @@
 constexpr const char* TOPIC_FOCBOX_SPEED = "/commands/motor/speed";
 constexpr const char* TOPIC_FOCBOX_ANGLE = "/commands/servo/position";
 constexpr const char* TOPIC_FOCBOX_BRAKE = "commands/motor/brake";
-constexpr const char* TOPIC_DRIVE_PARAM = "/commands/drive_param";
+constexpr const char* TOPIC_DRIVE_PARAM = "/commands/controlled_drive_param";
 constexpr const char* TOPIC_DRIVE_MODE = "/commands/drive_mode";
 constexpr const char* TOPIC_EMERGENCY_STOP = "/commands/emergency_stop";
 
