@@ -14,11 +14,11 @@ last_speed = 0
 
 def connect_to_database():
     try:
-        connection = psycopg2.connect(user = "sysadmin",
-                                    password = "pynative@#29",
+        connection = psycopg2.connect(user = "postgres",
+                                    password = "postgres",
                                     host = "127.0.0.1",
-                                    port = "5432",
-                                    database = "postgres_db")
+                                    port = "5433",
+                                    database = "my_db")
 
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
