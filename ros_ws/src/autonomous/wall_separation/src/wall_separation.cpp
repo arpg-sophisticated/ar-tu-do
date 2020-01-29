@@ -1,11 +1,12 @@
 #include "wall_separation.h"
 
+
 WallSeparation::WallSeparation()
     : m_debug_geometry(m_node_handle, TOPIC_VISUALIZATION, LIDAR_FRAME)
 {
     this->m_lidar_subscriber =
         m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &WallSeparation::lidar_callback, this);
-    this->m_voxel_publisher = m_node_handle.advertise<geometry_msgs::Vector3>(TOPIC_VOXEL_, 1, true);
+    this->m_voxel_publisher = m_node_handle.advertise<sensor_msgs::PointCloud2>(TOPIC_VOXEL_, 1, true);
 }
 
 std::vector<geometry_msgs::Point> lidar_to_cartesian(const sensor_msgs::LaserScan::ConstPtr& lidar)
@@ -76,6 +77,33 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
             it++;
         }
     }
+    
+
+    sensor_msgs::PointField tmp1 = sensor_msgs::PointField(); tmp1.name='x'; tmp1.offset=0;tmp1.datatype=sensor_msgs::PointField::FLOAT32;tmp1.count=2;
+    sensor_msgs::PointField tmp2 = sensor_msgs::PointField(); tmp2.name='y'; tmp2.offset=4;tmp2.datatype=sensor_msgs::PointField::FLOAT32;tmp2.count=2;
+    sensor_msgs::PointField tmp3 = sensor_msgs::PointField(); tmp3.name='score'; tmp3.offset=8;tmp3.datatype=sensor_msgs::PointField::UINT32;tmp3.count=1;
+
+    
+    voxelsCloud.fields = {tmp1,tmp2,tmp3};
+    voxelsCloud.height = 1;
+    voxelsCloud.point_step = 18; // FLOAT32 4Bytes * 2 (x und y Koordinate)+2 (count uint32)
+    voxelsCloud.width = voxels.size();
+    voxelsCloud.row_step = voxelsCloud.point_step * voxelsCloud.width;
+    voxelsCloud.is_bigendian =true;
+    voxelsCloud.is_dense = false;
+    voxelsCloud.data.resize(voxelsCloud.point_step*voxelsCloud.width);
+
+
+    for(size_t cp = 0; cp <voxelsCloud.width;++cp){
+        uint32_t tmp = voxels[cp]->get_score();
+        memcpy(&voxelsCloud.data[cp*voxelsCloud.point_step+voxelsCloud.fields[0].offset],&voxels[cp]->x,sizeof(double));
+        memcpy(&voxelsCloud.data[cp*voxelsCloud.point_step+voxelsCloud.fields[1].offset],&voxels[cp]->y,sizeof(double));
+        memcpy(&voxelsCloud.data[cp*voxelsCloud.point_step+voxelsCloud.fields[2].offset],&tmp,sizeof(uint32_t));
+        std::cout<< "Voxel " <<cp <<": xKoordinate: " <<voxels[cp]->x << " yKoordinate: " << voxels[cp]->y << " Score: "<<tmp<<"\n";
+    }
+
+
+    m_voxel_publisher.publish(voxelsCloud);
 
     this->m_debug_geometry.drawVoxels(0, voxels, voxelResolution, voxelResolution,
                                       1 / 10.0f); // 10 points for maximum score

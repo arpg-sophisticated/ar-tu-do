@@ -3,6 +3,7 @@
 #include "voxel.h"
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>
 #include <unordered_map>
 
@@ -18,6 +19,7 @@ class WallSeparation
     ros::NodeHandle m_node_handle;
     ros::Subscriber m_lidar_subscriber;
     ros::Publisher m_voxel_publisher;
+    sensor_msgs::PointCloud2 voxelsCloud;
 
     RvizGeometryPublisher m_debug_geometry;
     std::unordered_map<std::string, Voxel*> m_voxels; // TODO: Replace string representation with something proper
