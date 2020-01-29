@@ -1,9 +1,9 @@
 #pragma once
-#include <ros/ros.h>
+#include <car_config.h>
 #include <drive_msgs/drive_param.h>
+#include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Time.h>
-#include <car_config.h>
 
 const static float INITIAL_DYNAMIC_FRICTION = 0.5;
 const static float INITIAL_STATIC_FRICTION = 0.75;
@@ -38,21 +38,23 @@ class AccelerationController
 
     double m_angle = 0;
 
-    float getDynamicFriction() {
+    float getDynamicFriction()
+    {
         float friction;
         return m_node_handle.getParam("/physical_properties/dynamic_friction", friction) ? friction : 0;
     }
 
-    float getStaticFriction() {
+    float getStaticFriction()
+    {
         float friction;
         return m_node_handle.getParam("/physical_properties/static_friction", friction) ? friction : 0;
     }
 
+    /**
+     * Approaches m_target_speed over time with a certain acceleration given with CAR_ACCELERATION
+     **/
     void approachSpeedControlled(const ros::TimerEvent& event);
 
-    float calcRadiusFromAngle(float angle);
-    float calcMaxSpeed(float angle, float friction);
-    void setControlledTargetSpeed(float parameters_angle, float parameters_velocity);
     /**
      * @brief deals with incomming drive param messages
      */
