@@ -3,11 +3,11 @@
 	url = https://github.uconn.edu/ret15108/vesc
 [submodule "ros_ws/src/external_packages/particle_filter"]
 	path = ros_ws/src/external_packages/particle_filter
-	url = https://github.com/Autonomous-Racing-PG/particle_filter.git
+	url = https://github.com/arpg-sophisticated/particle_filter.git
 [submodule "ros_ws/src/external_packages/razor_imu_9dof"]
 	path = ros_ws/src/external_packages/razor_imu_9dof
 	url = https://github.com/KristofRobot/razor_imu_9dof.git
 [submodule "ros_ws/src/external_packages/imu_tools"]
 	path = ros_ws/src/external_packages/imu_tools
-	url = https://github.com/ccny-ros-pkg/imu_tools.git
+	url = https://github.com/arpg-sophisticated/imu_tools.git
 	branch = melodic
