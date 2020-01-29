@@ -13,10 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
-generate_dynamic_reconfigure_options(
-  cfg/store_training_data.cfg
-)
-
 ## Errors and Warnings
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp -Wdouble-promotion -Wformat -Wnonnull -Wmain -Wswitch-bool -Winvalid-memory-model -Wunknown-pragmas -Warray-bounds -Wfloat-equal -Wlogical-op -Wpacked ")
 # -Wpedantic cant be used because of ROS
@@ -27,16 +23,10 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp
 
 ## Declare things to be passed to dependent projects
 catkin_package(
-  CATKIN_DEPENDS dynamic_reconfigure drive_msgs roscpp rospy std_msgs
+  CATKIN_DEPENDS drive_msgs rospy std_msgs
 )
-
 
 ###########
 ## Build ##
 ###########
 
-## Specify additional locations of header files
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-)

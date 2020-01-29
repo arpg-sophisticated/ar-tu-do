@@ -5,6 +5,7 @@ import datetime
 import psycopg2
 from sensor_msgs.msg import LaserScan
 from drive_msgs.msg import drive_param
+from std_msgs.msg import String
 
 
 TOPIC_LASER_SCAN = "/scan"
@@ -12,9 +13,9 @@ TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 
 last_speed = 0
 
-def connect_to_database():
+def connect_to_database(self):
     try:
-        global connection = psycopg2.connect(user = "postgres",
+        connection = psycopg2.connect(user = "postgres",
                                     password = "postgres",
                                     host = "127.0.0.1",
                                     port = "5433",
@@ -40,8 +41,8 @@ def connect_to_database():
 
 
 def laser_callback(scan_message):
-    global last_scan_message = scan_message
-    global last_scan_time = datetime.datetime.now()
+    last_scan_message = scan_message
+    last_scan_time = datetime.datetime.now()
     
     cursor = connection.cursor()
     cursor.execute("INSERT INTO test_table (test) VALUES(1)")
@@ -49,8 +50,8 @@ def laser_callback(scan_message):
     conn.close()
 
 def laser_callback(drive_message):
-    global last_drive_message = drive_message
-    global last_drive_message_time = datetime.datetime.now()
+    last_drive_message = drive_message
+    last_drive_message_time = datetime.datetime.now()
 
 
 rospy.init_node('store_training_data', anonymous=True)
