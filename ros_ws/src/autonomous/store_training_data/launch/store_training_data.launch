@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <node pkg="store_training_data" type="store_training_data.py" name="store_training_data" />
+    <node
+      respawn="true"
+      pkg="store_training_data"
+      type="store_training_data.py"
+      name="store_training_data">
+    </node>
 </launch>

@@ -14,7 +14,7 @@ last_speed = 0
 
 def connect_to_database():
     try:
-        connection = psycopg2.connect(user = "postgres",
+        global connection = psycopg2.connect(user = "postgres",
                                     password = "postgres",
                                     host = "127.0.0.1",
                                     port = "5433",
@@ -42,6 +42,11 @@ def connect_to_database():
 def laser_callback(scan_message):
     global last_scan_message = scan_message
     global last_scan_time = datetime.datetime.now()
+    
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO test_table (test) VALUES(1)")
+    cursor.close()
+    conn.close()
 
 def laser_callback(drive_message):
     global last_drive_message = drive_message
@@ -49,6 +54,7 @@ def laser_callback(drive_message):
 
 
 rospy.init_node('store_training_data', anonymous=True)
+connect_to_database()
 
 rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
