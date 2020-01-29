@@ -57,7 +57,7 @@ Arguments:
 
 ### toad.sh system run [nogui,fast,drive,manual,customtrack] [trackname]
 
-This will run the gazebo simuation.
+This will run the gazebo simuation on the track which is specified in toad.settings.
 
 Arguments:
 * nogui - this disables the local gazebo client (more stable and performant on our systems)
