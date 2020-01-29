@@ -11,13 +11,14 @@ from std_msgs.msg import String
 TOPIC_LASER_SCAN = "/scan"
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 
-last_speed = 0
+connection = None
 
-def connect_to_database(self):
+def connect_to_database():
     try:
+        global connection
         connection = psycopg2.connect(user = "postgres",
                                     password = "postgres",
-                                    host = "127.0.0.1",
+                                    host = "localhost",
                                     port = "5433",
                                     database = "my_db")
 
@@ -49,7 +50,7 @@ def laser_callback(scan_message):
     cursor.close()
     conn.close()
 
-def laser_callback(drive_message):
+def drive_callback(drive_message):
     last_drive_message = drive_message
     last_drive_message_time = datetime.datetime.now()
 
