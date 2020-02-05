@@ -352,7 +352,7 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-			if [[ $CI == 'yes' ]]; then
+			if [[ $CI != 'yes' ]]; then
                        	 sudo apt-get upgrade -y
 			fi
                     else
@@ -442,7 +442,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                          sudo apt-get upgrade -y
+			fi
                     fi
                     RESULT=""
                     if [[ $CI == 'yes' ]]; then
