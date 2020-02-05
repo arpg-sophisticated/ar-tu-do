@@ -118,9 +118,9 @@ case $1 in
                     exit 1
                 fi
                 export DISPLAY=$(getActiveDisplay)
-                ARGUMENTS=""
+                ARGUMENTS="world:=$LAUNCHTRACK"
                 if [[ "$3" =~ "nogui" ]]; then
-                    ARGUMENTS="gui:=false "
+                    ARGUMENTS="$ARGUMENTS gui:=false "
                 fi
                 if [[ "$3" =~ "fast" ]]; then
                     ARGUMENTS="$ARGUMENTS fast:=true "
@@ -366,7 +366,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' && $CI == 'no' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin ros-kinetic-depthimage-to-laserscan
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
@@ -451,7 +451,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' && $CI == 'no' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin ros-melodic-depthimage-to-laserscan
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
@@ -490,7 +490,7 @@ case $1 in
                         sudo apt-get install -y python-pip
                         sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
                         sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython slack-cli
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
                     else
                         echo "Skipping"
                     fi

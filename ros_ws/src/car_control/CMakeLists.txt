@@ -52,6 +52,10 @@ add_executable(drive_parameters_multiplexer src/drive_parameters_multiplexer.cpp
 target_link_libraries(drive_parameters_multiplexer ${catkin_LIBRARIES})
 add_dependencies(drive_parameters_multiplexer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+# Declare Acceleration Controller executable
+add_executable(acceleration_controller src/acceleration_controller.cpp)
+target_link_libraries(acceleration_controller ${catkin_LIBRARIES})
+add_dependencies(acceleration_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Testing ##

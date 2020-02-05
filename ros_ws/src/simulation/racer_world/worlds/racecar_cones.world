@@ -47,27 +47,27 @@
   </model>
 
   <include>
-    <uri>model://racecar_description/models/cone</uri>
+    <uri>model://cone</uri>
     <pose>1 0 0 0 0 0</pose>
     <name>cone_1</name>
   </include>
   <include>
-    <uri>model://racecar_description/models/cone</uri>
+    <uri>model://cone</uri>
     <pose>2 0 0 0 0 0</pose>
     <name>cone_2</name>
   </include>
   <include>
-    <uri>model://racecar_description/models/cone</uri>
+    <uri>model://cone</uri>
     <pose>3 0 0 0 0 0</pose>
     <name>cone_3</name>
   </include>
   <include>
-    <uri>model://racecar_description/models/cone</uri>
+    <uri>model://cone</uri>
     <pose>4 0 0 0 0 0</pose>
     <name>cone_4</name>
   </include>
   <include>
-    <uri>model://racecar_description/models/cone</uri>
+    <uri>model://cone</uri>
     <pose>5 0 0 0 0 0</pose>
     <name>cone_5</name>
   </include>

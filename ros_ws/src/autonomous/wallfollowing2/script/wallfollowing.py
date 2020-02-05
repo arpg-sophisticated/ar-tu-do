@@ -62,7 +62,7 @@ def map(in_lower, in_upper, out_lower, out_upper, value):
 
 
 def convertRpmToSpeed(rpm):
-    # 1299.224 is the conversion factor from electrical revolutions per minute to m/s 
+    # 1299.224 is the conversion factor from electrical revolutions per minute to m/s
     # and is derived from the transmission and the rotational speed of the motor.
     # More values describing the car properties can be found in car_config.h.
     return rpm / 1299.224
@@ -148,7 +148,8 @@ def follow_walls(left_circle, right_circle, barrier, delta_time):
     last_speed = relative_speed
     speed = map(0, 1, parameters.min_throttle, parameters.max_throttle, relative_speed)  # nopep8
     steering_angle = steering_angle * map(parameters.high_speed_steering_limit_dead_zone, 1, 1, parameters.high_speed_steering_limit, relative_speed)  # nopep8
-    # 20000 are the maximal electrical revolutions per minute. More values describing the car properties can be found in car_config.h.
+    # 20000 are the maximal electrical revolutions per minute. More values
+    # describing the car properties can be found in car_config.h.
     speed = convertRpmToSpeed(speed * 20000)
     drive(steering_angle, speed)
 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <sdf version="1.4">
-<world name="track_barca">
+<world name="racecar_walker">
 
   <scene>
     <ambient>0.5 0.5 0.5 1.0</ambient>
@@ -34,9 +34,9 @@
           </light>
 
   <include>
-    <uri>model://barca_track</uri>
+    <uri>model://walker_racecourse</uri>
     <pose>-4 2 -.5 0 0 -1.57</pose>
-    <name>barca_track</name>
+    <name>walker_racecourse</name>
   </include>
 
 

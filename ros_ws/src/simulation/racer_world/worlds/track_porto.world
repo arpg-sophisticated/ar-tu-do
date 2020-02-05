@@ -34,7 +34,7 @@
           </light>
 
   <include>
-    <uri>model://racecar_description/models/porto_track</uri>
+    <uri>model://porto_track</uri>
     <pose>1 2 -.5 0 0 -1.57</pose>
     <name>porto_track</name>
   </include>
