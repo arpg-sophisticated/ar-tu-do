@@ -35,11 +35,11 @@ def show_line_in_rviz(id, points, color, line_width=0.02):
     marker_publisher.publish(message)
 
 
-def show_circle_in_rviz(circle, wall, id):
+def show_circle_in_rviz(circle, wall, id, color):
     start_angle = circle.get_angle(Point(wall[0, 0], wall[0, 1]))
     end_angle = circle.get_angle(Point(wall[-1, 0], wall[-1, 1]))
     points = circle.create_array(start_angle, end_angle)
-    show_line_in_rviz(id, points, color=ColorRGBA(0, 1, 1, 1))
+    show_line_in_rviz(id, points, color=color)
 
 
 def delete_marker(id):
