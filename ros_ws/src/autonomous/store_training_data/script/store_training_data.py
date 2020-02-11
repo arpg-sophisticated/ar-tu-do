@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import numpy
 import rospy
 import datetime
 #import timezone
@@ -7,10 +8,15 @@ import psycopg2
 from sensor_msgs.msg import LaserScan
 from drive_msgs.msg import drive_param
 from std_msgs.msg import String
+from sensor_msgs.msg import PointCloud2
+import sensor_msgs.point_cloud2 as pc2
 
 
 TOPIC_LASER_SCAN = "/scan"
+TOPIC_VOXEL = "/scan/voxels"
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
+
+voxel_resolution = 0.2
 
 connection = None
 
@@ -70,12 +76,28 @@ def laser_callback(scan_message):
 def voxel_callback(voxel_message):
     current_speed = 0
     current_time = datetime.datetime.now()
-    voxel = [[False,False,False],[False,False,False],[False,False,False]]
+    voxel = numpy.zeros((101, 101), dtype=bool)
+
+    p_gen = pc2.read_points(voxel_message, field_names = ("x", "y", "z", "score"), skip_nans=True)
+
+    for p in p_gen:
+        x= p[0]
+        y= p[1]
+        z= p[2]
+        score= p[3]
+        print " x : %f  y: %f  z: %f  score: %f" %(x,y,z,score)
+        x_index = x/voxel_resolution +50
+        y_index = y/voxel_resolution +50
+        if (abs(x_index)<=100 and abs(y_index)<=100):
+            voxel[int(x_index),int(y_index)] = 1
+
+    numpy.set_printoptions(threshold=sys.maxsize)
+    print(voxel)
 
     new_velocity = 0
     new_angle = 0
 
-    write_entry_to_db(current_time, current_speed,voxel,new_velocity,new_angle)
+    #write_entry_to_db(current_time, current_speed,voxel,new_velocity,new_angle)
 
 
 def drive_callback(drive_message):
@@ -86,10 +108,9 @@ def drive_callback(drive_message):
 rospy.init_node('store_training_data', anonymous=True)
 connect_to_database()
 
-voxel_callback("") # just a test, TODO: remove this line
-
-rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
-rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
+#rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
+rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback)
+#rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
 
 while not rospy.is_shutdown():
     rospy.spin()
