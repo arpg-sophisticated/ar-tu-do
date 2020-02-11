@@ -1,5 +1,4 @@
 #include "car_controller.h"
-#include "car_config.h"
 
 #include <boost/algorithm/clamp.hpp>
 
@@ -27,26 +26,26 @@ void CarController::driveParametersCallback(const drive_msgs::drive_param::Const
                                  m_drive_param_lock ? 0 : parameters->angle);
 }
 
-void CarController::publishDriveParameters(double relative_speed, double relative_angle)
+void CarController::publishDriveParameters(float speed, float relative_angle)
 {
-    double speed = relative_speed * car_config::MAX_RPM_ELECTRICAL;
-    double angle = (relative_angle * car_config::MAX_SERVO_POSITION + car_config::MAX_SERVO_POSITION) / 2;
+    float rpm = convertSpeedToRpm(speed);
+    float angle = (relative_angle * car_config::MAX_SERVO_POSITION + car_config::MAX_SERVO_POSITION) / 2;
 
-    this->publishSpeed(speed);
+    this->publishSpeed(rpm);
     this->publishAngle(angle);
 
     ROS_DEBUG_STREAM("running: "
                      << " | speed: " << speed << " | angle: " << angle);
 }
 
-void CarController::publishSpeed(double speed)
+void CarController::publishSpeed(float speed)
 {
     std_msgs::Float64 speed_message;
     speed_message.data = speed;
     this->m_speed_publisher.publish(speed_message);
 }
 
-void CarController::publishAngle(double angle)
+void CarController::publishAngle(float angle)
 {
     std_msgs::Float64 angle_message;
     angle_message.data = angle;

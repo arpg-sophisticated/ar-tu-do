@@ -1,14 +1,17 @@
 #pragma once
 
 #include <inttypes.h>
+//#include <sensor_msgs/PointField.h>
+#include <cstring>
 
 #define VOXEL_HISTORY_LENGTH 20
 
 class Voxel
 {
     public:
-    double x;
-    double y;
+    float x;
+    float y;
+
     uint32_t get_score()
     {
         if (this->score_valid)
@@ -39,6 +42,11 @@ class Voxel
     void increment_score()
     {
         this->scores[0]++;
+    }
+
+    void setScore(uint32_t pScore)
+    {
+        this->score = pScore;
     }
 
     private:

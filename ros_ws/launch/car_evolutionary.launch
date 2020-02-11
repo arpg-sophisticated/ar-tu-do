@@ -24,7 +24,10 @@
 
     <include file="$(find hardware)/launch/static_wheel_publisher.launch"/>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find car_control)/launch/car.rviz"/>
+    <arg name="show_rviz" default="1"/>
+    <group if="$(eval arg('show_rviz') == 1)">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find car_control)/launch/car.rviz" />
+    </group>
 
     <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node">
         <rosparam file="$(find hardware)/razor_imu_config.yaml" command="load"/>

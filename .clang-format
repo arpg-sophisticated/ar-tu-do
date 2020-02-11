@@ -1,4 +1,6 @@
-BasedOnStyle: WebKit
+BasedOnStyle: llvm 
+SortIncludes: false
+IncludeBlocks: Preserve
 AccessModifierOffset: 0
 AlignAfterOpenBracket: Align
 AlignEscapedNewlinesLeft: false

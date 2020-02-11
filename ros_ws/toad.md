@@ -18,6 +18,20 @@ For sure, you need a properly configured system with Ubuntu 16.04 or 18.04 runni
 
 This was tested with Ubuntu 18.04 from local machine and remote system. If the can't recognize the DISPLAY correctly, please send me the output of ```w -sh```, the output of ```env``` and the output of the script.
 
+## Important remark on Gazebo
+
+Depending on your system, date and the attitudes of the ubuntupeople and fanboys, that prefer newer over stable versions, you might get a very new gazebo version and, oh wonder, that won't load the simulation. After hours of debugging the simulation it become clear, that anything other than 
+
+9.0.0+dfsg5-3ubuntu1+ppa2
+
+will crash, or just load sometimes or starts never, a.s.o. If you experience problems with gazebo, DOWNGRADE to the above mentioned version by putting
+
+http://packages.ros.org/ros/ubuntu bionic/main amd64 Packages
+
+into your sources.list and do a manual downgrade with aptitude for example.
+
+**Important: Please mark gazebo9 package after downgrade as manually holded (= in aptitude) and proceed that for it's dependencies. Otherwise your version will be upgraded on next system upgrade!**
+
 ## toad.sh system
 
 Commands to use on a normal computer or on the build server. Branch is configured in BRANCHBUILD.
@@ -43,19 +57,16 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh system run [nogui,fast,drive,manual]
+### toad.sh system run [nogui,fast,drive,manual,customtrack] [trackname]
 
-    echo "           nogui  - disable gazebo client"
-    echo "           fast   - for fast mode to be true"
-    echo "           drive  - to enforce autonomous driving"
-    echo "           manual - to enforce manual driving"
-This will run the gazebo simuation.
+This will run the gazebo simuation on the track which is specified in toad.settings.
 
 Arguments:
 * nogui - this disables the local gazebo client (more stable and performant on our systems)
 * fast - enforce fast mode
 * drive - enforce autonomous driving
-* manual -  enforce manual driving
+* manual - enforce manual driving
+* customtrack - start simulation with custom track as configured in toad.settings, you may add a trackname as 4th parameter to override track in settings
 
 ## toad.sh car
 
@@ -82,9 +93,25 @@ This will reset the working dir to the current state of the configured branch an
 Arguments:
 * cron - this removes the confirmation (usefull for cron)
 
-### toad.sh car run
+### toad.sh car run [drive,manual]
 
-This will run the software on the car.
+This will run all the software on the car.
+
+Arguments:
+* drive - enforce autonomous driving
+* manual -  enforce manual driving
+
+### toad.sh car remote [drive,manual]
+
+This will run all the software on the car, but without rviz.
+
+Arguments:
+* drive - enforce autonomous driving
+* manual -  enforce manual driving
+
+### toad.sh car control
+
+This will run rviz software on your machine connecting to the car.
 
 ## toad.sh init
 
@@ -120,6 +147,10 @@ Arguments:
 This will install IDEs and provide informations how to get the plugins for ROS
 * Visual Studio Code
 * Netbeans
+
+### toad.sh init camstream
+
+This will install all packages required for camera streaming server and client.
 
 ## toad.sh slack
 

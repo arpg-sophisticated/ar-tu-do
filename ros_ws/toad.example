@@ -24,6 +24,26 @@ LAUNCHBUILD="gazebo.launch"
 # launchfile for car
 LAUNCHCAR="car_wallfollowing.launch"
 
+# IMPORTANT: IF YOU'RE INSANE, SET THIS TO 1, THIS WILL ENABLE 
+# THE POSSIBILITY TO START THE CAR IN AUTONOMOUS MODE DIRECTLY
+LAUNCHCARINSANE="0"
+
+# custom racetrack
+# - racecar
+# - racecar_cones
+# - racecar_parking_1
+# - racecar_tunnel
+# - racetrack
+# - racetrack_decorated
+# - racetrack_decorated_2
+# - racetrack_decorated_2_big
+# - racetrack_obstacle
+# - track_barca
+# - track_levine
+# - track_porto
+# - walker_racecourse
+LAUNCHTRACK="racetrack_decorated_2"
+
 # path for ros to source
 PATHROS="/opt/ros/melodic/setup.bash"
 
@@ -32,6 +52,12 @@ PATHSETUP="./devel/setup.bash"
 
 # use gpu for lidar (true|false)
 USEGPU="false"
+
+# IP address of car for remote rviz
+CARIP="192.168.42.10"
+
+# main network interface of the car, used for determining address
+CARINTERFACE="wlan0"
 
 # set to 1 after configuring
 CONFIGURED="0"

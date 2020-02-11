@@ -43,8 +43,8 @@
     <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
     <node name="wall_separation" pkg="wall_separation" type="wall_separation" />
-
-    <node pkg="store_training_data" type="store_training_data.py" name="store_training_data" />
+    <node name="voxel_classifier" pkg="voxel_classifier" type="voxel_classifier" />
+  <!--  <node name="voxel_classifier" pkg="voxel_classifier" type"voxel_classifier" />-->
 
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
     </node>

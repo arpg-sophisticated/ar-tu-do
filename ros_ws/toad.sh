@@ -118,9 +118,9 @@ case $1 in
                     exit 1
                 fi
                 export DISPLAY=$(getActiveDisplay)
-                ARGUMENTS=""
+                ARGUMENTS="world:=$LAUNCHTRACK"
                 if [[ "$3" =~ "nogui" ]]; then
-                    ARGUMENTS="gui:=false "
+                    ARGUMENTS="$ARGUMENTS gui:=false "
                 fi
                 if [[ "$3" =~ "fast" ]]; then
                     ARGUMENTS="$ARGUMENTS fast:=true "
@@ -130,6 +130,13 @@ case $1 in
                 fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
+                fi
+                if [[ "$3" =~ "customtrack" ]]; then
+                    if [[ "$4" =~ [a-z] ]]; then
+                        ARGUMENTS="$ARGUMENTS world:=$4 "
+                    else
+                        ARGUMENTS="$ARGUMENTS world:=$LAUNCHTRACK "
+                    fi
                 fi
                 source $PATHROS
                 source $PATHSETUP
@@ -147,7 +154,7 @@ case $1 in
     car)
         # exit when no second parameter is given
         if [[ $# -le 1 ]]; then
-            toadHelpSystem
+            toadHelpCar
             echo
             exit 1
         fi
@@ -219,11 +226,62 @@ case $1 in
             run)
                 source $PATHROS
                 source $PATHSETUP
-                roslaunch launch/$LAUNCHCAR
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
+                ARGUMENTS=""
+                if [[ "$3" =~ "drive" ]]; then
+                    if [[ "$LAUNCHCARINSANE" == "1" ]]; then
+                        ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                    else
+			echo
+                        echo "Autonomous mode is disabled in configuration, press enter to proceed without or CRTL+C to exit"
+			read
+		    fi
+                fi
+                if [[ "$3" =~ "manual" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=1 "
+                fi
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
-                    sendSlackMessage custom "Watch you feet, I'm on the road with following arguments: $ARGUMENTS"
+                    sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
+            ;;
+            remote)
+                source $PATHROS
+                source $PATHSETUP
+                MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+		export ROS_IP=$MAINIPADDRESS
+		export ROS_HOSTNAME=$MAINIPADDRESS
+		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
+                ARGUMENTS="show_rviz:=0"
+                if [[ "$3" =~ "drive" ]]; then
+                    if [[ "$LAUNCHCARINSANE" == "1" ]]; then
+                        ARGUMENTS="$ARGUMENTS mode_override:=2 "
+                    else
+			echo
+                        echo "Autonomous mode is disabled in configuration, press enter to proceed without or CRTL+C to exit"
+			read
+		    fi
+                fi
+                if [[ "$3" =~ "manual" ]]; then
+                    ARGUMENTS="$ARGUMENTS mode_override:=1 "
+                fi
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
+                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
+                    echo
+                    sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
+                fi
+            ;;
+            control)
+                source $PATHROS
+                source $PATHSETUP
+		export ROS_IP="$CARIP"
+		export ROS_HOSTNAME="$CARIP"
+		export ROS_MASTER_URI="http://$CARIP:11311"
+                rviz -d src/car_control/launch/car.rviz
             ;;
             *)
                 toadHelpCar
@@ -241,7 +299,7 @@ case $1 in
         VERSION=$(lsb_release -r | awk {'print $2'})
         CODENAME=$(lsb_release -c | awk {'print $2'})
         FORCED="yes"
-        if [[ $3 != 'force' ]]; then
+        if [[ $3 != 'force' ]] && [[ $4 != 'force' ]]; then
             if [[ $DISTRIBUTION != 'Ubuntu' ]]; then
                 echo "Your distribution ($DISTRIBUTION) is not supported"
                 echo "You may use the force argument, but be warned!"
@@ -256,14 +314,33 @@ case $1 in
             fi
             FORCED="no"
         fi
+        
+        CI="yes"
+        if [[ $3 != 'ci' ]] && [[ $4 != 'ci' ]]; then
+          CI="no"
+        fi
+        
+        #
+        #read RESULT
+        #while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
+        #    toadConfirmationEnter "This will install all required system packages"
+        #    read RESULT
+        #done
+        #echo $RESULT
+#exit
 
         case $2 in
             system)
                 toadInitParameters
-                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                toadConfirmationRequest "This will install all required system packages"
+                if [[ $CI != "yes" ]]; then
+                  toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                  toadConfirmationRequest "This will install all required system packages"
+                fi
                 if [[ $VERSION == '16.04' ]]; then
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
                         read RESULT
@@ -274,25 +351,37 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                       	 sudo apt-get upgrade -y
+			fi
                     else
                         echo "Skipping"
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we install OS Packages"
                         read RESULT
                     done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+                    if [[ $RESULT == 'p' && $CI == 'no' ]]; then
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin ros-kinetic-depthimage-to-laserscan
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-                    else
+		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
+			sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-kinetic-ros-base ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
+			sudo apt-get install -y libignition-math2-dev
+			sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
+		    else
                         echo "Skipping"
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we init ROS"
                         read RESULT
@@ -304,6 +393,9 @@ case $1 in
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
@@ -320,6 +412,9 @@ case $1 in
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we install range_libc"
                         read RESULT
@@ -332,6 +427,9 @@ case $1 in
                     fi
                 else
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Update packages and upgrade system"
                         read RESULT
@@ -342,22 +440,34 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                          sudo apt-get upgrade -y
+			fi
                     fi
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
                     done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control
+                    if [[ $RESULT == 'p' && $CI == 'no' ]]; then
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin ros-melodic-depthimage-to-laserscan
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-                    else
+		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
+		    	sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-ros-base ros-melodic-gazebo-ros-control
+			sudo apt-get install -y libignition-math2-dev
+                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
+		    else
                         echo "Skipping"
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we init ROS"
                         read RESULT
@@ -369,6 +479,9 @@ case $1 in
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we reset pip and install python packages"
                         read RESULT
@@ -379,19 +492,24 @@ case $1 in
                         sudo apt-get install -y python-pip
                         sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
                         sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython slack-cli
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
                     else
                         echo "Skipping"
                     fi
 
                     RESULT=""
+                    if [[ $CI == 'yes' ]]; then
+                        RESULT="p"
+                    fi
                     while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
                         toadConfirmationEnter "Now we install range_libc"
                         read RESULT
                     done
                     if [[ $RESULT == 'p' ]]; then
+                        WS_DIR=$(pwd)
                         cd ../.. && git clone http://github.com/kctess5/range_libc
                         cd ../range_libc/pywrapper && ./compile.sh
+                        cd $WS_DIR
                     else
                         echo "Skipping"
                     fi
@@ -399,22 +517,35 @@ case $1 in
             ;;
             ros)
                 toadInitParameters
-                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                toadConfirmationRequest "This will install all required ros packages"
+                if [[ $CI != 'yes' ]]; then
+                    toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                    toadConfirmationRequest "This will install all required ros packages"
+                fi
+		source $PATHROS
                 if [[ $VERSION == '16.04' ]]; then
-                    cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
+                    source $PATHROS
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
                     cd $WORKDIR/.. && rosdep update
                     cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro kinetic 
                     catkin_make
-                else
-                    cd $WORKDIR/src/external_packages/ && git clone https://github.com/KristofRobot/razor_imu_9dof.git
+                fi
+                if [[ $VERSION == '18.04' ]]; then
                     cd $WORKDIR/.. && git submodule init
                     cd $WORKDIR/.. && git submodule update --recursive
                     cd $WORKDIR/.. && rosdep update
                     cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro melodic 
                     catkin_make
+                fi
+            ;;
+            camstream)
+                toadInitParameters
+                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
+                toadConfirmationRequest "This will install all required packages for camera streaming server and client"
+                if [[ $VERSION == '16.04' ]]; then
+                    apt-get install mplayer mencoder ffmpeg netcat
+                else
+                    apt-get install mplayer mencoder ffmpeg netcat
                 fi
             ;;
             ide)
@@ -499,9 +630,17 @@ case $1 in
                 if [[ $VERSION == '16.04' ]]; then
                     source $PATHROS
                     source $PATHSETUP
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 else
                     source $PATHROS
                     source $PATHSETUP
+                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
+                    export ROS_IP=$MAINIPADDRESS
+                    export ROS_HOSTNAME=$MAINIPADDRESS
+                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 fi
                 echo "Done:"
                 echo
