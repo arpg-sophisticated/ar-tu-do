@@ -105,7 +105,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
     voxelsCloud.fields = { tmp1, tmp2, tmp3, tmp4 };
     voxelsCloud.height = 1;
     voxelsCloud.point_step =
-        2 * sizeof(float) + sizeof(uint32_t); // FLOAT32 4Bytes * 2 (x und y Koordinate)+4 (count uint32)
+        3 * sizeof(float) + sizeof(uint32_t); // FLOAT32 4Bytes * 3 (x, y und z Koordinate) + 4 (count uint32)
     voxelsCloud.width = voxels.size();
     voxelsCloud.row_step = voxelsCloud.point_step * voxelsCloud.width;
     voxelsCloud.is_bigendian = false;
