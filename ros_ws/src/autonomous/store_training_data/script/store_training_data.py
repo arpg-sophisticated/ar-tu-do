@@ -19,8 +19,8 @@ def connect_to_database():
         connection = psycopg2.connect(user = "postgres",
                                     password = "postgres",
                                     host = "localhost",
-                                    port = "5433",
-                                    database = "my_db")
+                                    port = "5432",
+                                    database = "testdb")
 
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
@@ -33,12 +33,7 @@ def connect_to_database():
 
     except (Exception, psycopg2.Error) as error :
         print ("Error while connecting to PostgreSQL", error)
-    finally:
-        #closing database connection.
-            if(connection):
-                cursor.close()
-                connection.close()
-                print("PostgreSQL connection is closed")
+    
 
 
 def laser_callback(scan_message):
@@ -46,9 +41,9 @@ def laser_callback(scan_message):
     last_scan_time = datetime.datetime.now()
     
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO test_table (test) VALUES(1)")
+    cursor.execute("INSERT INTO public.test_table (test) VALUES(1);")
+    connection.commit()
     cursor.close()
-    conn.close()
 
 def drive_callback(drive_message):
     last_drive_message = drive_message
@@ -63,3 +58,7 @@ rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
 
 while not rospy.is_shutdown():
     rospy.spin()
+
+if(connection):
+    connection.close()
+    print("PostgreSQL connection is closed")
