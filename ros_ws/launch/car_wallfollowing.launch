@@ -18,6 +18,9 @@
     <include file="$(find teleoperation)/launch/remote_control.launch">
         <arg name="joystick_type" value="$(arg joystick_type)"/>
     </include>
+    
+    <!-- zed camera launch file -->
+    <include file="./launch/zed.launch"/>
 
     <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
 
