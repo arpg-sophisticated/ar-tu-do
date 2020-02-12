@@ -30,6 +30,8 @@ http://packages.ros.org/ros/ubuntu bionic/main amd64 Packages
 
 into your sources.list and do a manual downgrade with aptitude for example.
 
+**Important: Please mark gazebo9 package after downgrade as manually holded (= in aptitude) and proceed that for it's dependencies. Otherwise your version will be upgraded on next system upgrade!**
+
 ## toad.sh system
 
 Commands to use on a normal computer or on the build server. Branch is configured in BRANCHBUILD.
@@ -106,6 +108,13 @@ This will run all the software on the car, but without rviz.
 Arguments:
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
+
+### toad.sh car record
+
+Records rosbag on car to folder rosbags, arguments are mandatory. This command should be run parallel to the run command.
+
+Arguments:
+* camera - to record rosbag from camera
 
 ### toad.sh car control
 

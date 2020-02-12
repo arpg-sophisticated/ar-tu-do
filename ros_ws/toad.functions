@@ -75,6 +75,10 @@ function toadHelpCar {
     echo "           drive       - to enforce autonomous driving"
     echo "           manual      - to enforce manual driving"
     echo
+    echo "       toad.sh car record"
+    echo "       Records rosbag on car to folder rosbags, add"
+    echo "           camera      - to record rosbag from camera"
+    echo
     echo "       toad.sh car remote"
     echo "       Starts software on car without rviz, add"
     echo "           drive       - to enforce autonomous driving"
