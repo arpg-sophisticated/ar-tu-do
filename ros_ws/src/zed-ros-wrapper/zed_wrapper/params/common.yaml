@@ -8,17 +8,17 @@ exposure:                   100                                 # Dynamic
 gain:                       100                                 # Dynamic
 confidence:                 100                                 # Dynamic
 mat_resize_factor:          1.0                                 # Dynamic
-point_cloud_freq:           40.0                                # Dynamic - frequency of the pointcloud publishing (equal or less to `frame_rate` value)
+point_cloud_freq:           30.0                                # Dynamic - frequency of the pointcloud publishing (equal or less to `frame_rate` value)
 
 general:
     camera_flip:                false
     zed_id:                     -1
     serial_number:              0
     resolution:                 3                                   # '0': HD2K, '1': HD1080, '2': HD720, '3': VGA
-    frame_rate:                 40
+    frame_rate:                 30
     gpu_id:                     -1
-    base_frame:                 'base_link'                         # must be equal to the frame_id used in the URDF file
-#    base_frame:                 'camera'                            # must be equal to the frame_id used in the URDF file
+    #    base_frame:                 'base_link'                         # must be equal to the frame_id used in the URDF file
+    base_frame:                 'camera'                            # must be equal to the frame_id used in the URDF file
     camera_frame:               'zed_camera_center'                 # must be equal to the frame_id used in the URDF file
     left_camera_frame:          'zed_left_camera_frame'             # must be equal to the frame_id used in the URDF file
     left_camera_optical_frame:  'zed_left_camera_optical_frame'     # must be equal to the frame_id used in the URDF file
@@ -38,13 +38,14 @@ video:
 
 depth:
     quality:                    1                                   # '0': NONE, '1': PERFORMANCE, '2': MEDIUM, '3': QUALITY, '4': ULTRA
-    sensing_mode:               0                                   # '0': STANDARD, '1': FILL
+    sensing_mode:               1                                   # '0': STANDARD, '1': FILL
     depth_stabilization:        1                                   # `0`: disabled, `1`: enabled
-    openni_depth_mode:          0                                   # '0': 32bit float meters, '1': 16bit uchar millimeters
+    openni_depth_mode:          1                                   # '0': 32bit float meters, '1': 16bit uchar millimeters
     depth_topic_root:           'depth'                             # default `depth/depth_registered` or `depth/depth_raw_registered` if `openni_depth_mode` is true
     point_cloud_topic_root:     'point_cloud'
     disparity_topic:            'disparity/disparity_image'
     confidence_root:            'confidence'                        # default `confidence/confidence_image` and `confidence/confidence_map`
+
 
 tracking:
 #    publish_tf:                 true                                # publish `odom -> base_link` TF
