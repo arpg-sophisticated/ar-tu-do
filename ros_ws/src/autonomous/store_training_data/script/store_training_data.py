@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import numpy
 import rospy
 import datetime
@@ -51,7 +52,7 @@ def write_entry_to_db(current_time,current_speed,voxel,new_velocity,new_angle):
     voxel_string= "'{"
 
 
-    # TODO: noch für numpy array umschreiben
+    #TODO noch fuer numpy array umschreiben
     for i in voxel:
         voxel_string = voxel_string + "{"
         for j in i:
@@ -91,7 +92,7 @@ def voxel_callback(voxel_message):
         x_index = x/voxel_resolution +50
         y_index = y/voxel_resolution +50
         if (abs(x_index)<=100 and abs(y_index)<=100):
-            voxel[int(x_index),int(y_index)] = 1        # TODO: bisher nicht wirklich effizient
+            voxel[int(x_index),int(y_index)] = 1        #TODO bisher nicht wirklich effizient
 
     numpy.set_printoptions(threshold=sys.maxsize)
     print(voxel)
