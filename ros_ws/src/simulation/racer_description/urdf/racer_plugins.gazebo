@@ -17,7 +17,7 @@
   <gazebo reference="camera">
     <sensor type="depth" name="camera1">
       <!-- 672x376@100Hz - 87deg - 1.51844 -->
-      <update_rate>40.0</update_rate>
+      <update_rate>30.0</update_rate>
       
       <!-- 854x480@100Hz - 87deg - 1.51844 -->
       <!--<update_rate>100.0</update_rate>-->
@@ -68,7 +68,7 @@
       <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
         <alwaysOn>true</alwaysOn>
         <!-- update rate lowered arificially -->
-        <updateRate>40.0</updateRate>
+        <updateRate>30.0</updateRate>
         <cameraName>racer/camera1</cameraName>
         <!--<frameName>base_link</frameName>-->               
         <frameName>camera</frameName>               
