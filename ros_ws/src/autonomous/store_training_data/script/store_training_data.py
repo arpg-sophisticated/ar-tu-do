@@ -18,6 +18,8 @@ TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 
 voxel_resolution = 0.2
 
+last_voxel_message = None
+last_voxel_message_time = None
 
 def connect_to_database():
     try:
@@ -41,7 +43,7 @@ def connect_to_database():
     except (Exception, psycopg2.Error) as error :
         print ("Error while connecting to PostgreSQL", error)
     
-def write_entry_to_db(current_time,current_speed,voxel,new_velocity,new_angle):
+def write_entry_to_db(current_time,current_speed,voxel,velocity,angle):
     current_time_formated = current_time.strftime("'%m-%d-%Y %H:%M:%S.%f'") #"'01-01-2000 00:00:00.000'"
     numpy.set_printoptions(threshold=sys.maxsize)
     voxel_string = numpy.array2string(voxel, separator=',')
@@ -52,25 +54,15 @@ def write_entry_to_db(current_time,current_speed,voxel,new_velocity,new_angle):
     voxel_string="'"+voxel_string+"'"
 
 
-    values_string = "VALUES("+current_time_formated+", "+str(current_speed)+","+voxel_string+", "+str(new_velocity)+","+str(new_angle)+","+str(sector_time)+","+str(sector_number)+")"
+    values_string = "VALUES("+current_time_formated+", "+str(current_speed)+","+voxel_string+", "+str(velocity)+","+str(angle)+","+str(sector_time)+","+str(sector_number)+")"
 
     try:
         cursor.execute("INSERT INTO public.training_data (ts,speed,voxel,calc_velocity,calc_angle,sector_time,sector_number) "+ values_string+";")
     except (Exception, psycopg2.Error) as error :
         print ("Error while storing training data in PostgreSQL", error)
 
-def laser_callback(scan_message):
-    last_scan_message = scan_message
-    last_scan_time = datetime.datetime.now()
-    
-    cursor = connection.cursor()
-    cursor.execute("INSERT INTO public.test_table (test) VALUES(1);")
-    connection.commit()
-    cursor.close()
 
-def voxel_callback(voxel_message):
-    current_speed = 0
-    current_time = datetime.datetime.now()
+def createDBVoxelArray(voxel_message):
     voxel = numpy.zeros((101, 101), dtype=bool)
 
     p_gen = pc2.read_points(voxel_message, field_names = ("x", "y", "z", "score"), skip_nans=True)
@@ -85,15 +77,32 @@ def voxel_callback(voxel_message):
         if (abs(x_index)<=100 and abs(y_index)<=100):
             voxel[int(x_index),int(y_index)] = 1        #TODO bisher nicht wirklich effizient
 
-    new_velocity = 0
-    new_angle = 0
+    return voxel
 
-    write_entry_to_db(current_time, current_speed,voxel,new_velocity,new_angle)
+def laser_callback(scan_message):
+    last_scan_message = scan_message
+    last_scan_time = datetime.datetime.now()
+    
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO public.test_table (test) VALUES(1);")
+    connection.commit()
+    cursor.close()
+
+def voxel_callback(voxel_message):
+    global last_voxel_message
+    last_voxel_message = voxel_message
 
 
 def drive_callback(drive_message):
-    last_drive_message = drive_message
-    last_drive_message_time = datetime.datetime.now()
+    current_speed = 0
+    current_time = datetime.datetime.now()
+
+    velocity = drive_message.velocity
+    angle = drive_message.angle
+    if(last_voxel_message is not None):
+        dbVoxelArray = createDBVoxelArray(last_voxel_message)
+        write_entry_to_db(current_time, current_speed,dbVoxelArray,velocity,angle)
+
 
 
 rospy.init_node('store_training_data', anonymous=True)
@@ -101,7 +110,7 @@ connect_to_database()
 
 #rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback)
-#rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
+rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
 
 while not rospy.is_shutdown():
     rospy.spin()
