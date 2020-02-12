@@ -15,7 +15,7 @@ general:
     zed_id:                     -1
     serial_number:              0
     resolution:                 3                                   # '0': HD2K, '1': HD1080, '2': HD720, '3': VGA
-    frame_rate:                 100
+    frame_rate:                 40
     gpu_id:                     -1
     base_frame:                 'base_link'                         # must be equal to the frame_id used in the URDF file
 #    base_frame:                 'camera'                            # must be equal to the frame_id used in the URDF file
