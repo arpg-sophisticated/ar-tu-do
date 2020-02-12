@@ -275,6 +275,21 @@ case $1 in
                     sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
                 fi
             ;;
+            record)
+                case $3 in
+                    camera)
+                        BAGNAME="camera-$(date +%s).bag"
+                        mkdir -p rosbags > /dev/null 2>&1
+                        echo "This will record camera data to file $BAGNAME"
+                        source $PATHROS
+                        source $PATHSETUP
+                        rosbag record -O rosbags/$BAGNAME /camera/left/camera_info /camera/right/camera_info /camera/left/image_raw/compressed /camera/right/image_raw/compressed /tf
+                    ;;
+                    *)
+                        toadHelpCar
+                    ;;
+                esac
+            ;;
             control)
                 source $PATHROS
                 source $PATHSETUP

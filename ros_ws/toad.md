@@ -109,6 +109,13 @@ Arguments:
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
 
+### toad.sh car record
+
+Records rosbag on car to folder rosbags, arguments are mandatory. This command should be run parallel to the run command.
+
+Arguments:
+* camera - to record rosbag from camera
+
 ### toad.sh car control
 
 This will run rviz software on your machine connecting to the car.
