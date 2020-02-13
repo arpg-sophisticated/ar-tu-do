@@ -31,13 +31,13 @@ class JoystickController
      * @brief scales the absolute acceleration provided by the joystick.
      * Useful if the car should not drive with 100% speed if acceleration button is fully pressed
      */
-    float m_acceleration_scaling_factor = 0.35f;
+    float m_acceleration_scaling_factor = 10.0f;
 
     /**
      * @brief scales the absolute deceleration provided by the joystick.
      * Useful if the car should not decelerate with 100% speed if deceleration button is fully pressed
      */
-    float m_deceleration_scaling_factor = 0.35f;
+    float m_deceleration_scaling_factor = 10.0f;
 
     /**
      * @brief scales the absolute steering value (between -1 and 1) provided by the joystick.

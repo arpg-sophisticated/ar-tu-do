@@ -1,32 +1,25 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(drive_msgs)
+project(wallfollowing3)
+
+## Compile as C++11, supported in ROS Kinetic and newer
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
+  drive_msgs
+  roscpp
+  rospy
   std_msgs
-  message_generation
+)
+
+generate_dynamic_reconfigure_options(
+  cfg/wallfollowing3.cfg
 )
 
 ## Errors and Warnings
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp -Wdouble-promotion -Wformat -Wnonnull -Wmain -Wswitch-bool -Winvalid-memory-model -Wunknown-pragmas -Warray-bounds -Wfloat-equal -Wlogical-op -Wpacked ")
 # -Wpedantic cant be used because of ROS
-
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  drive_param.msg
-  gazebo_state_telemetry.msg
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
 
 ###################################
 ## catkin specific configuration ##
@@ -34,7 +27,7 @@ generate_messages(
 
 ## Declare things to be passed to dependent projects
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs
+  CATKIN_DEPENDS dynamic_reconfigure drive_msgs roscpp rospy std_msgs
 )
 
 
@@ -44,5 +37,6 @@ catkin_package(
 
 ## Specify additional locations of header files
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )

@@ -12,7 +12,7 @@ AccelerationController::AccelerationController()
         m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_CONTROLLED_DRIVE_PARAM, 1);
     m_emergency_stop_publisher = m_node_handle.advertise<std_msgs::Time>(TOPIC_EMERGENCY_STOP, 1);
 
-    m_timer = m_node_handle.createTimer(ros::Duration(0.02), &AccelerationController::approachSpeedControlled, this);
+    m_timer = m_node_handle.createTimer(ros::Duration(0.01), &AccelerationController::approachSpeedControlled, this);
 
     // add physical properties to the parameter server so that they can be used in other nodes and could be changed
     m_node_handle.setParam("/physical_properties/dynamic_friction", INITIAL_DYNAMIC_FRICTION);
