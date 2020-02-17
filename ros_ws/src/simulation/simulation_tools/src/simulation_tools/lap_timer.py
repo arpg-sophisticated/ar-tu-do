@@ -139,5 +139,5 @@ def model_state_callback(message):
 
 rospy.init_node('lap_timer', anonymous=True)
 rospy.Subscriber("/gazebo/model_states", ModelStates, model_state_callback)
-lap_timer_publisher = rospy.Publisher(TOPIC_LAP_TIMER, lap_timer_msg, queue_size=1)
+#lap_timer_publisher = rospy.Publisher(TOPIC_LAP_TIMER, lap_timer_msg, queue_size=1)
 rospy.spin()

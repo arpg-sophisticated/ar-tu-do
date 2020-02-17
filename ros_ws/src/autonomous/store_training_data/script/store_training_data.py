@@ -44,7 +44,7 @@ def connect_to_database():
         print ("Error while connecting to PostgreSQL", error)
     
 def write_entry_to_db(current_time,current_speed,voxel,velocity,angle):
-    current_time_formated = current_time.strftime("'%m-%d-%Y %H:%M:%S.%f'") #"'01-01-2000 00:00:00.000'"
+    current_time_formated = current_time.strftime("'%d-%m-%Y %H:%M:%S.%f'") #"'01-01-2000 00:00:00.000'"
     numpy.set_printoptions(threshold=sys.maxsize)
     voxel_string = numpy.array2string(voxel, separator=',')
     sector_number=0
@@ -111,7 +111,7 @@ connect_to_database()
 #rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
-rospy.Subscriber(TOPIC_LAP_TIMER, lap_timer_msg, drive_callback)
+#rospy.Subscriber(TOPIC_LAP_TIMER, lap_timer_msg, drive_callback)
 
 while not rospy.is_shutdown():
     rospy.spin()
