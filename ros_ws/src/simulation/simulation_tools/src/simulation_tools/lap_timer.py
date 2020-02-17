@@ -4,6 +4,7 @@ import rospy
 import sys
 from gazebo_msgs.msg import ModelState, ModelStates
 from std_msgs.msg import Duration
+from msg import lap_timer_msg
 from math import floor
 
 from collections import namedtuple
@@ -36,7 +37,7 @@ class Timer():
         self.next_checkpoint = 0
         self.history = []
         self.start = None
-        self.firstround = True
+        self.current_lap = 0
         self.checkpoint_start_time = None
         self.lap_time_publisher = rospy.Publisher(
             "/lap_time", Duration, queue_size=1)
@@ -47,15 +48,19 @@ class Timer():
             if self.next_checkpoint >= len(self.checkpoints):
                 self.next_checkpoint = 0
             if self.next_checkpoint == 1:
-                if  not self.firstround:
+                if current_lap != 0:
                     self.pass_checkpoint(self.next_checkpoint)
                     self.complete_lap()
                 self.start_lap()          
             else:
                 self.pass_checkpoint(self.next_checkpoint)
+            message = lap_timer_msg()
+            message.current_lap= self.current_lap
+            message.current_sector = self.current_sector
+            lap_timer_publisher.publish(message)
 
     def start_lap(self):
-        self.firstround = False
+        self.current_lap = self.current_lap+1
         rospy.loginfo("Lap started (" + self.name + ")")
         self.start = rospy.Time.now()  
         self.checkpoint_start_time = self.start
@@ -76,9 +81,9 @@ class Timer():
     def pass_checkpoint(self, next_checkpoint):
         checkpoint_time = rospy.Time.now()
         checkpoint_duration = checkpoint_time - self.checkpoint_start_time
-        checkpoint_label = str((self.next_checkpoint-1)%len(self.checkpoints))
-        if checkpoint_label == "0":
-            checkpoint_label = str(len(self.checkpoints))
+        self.current_sector= str((self.next_checkpoint-1)%len(self.checkpoints))
+        if self.current_sector == "0":
+            self.current_sector = str(len(self.checkpoints))
 
 
         rospy.loginfo("checkpoint " + checkpoint_label + ": " + format_duration(checkpoint_duration))
@@ -134,5 +139,5 @@ def model_state_callback(message):
 
 rospy.init_node('lap_timer', anonymous=True)
 rospy.Subscriber("/gazebo/model_states", ModelStates, model_state_callback)
-
+lap_timer_publisher = rospy.Publisher(TOPIC_LAP_TIMER, lap_timer_msg, queue_size=1)
 rospy.spin()

@@ -111,6 +111,7 @@ connect_to_database()
 #rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_callback)
+rospy.Subscriber(TOPIC_LAP_TIMER, lap_timer_msg, drive_callback)
 
 while not rospy.is_shutdown():
     rospy.spin()

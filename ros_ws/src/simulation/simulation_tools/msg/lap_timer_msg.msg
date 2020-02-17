@@ -1,0 +1,2 @@
+float32 current_lap
+float32 current_sector
