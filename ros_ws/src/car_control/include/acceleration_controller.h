@@ -5,8 +5,8 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Time.h>
 
-const static float INITIAL_DYNAMIC_FRICTION = 0.5;
-const static float INITIAL_STATIC_FRICTION = 0.75;
+const static float INITIAL_DYNAMIC_FRICTION = 0.47;
+const static float INITIAL_STATIC_FRICTION = 0.7;
 const static float CAR_ACCELERATION = 9.81 * INITIAL_DYNAMIC_FRICTION;
 
 const static bool EMERGENCY_STOP_ACTIVE = false;

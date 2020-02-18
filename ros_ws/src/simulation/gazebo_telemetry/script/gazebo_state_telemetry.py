@@ -2,6 +2,7 @@
 
 import rospy
 from gazebo_msgs.msg import ModelState, ModelStates, LinkState, LinkStates
+from drive_msgs.msg import gazebo_state_telemetry
 
 from track import track, Point
 
@@ -60,34 +61,6 @@ def calculate_wheel_velocity():
     wheel_velocity = angular_velocity * WHEEL_RADIUS
 
 
-def show_info():
-    if car_velocity is None or max_car_velocity is None or wheel_velocity is None or car_acceleration is None:
-        return
-
-    position = Point(
-        model_states_message.pose[1].position.x,
-        model_states_message.pose[1].position.y)
-
-    rospy.loginfo(
-        "car: {0:.2f} m/s, max: {1:.2f} m/s, wheels: {2:.2f} m/s, slip:".format(
-            car_velocity,
-            max_car_velocity,
-            wheel_velocity) +
-        "{0:.2f}\n".format(
-            wheel_velocity -
-            car_velocity).rjust(7) +
-        "accel: {0: 2f}m/s^2, max: {1: 2f}m/s^2, min: {2: 2f}m/s^2\n".format(
-            car_acceleration,
-            max_car_acceleration,
-            min_car_acceleration) +
-        str(
-                track.localize(position)) +
-        ", world: ({0:.2f}, {1:.2f})\n".format(
-            position.x,
-            position.y) +
-        "-------------------------------------------")
-
-
 idle = True
 
 
@@ -105,7 +78,8 @@ def calculate_velocity(event):
             return
         else:
             idle = True
-    show_info()
+
+    publish_state_telemetry()
 
 
 def calculate_acceleration():
@@ -123,9 +97,20 @@ def calculate_acceleration():
         min_car_acceleration = car_acceleration
 
 
-rospy.init_node('speedometer', anonymous=True)
+def publish_state_telemetry():
+    msg = gazebo_state_telemetry()
+    msg.car_acceleration = float(car_acceleration) if car_acceleration is not None else 0.0
+    msg.car_speed = float(car_velocity) if car_velocity is not None else 0.0
+    msg.wheel_speed = float(wheel_velocity) if wheel_velocity is not None else 0.0
+    msg.point_x = float(model_states_message.pose[1].position.x)
+    msg.point_y = float(model_states_message.pose[1].position.y)
+    gazebo_telemetry_publisher.publish(msg)
+
+
+rospy.init_node('gazebo_state_telemetry')
 rospy.Subscriber("/gazebo/model_states", ModelStates, model_state_callback)
 rospy.Subscriber("/gazebo/link_states", LinkStates, link_state_callback)
+gazebo_telemetry_publisher = rospy.Publisher("/gazebo/state_telemetry", gazebo_state_telemetry, queue_size=1)
 rospy.Timer(rospy.Duration(0.05, 0), calculate_velocity)
 
 rospy.spin()
