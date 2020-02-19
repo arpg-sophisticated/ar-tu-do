@@ -42,8 +42,11 @@
     </include>
     <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
-    <node name="wall_separation" pkg="wall_separation" type="wall_separation" />
-  <!--  <node name="voxel_classifier" pkg="voxel_classifier" type"voxel_classifier" />-->
+    <node name="wall_separation" pkg="wall_separation" type="wall_separation">
+	<param name="voxel_size" type="double" value="0.3" />
+	<param name="topic_laser_scan" type="string" value="/scan" />
+	<param name="topic_voxels" type="string" value="/scan/voxels" />
+    </node>
 
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
     </node>

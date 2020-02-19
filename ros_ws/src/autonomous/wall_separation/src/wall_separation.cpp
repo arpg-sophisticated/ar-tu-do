@@ -13,11 +13,21 @@ double euclideanLength(double vector[], size_t size)
 }
 
 WallSeparation::WallSeparation()
-    : m_debug_geometry(m_node_handle, TOPIC_VISUALIZATION, LIDAR_FRAME)
+    : m_private_node_handle("~")
+    , m_debug_geometry(m_node_handle, TOPIC_VISUALIZATION, LIDAR_FRAME)
 {
+    std::string topicLaserScan;
+    std::string topicVoxel;
+
+    if (!this->m_private_node_handle.getParamCached("topic_laser_scan", topicLaserScan))
+        topicLaserScan = TOPIC_LASER_SCAN;
+
+    if (!this->m_private_node_handle.getParamCached("topic_voxels", topicVoxel))
+        topicVoxel = TOPIC_VOXEL_;
+
     this->m_lidar_subscriber =
-        m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &WallSeparation::lidar_callback, this);
-    this->m_voxel_publisher = m_node_handle.advertise<sensor_msgs::PointCloud2>(TOPIC_VOXEL_, 1, true);
+        m_node_handle.subscribe<sensor_msgs::LaserScan>(topicLaserScan, 1, &WallSeparation::lidar_callback, this);
+    this->m_voxel_publisher = m_node_handle.advertise<sensor_msgs::PointCloud2>(topicVoxel, 1, true);
 }
 
 std::vector<geometry_msgs::Point> lidar_to_cartesian(const sensor_msgs::LaserScan::ConstPtr& lidar)
@@ -45,7 +55,9 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
 {
     std::vector<geometry_msgs::Point> points = lidar_to_cartesian(lidar);
 
-    float voxelResolution = 0.2f; // TODO: dynamic reconfigure
+    double voxelResolution;
+    if (!this->m_private_node_handle.getParamCached("voxel_size", voxelResolution))
+        voxelResolution = 0.2;
 
     double minimumPointDiscard = lidar->range_min / lidar->range_max;
 

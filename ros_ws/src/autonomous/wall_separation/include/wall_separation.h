@@ -17,6 +17,7 @@ class WallSeparation
 {
     private:
     ros::NodeHandle m_node_handle;
+    ros::NodeHandle m_private_node_handle;
     ros::Subscriber m_lidar_subscriber;
     ros::Publisher m_voxel_publisher;
     sensor_msgs::PointCloud2 voxelsCloud;
