@@ -1,4 +1,16 @@
 #include "wall_separation.h"
+#include <cmath>
+#include <math.h>
+#include <ros/console.h>
+
+/** Why does this exist nowhere else :'( */
+double euclideanLength(double vector[], size_t size)
+{
+    double norm = 0;
+    for (size_t i = 0; i < size; i++)
+        norm += vector[i] * vector[i];
+    return sqrt(norm);
+}
 
 WallSeparation::WallSeparation()
     : m_debug_geometry(m_node_handle, TOPIC_VISUALIZATION, LIDAR_FRAME)
@@ -22,6 +34,7 @@ std::vector<geometry_msgs::Point> lidar_to_cartesian(const sensor_msgs::LaserSca
         geometry_msgs::Point point;
         point.x = range * cos(angle);
         point.y = range * sin(angle);
+        point.z = range;
         points.push_back(point);
     }
 
@@ -32,7 +45,9 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
 {
     std::vector<geometry_msgs::Point> points = lidar_to_cartesian(lidar);
 
-    float voxelResolution = 0.2f;
+    float voxelResolution = 0.2f; // TODO: dynamic reconfigure
+
+    double minimumPointDiscard = lidar->range_min / lidar->range_max;
 
     for (auto pair : m_voxels)
         pair.second->start_new_episode();
@@ -56,16 +71,21 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
             voxel->x = voxelX;
             voxel->y = voxelY;
         }
-        voxel->increment_score();
+        voxel->increment_score(
+            point.z /
+            double(
+                lidar->range_max)); // The further the point is away, the higher it counts (because they scatter more)
 
         m_voxels[key] = voxel;
     }
 
     std::unordered_map<std::string, Voxel*>::iterator it = m_voxels.begin();
     std::vector<Voxel*> voxels;
+    double scoreHolder[m_voxels.size()];
+    int i = 0;
     while (it != m_voxels.end())
     {
-        if (it->second->get_score() == 0)
+        if (it->second->get_score() <= minimumPointDiscard)
         {
             delete it->second;
             it = m_voxels.erase(it);
@@ -73,9 +93,14 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
         else
         {
             voxels.push_back(it->second);
+            scoreHolder[i++] = it->second->get_score();
             it++;
         }
     }
+
+    double normedScores[voxels.size()];
+    memcpy(normedScores, scoreHolder, voxels.size() * sizeof(double));
+    double vectorEuclideanLength = euclideanLength(normedScores, voxels.size());
 
     // Anlegen der Parameter für jede Wert eines Feldes (Strukturangabe)
     sensor_msgs::PointField tmp1 = sensor_msgs::PointField();
@@ -96,7 +121,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
     sensor_msgs::PointField tmp4 = sensor_msgs::PointField();
     tmp4.name = "score";
     tmp4.offset = sizeof(float) + sizeof(float) + sizeof(float);
-    tmp4.datatype = sensor_msgs::PointField::UINT32;
+    tmp4.datatype = sensor_msgs::PointField::FLOAT32;
     tmp4.count = 1;
 
     // Message mit Metainformationen befüllen
@@ -104,8 +129,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
     voxelsCloud.header.stamp = ros::Time::now();
     voxelsCloud.fields = { tmp1, tmp2, tmp3, tmp4 };
     voxelsCloud.height = 1;
-    voxelsCloud.point_step =
-        3 * sizeof(float) + sizeof(uint32_t); // FLOAT32 4Bytes * 3 (x, y und z Koordinate) + 4 (count uint32)
+    voxelsCloud.point_step = 4 * sizeof(float); // FLOAT32 4Bytes * 4 (x, y und z Koordinate und score float)
     voxelsCloud.width = voxels.size();
     voxelsCloud.row_step = voxelsCloud.point_step * voxelsCloud.width;
     voxelsCloud.is_bigendian = false;
@@ -116,7 +140,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
     // befüllen und nur zuweisen später?
     for (size_t cp = 0; cp < voxelsCloud.width; ++cp)
     {
-        uint32_t tmp = voxels[cp]->get_score();
+        float tmp = float(voxels[cp]->get_score() / vectorEuclideanLength); // Norm it down here...
         memcpy(&voxelsCloud.data.data()[cp * voxelsCloud.point_step + voxelsCloud.fields[0].offset], &voxels[cp]->x,
                sizeof(float));
         memcpy(&voxelsCloud.data.data()[cp * voxelsCloud.point_step + voxelsCloud.fields[1].offset], &voxels[cp]->y,
@@ -124,7 +148,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
         voxelsCloud.data.data()[cp * voxelsCloud.point_step + voxelsCloud.fields[2].offset] = 0;
 
         memcpy(&voxelsCloud.data.data()[cp * voxelsCloud.point_step + voxelsCloud.fields[3].offset], &tmp,
-               sizeof(uint32_t));
+               sizeof(float));
     }
 
     m_voxel_publisher.publish(voxelsCloud);
