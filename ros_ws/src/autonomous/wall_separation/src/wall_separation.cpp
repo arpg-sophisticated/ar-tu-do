@@ -59,7 +59,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
     if (!this->m_private_node_handle.getParamCached("voxel_size", voxelResolution))
         voxelResolution = 0.2;
 
-    double minimumPointDiscard = lidar->range_min / lidar->range_max;
+    double minimumPointDiscard = double(lidar->range_min / lidar->range_max);
 
     for (auto pair : m_voxels)
         pair.second->start_new_episode();
@@ -166,7 +166,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
     m_voxel_publisher.publish(voxelsCloud);
 
     this->m_debug_geometry.drawVoxels(0, voxels, voxelResolution, voxelResolution,
-                                      1 / 10.0f); // 10 points for maximum score
+                                      1 / 10.0); // 10 points for maximum score
 }
 
 int main(int argc, char** argv)
