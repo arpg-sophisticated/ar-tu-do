@@ -1,6 +1,11 @@
 #include "wall_separation.h"
+#include "sensor_msgs/PointCloud2.h"
 #include <cmath>
 #include <math.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <ros/console.h>
 
 /** Why does this exist nowhere else :'( */
@@ -20,39 +25,20 @@ WallSeparation::WallSeparation()
     std::string topicVoxel;
 
     if (!this->m_private_node_handle.getParamCached("topic_laser_scan", topicLaserScan))
-        topicLaserScan = TOPIC_LASER_SCAN;
+        topicLaserScan = TOPIC_INPUT_POINTCLOUD;
 
     if (!this->m_private_node_handle.getParamCached("topic_voxels", topicVoxel))
         topicVoxel = TOPIC_VOXEL_;
 
-    this->m_lidar_subscriber =
-        m_node_handle.subscribe<sensor_msgs::LaserScan>(topicLaserScan, 1, &WallSeparation::lidar_callback, this);
+    this->m_input_subscriber =
+        m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicLaserScan, 1, &WallSeparation::input_callback, this);
     this->m_voxel_publisher = m_node_handle.advertise<sensor_msgs::PointCloud2>(topicVoxel, 1, true);
 }
 
-std::vector<geometry_msgs::Point> lidar_to_cartesian(const sensor_msgs::LaserScan::ConstPtr& lidar)
+void WallSeparation::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
 {
-    std::vector<geometry_msgs::Point> points;
 
-    uint32_t scan_count = (lidar->angle_max - lidar->angle_min) / lidar->angle_increment;
-
-    for (uint32_t i = 0; i < scan_count; i++)
-    {
-        double range = lidar->ranges[i];
-        double angle = lidar->angle_min + i * lidar->angle_increment;
-
-        geometry_msgs::Point point;
-        point.x = range * cos(angle);
-        point.y = range * sin(angle);
-        point.z = range;
-        points.push_back(point);
-    }
-
-    return points;
-}
-
-void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lidar)
-{
+#if 0   
     std::vector<geometry_msgs::Point> points = lidar_to_cartesian(lidar);
 
     double voxelResolution;
@@ -167,6 +153,30 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
 
     this->m_debug_geometry.drawVoxels(0, voxels, voxelResolution, voxelResolution,
                                       1 / 10.0); // 10 points for maximum score
+#endif
+    double voxelResolution;
+    if (!this->m_private_node_handle.getParamCached("voxel_size", voxelResolution))
+        voxelResolution = 0.2;
+    // Container for original & filtered data
+    pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
+    pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
+    pcl::PCLPointCloud2 cloud_filtered;
+
+    // Convert to PCL data type
+    pcl_conversions::toPCL(*pointCloud, *cloud);
+
+    // Perform the actual filtering
+    pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+    sor.setInputCloud(cloudPtr);
+    sor.setLeafSize(voxelResolution, voxelResolution, voxelResolution);
+    sor.filter(cloud_filtered);
+
+    // Convert to ROS data type
+    sensor_msgs::PointCloud2 output;
+    pcl_conversions::fromPCL(cloud_filtered, output);
+
+    // Publish the data
+    this->m_voxel_publisher.publish(output);
 }
 
 int main(int argc, char** argv)
