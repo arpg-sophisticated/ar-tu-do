@@ -167,6 +167,10 @@ void WallSeparation::input_callback(const sensor_msgs::PointCloud2::ConstPtr& po
     if (!this->m_private_node_handle.getParamCached("sor_stddev_mul_thresh", stddevMulThresh))
         voxelResolution = 3.0;
 
+    bool removeOutliers;
+    if (!this->m_private_node_handle.getParamCached("sor_enabled", removeOutliers))
+        removeOutliers = false;
+
     // Container for original & filtered data
     pcl::PCLPointCloud2::Ptr inputCloud(new pcl::PCLPointCloud2);
 
@@ -182,16 +186,19 @@ void WallSeparation::input_callback(const sensor_msgs::PointCloud2::ConstPtr& po
     vox.setLeafSize(voxelResolution, voxelResolution, voxelResolution);
     vox.filter(*cloud_voxelized_ptr);
 
-    pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> sor;
-    sor.setInputCloud(cloud_voxelized_ptr);
-    sor.setMeanK(meanK);
-    sor.setStddevMulThresh(stddevMulThresh);
     pcl::PCLPointCloud2::Ptr cloud_sor_ptr(new pcl::PCLPointCloud2);
-    sor.filter(*cloud_sor_ptr);
+    if (removeOutliers)
+    {
+        pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> sor;
+        sor.setInputCloud(cloud_voxelized_ptr);
+        sor.setMeanK(meanK);
+        sor.setStddevMulThresh(stddevMulThresh);
+        sor.filter(*cloud_sor_ptr);
+    }
 
     // Convert to ROS data type
     sensor_msgs::PointCloud2 output;
-    pcl_conversions::moveFromPCL(*cloud_sor_ptr, output);
+    pcl_conversions::moveFromPCL(removeOutliers ? *cloud_sor_ptr : *cloud_voxelized_ptr, output);
 
     // Publish the data
     this->m_voxel_publisher.publish(output);
