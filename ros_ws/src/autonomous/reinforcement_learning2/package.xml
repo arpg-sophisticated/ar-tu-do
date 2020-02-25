@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package format="2">
-  <name>store_training_data</name>
+  <name>reinforcement_learning2</name>
   <version>0.0.0</version>
-  <description>store training data in postgresDB</description>
+  <description>reinforcement Learning stuff</description>
 
   <!-- Maintainer -->
   <maintainer email="f110@ls12.cs.uni-dortmund.de">PG F1/10</maintainer>

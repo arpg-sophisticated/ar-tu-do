@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+<!-- Launches all necessary nodes that let the car drive autonomously. -->    
+    <!-- drive_nn node -->
+    <node
+      respawn="true"
+      pkg="reinforcement_learning2"
+      type="drive_nn.py"
+      name="drive_nn"
+      output="screen" >
+    </node>
+</launch>
