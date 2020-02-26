@@ -5,6 +5,7 @@ import numpy as np
 import datetime
 import sys
 import glob
+import os
 import keras.backend as K
 from tensorflow.keras import datasets, layers, models
 
@@ -41,7 +42,7 @@ def build_model():
     model.add(layers.Conv2D(17, (13, 13), activation='relu'))
     model.add(layers.Reshape((1,17)))
     model.add(layers.Dense(17, input_shape=(1,17)))
-    model.add(layers.Dense(1, input_shape=(1,17),activation='linear'))
+    model.add(layers.Dense(2, input_shape=(1,17),activation='linear'))
 
     model.build()
     print(model.summary())
@@ -86,7 +87,7 @@ def save_model(model):
 
 def get_training_data_from_db():
     print("executing db-query")
-    query = "select calc_angle from training_data"
+    query = "select calc_velocity,calc_angle from training_data order by ts asc"
     #query = "select calc_velocity,calc_angle from training_data"
 
     cursor.execute(query)
@@ -98,8 +99,9 @@ def get_training_data_from_png():
     print("reading pictures")
 
     data_list = []
-    for im_path in glob.glob("/home/marvin/Pictures/*.png"):
+    for im_path in sorted(glob.glob("/home/marvin/Pictures/*.png"),key=os.path.getmtime):
         data_list.append(plt.imread(im_path)[:,:,0])
+        #print(im_path)
     
     np_array = np.asarray(data_list, dtype=np.float32)
     return np_array
