@@ -5,6 +5,6 @@
       pkg="reinforcement_learning2"
       type="drive_nn.py"
       name="drive_nn"
-      output="screen" >
+      output="screen">
     </node>
 </launch>

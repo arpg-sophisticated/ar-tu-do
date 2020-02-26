@@ -1,19 +1,29 @@
+#!/usr/bin/env python
 
 from sensor_msgs.msg import PointCloud2
 import sys
 import numpy
 import rospy
 from drive_msgs.msg import drive_param
+from tensorflow.keras import models
+import sensor_msgs.point_cloud2 as pc2
+import numpy as np
 
 
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_VOXEL = "/scan/voxels"
+voxel_resolution = 0.2
+
 
 def voxel_callback(voxel_message):    
-    prediction = model.predict(voxel_message)
+    voxel_arry = createDBVoxelArray(voxel_message)
+    voxel_arry = np.expand_dims(voxel_arry ,-1)
+    voxel_arry = np.expand_dims(voxel_arry ,0)
+    prediction = model.predict(voxel_arry)
     message = drive_param()
-    message.angle = prediction[0] 
-    message.velocity = prediction[1] 
+    message.velocity = prediction[0,0,0] 
+    message.angle = prediction[0,0,1]
+
     drive_parameters_publisher.publish(message)
 
 def createDBVoxelArray(voxel_message):
@@ -36,16 +46,22 @@ def createDBVoxelArray(voxel_message):
     return voxel
 
 def load_model():
-    json_file = open('model.json', 'r')
+    global model
+    json_file = open('/home/marvin/code/ar-tu-do/ros_ws/model26-02-2020_08:28.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
-    global model = model_from_json(loaded_model_json)
+    model = models.model_from_json(loaded_model_json)
     # load weights into new model
-    model.load_weights("model.h5")
+    model.load_weights("/home/marvin/code/ar-tu-do/ros_ws/model26-02-2020_08:28.h5")
     print("Loaded model from disk")
 
+
+load_model()
+
+rospy.init_node('drive_nn', anonymous=True)
 
 rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback)
 drive_parameters_publisher = rospy.Publisher(TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 
-load_model()
+while not rospy.is_shutdown():
+    rospy.spin()

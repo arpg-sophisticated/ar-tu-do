@@ -7,7 +7,7 @@ import sys
 import glob
 import os
 import keras.backend as K
-from tensorflow.keras import datasets, layers, models
+from tensorflow.keras import datasets, layers, models, Input, Model
 
 def connect_to_database():
     try:
@@ -33,9 +33,41 @@ def connect_to_database():
 
 def diff_pred(y_true, y_pred):
     return K.mean(abs(y_true-y_pred))
+def diff_velocity(y_true, y_pred):
+    return K.mean(abs(y_true[0] -y_pred[0] ))
+def diff_angle(y_true, y_pred):
+    return K.mean(abs(y_true[1]-y_pred[1]))
 
+weights = K.variable(value=np.array([[0.1, 0.1, 0.1, 0.1, 0.6]]))
+
+def custom_loss(y_true, y_pred):
+    return tf.matmul(K.square(y_true - y_pred), tf.transpose(weights))
 
 def build_model():
+    inputPNG = Input(shape=(21, 21, 1))
+    inputNumeric = Input(shape=(1,))
+
+    png_branch = layers.Conv2D(17, (7, 7), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch)
+    png_branch = layers.Conv2D(17, (13, 13), activation='relu')(png_branch)
+    png_branch = layers.Reshape((17,))(png_branch)
+    png_branch = Model(inputs=inputPNG,outputs=png_branch)
+
+    numeric_branch = layers.Dense(3)(inputNumeric)
+    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
+
+    combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
+    combined_branch = layers.Dense(20)(combined_branch)
+    combined_branch = layers.Dense(2)(combined_branch)
+
+    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
+
+    print(model.summary())
+
+    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
+    return model
+
+def build_model_old():
     model = models.Sequential()
     model.add(layers.Conv2D(17, (7, 7), activation='relu', input_shape=(21, 21, 1)))
     model.add(layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1)))
@@ -43,33 +75,39 @@ def build_model():
     model.add(layers.Reshape((1,17)))
     model.add(layers.Dense(17, input_shape=(1,17)))
     model.add(layers.Dense(2, input_shape=(1,17),activation='linear'))
-
     model.build()
     print(model.summary())
 
-    model.compile(optimizer='adam',loss='mean_squared_error',
-              metrics=[diff_pred])
+    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
     return model
 
-def train_model_from_database():   
+def train_model():   
 
     model = build_model()
 
     connect_to_database()
 
-    training_data_from_db = get_training_data_from_db()
     training_data_from_png = get_training_data_from_png()
+    training_data_from_db = get_training_data_from_db()
+
+    print(training_data_from_db.shape)
+    training_data_numeric = training_data_from_db[:,0]
+    training_data_label = training_data_from_db[:,1:]
+
+    print(training_data_numeric)
 
     numpy_array = np.array([])
 
-    trainX=np.expand_dims(training_data_from_png ,-1)
-    trainY=np.expand_dims(training_data_from_db,-2)
-    print("Shape of Training-Data-x:")
-    print(trainX.shape)
+    trainXPNG = np.expand_dims(training_data_from_png ,-1)
+    trainXNumeric = np.expand_dims(training_data_numeric ,-1)
+    print("Shape of Training-Data-x-png:")
+    print(trainXPNG.shape)
+    print("Shape of Training-Data-x-numeric:")
+    print(trainXNumeric.shape)
     print("Shape of Training-Data-y:")
-    print(trainY.shape)
+    print(training_data_label.shape)
     print("train model")
-    model.fit(trainX, trainY, batch_size=32, epochs=50)
+    model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=32, epochs=50)
     save_model(model)
     
 def save_model(model):
@@ -87,7 +125,7 @@ def save_model(model):
 
 def get_training_data_from_db():
     print("executing db-query")
-    query = "select calc_velocity,calc_angle from training_data order by ts asc"
+    query = "select speed,calc_velocity,calc_angle from training_data order by ts asc"
     #query = "select calc_velocity,calc_angle from training_data"
 
     cursor.execute(query)
@@ -105,4 +143,5 @@ def get_training_data_from_png():
     
     np_array = np.asarray(data_list, dtype=np.float32)
     return np_array
-train_model_from_database()
+
+train_model()

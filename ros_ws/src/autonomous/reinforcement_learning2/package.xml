@@ -17,5 +17,6 @@
   <depend>drive_msgs</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
+  <depend>tensorflow</depend>
 
 </package>

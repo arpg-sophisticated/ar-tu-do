@@ -40,7 +40,8 @@
     <include file="$(find teleoperation)/launch/remote_control.launch">
         <arg name="joystick_type" value="$(arg joystick_type)"/>
     </include>
-    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
+    <!--<include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>-->
+    <include file="$(find reinforcement_learning2)/launch/drive_nn.launch"/>
 
     <node name="wall_separation" pkg="wall_separation" type="wall_separation" />
     <node name="voxel_classifier" pkg="voxel_classifier" type="voxel_classifier" />
