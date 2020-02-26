@@ -145,3 +145,8 @@ def get_training_data_from_png():
     return np_array
 
 train_model()
+#TODO: 
+# speed in db speichern
+# nn optimieren
+# mehr daten aufzeichnen
+# zuordnung von drive-param zu voxel bei store
