@@ -34,14 +34,16 @@ def connect_to_database():
 def diff_pred(y_true, y_pred):
     return K.mean(abs(y_true-y_pred))
 def diff_velocity(y_true, y_pred):
-    return K.mean(abs(y_true[0] -y_pred[0] ))
+    return K.mean(abs((y_true[0]/10) -(y_pred[0]/10)))
 def diff_angle(y_true, y_pred):
-    return K.mean(abs(y_true[1]-y_pred[1]))
+    return K.mean(abs((y_true[1]/100)-(y_pred[1]/100)))
 
-weights = K.variable(value=np.array([[0.1, 0.1, 0.1, 0.1, 0.6]]))
+weights = K.variable(value=np.array([[10, 100]]))
 
 def custom_loss(y_true, y_pred):
-    return tf.matmul(K.square(y_true - y_pred), tf.transpose(weights))
+    y_true = tf.matmul(y_true,tf.transpose(weights))
+    y_pred = tf.matmul(y_pred,tf.transpose(weights))
+    return K.square(y_true - y_pred)
 
 def build_model():
     inputPNG = Input(shape=(21, 21, 1))
@@ -67,23 +69,60 @@ def build_model():
     model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
     return model
 
-def build_model_old():
-    model = models.Sequential()
-    model.add(layers.Conv2D(17, (7, 7), activation='relu', input_shape=(21, 21, 1)))
-    model.add(layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1)))
-    model.add(layers.Conv2D(17, (13, 13), activation='relu'))
-    model.add(layers.Reshape((1,17)))
-    model.add(layers.Dense(17, input_shape=(1,17)))
-    model.add(layers.Dense(2, input_shape=(1,17),activation='linear'))
-    model.build()
+def build_model2():
+    inputPNG = Input(shape=(21, 21, 1))
+    inputNumeric = Input(shape=(1,))
+
+    png_branch = layers.Conv2D(30, (5, 5), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=(5, 5),strides=(1,1))(png_branch)
+    png_branch = layers.Conv2D(20, (5, 5), activation='relu')(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(2, 2),strides=(1,1))(png_branch)
+    png_branch = layers.Flatten()(png_branch)
+    png_branch = layers.Dense(20)(png_branch)
+    png_branch = Model(inputs=inputPNG,outputs=png_branch)
+
+    numeric_branch = layers.Dense(5)(inputNumeric)
+    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
+
+    combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
+    combined_branch = layers.Dense(25)(combined_branch)
+    combined_branch = layers.Dense(2)(combined_branch)
+
+    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
+
     print(model.summary())
 
     model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
     return model
 
+def build_model3():
+    inputPNG = Input(shape=(71, 71, 1))
+    inputNumeric = Input(shape=(1,))
+
+    png_branch = layers.Conv2D(11, (25, 25), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=(2, 2),strides=(2,2))(png_branch)
+    png_branch = layers.Flatten()(png_branch)
+    png_branch = layers.Dense(20, activation='relu')(png_branch)
+    png_branch = Model(inputs=inputPNG,outputs=png_branch)
+
+    numeric_branch = layers.Dense(5)(inputNumeric)
+    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
+
+    combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
+    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
+    combined_branch = layers.Dense(2)(combined_branch)
+
+    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
+
+    print(model.summary())
+
+    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
+    return model
+
+
 def train_model():   
 
-    model = build_model()
+    model = build_model3()
 
     connect_to_database()
 
@@ -125,7 +164,7 @@ def save_model(model):
 
 def get_training_data_from_db():
     print("executing db-query")
-    query = "select speed,calc_velocity,calc_angle from training_data order by ts asc"
+    query = "select speed,calc_velocity*10,calc_angle*100 from training_data order by ts asc"
     #query = "select calc_velocity,calc_angle from training_data"
 
     cursor.execute(query)
@@ -135,13 +174,15 @@ def get_training_data_from_db():
 
 def get_training_data_from_png():
     print("reading pictures")
-
+    np.set_printoptions(threshold=sys.maxsize)
     data_list = []
     for im_path in sorted(glob.glob("/home/marvin/Pictures/*.png"),key=os.path.getmtime):
         data_list.append(plt.imread(im_path)[:,:,0])
+        #print(plt.imread(im_path)[:,:,0])
         #print(im_path)
     
     np_array = np.asarray(data_list, dtype=np.float32)
+    
     return np_array
 
 train_model()

@@ -57,8 +57,11 @@ def calculate_wheel_velocity():
     twists = [link_states_message.twist[i].angular for i in indices]
 
     angle_velocities = [(t.x**2 + t.y**2)**0.5 for t in twists]
-    angular_velocity = sum(angle_velocities) / len(angle_velocities)
-    wheel_velocity = angular_velocity * WHEEL_RADIUS
+    if(len(angle_velocities)> 0):
+        angular_velocity = sum(angle_velocities) / len(angle_velocities)
+        wheel_velocity = angular_velocity * WHEEL_RADIUS
+    else:
+        wheel_velocity =0
 
 
 idle = True
@@ -73,7 +76,12 @@ def calculate_velocity(event):
     calculate_wheel_velocity()
     calculate_acceleration()
 
-    if abs(car_velocity) < 0.01 and abs(wheel_velocity) < 0.01:
+    if (car_velocity is None) or (wheel_velocity is None):
+        if idle:
+            return
+        else:
+            idle = True
+    elif abs(car_velocity) < 0.01 and abs(wheel_velocity) < 0.01:
         if idle:
             return
         else:

@@ -32,7 +32,7 @@ void WallSeparation::lidar_callback(const sensor_msgs::LaserScan::ConstPtr& lida
 {
     std::vector<geometry_msgs::Point> points = lidar_to_cartesian(lidar);
 
-    float voxelResolution = 0.2f;
+    float voxelResolution = 0.1f;
 
     for (auto pair : m_voxels)
         pair.second->start_new_episode();
