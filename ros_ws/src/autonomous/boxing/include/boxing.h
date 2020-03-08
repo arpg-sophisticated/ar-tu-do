@@ -12,7 +12,7 @@ constexpr const char* TOPIC_VOXEL_ = "/scan/voxels";
 
 constexpr const char* LIDAR_FRAME = "laser";
 
-class WallSeparation
+class Boxing
 {
     private:
     ros::NodeHandle m_node_handle;
@@ -24,6 +24,6 @@ class WallSeparation
     RvizGeometryPublisher m_debug_geometry;
     std::unordered_map<std::string, Voxel*> m_voxels; // TODO: Replace string representation with something proper
     public:
-    WallSeparation();
+    Boxing();
     void input_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar);
 };

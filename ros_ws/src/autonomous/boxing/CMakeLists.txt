@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(wall_separation)
+project(boxing)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -38,6 +38,6 @@ include_directories(
 )
 
 # wall following node 
-add_executable(wall_separation src/wall_separation.cpp src/rviz_geometry_publisher.cpp )
-target_link_libraries(wall_separation ${catkin_LIBRARIES})
-add_dependencies(wall_separation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(boxing src/boxing.cpp src/rviz_geometry_publisher.cpp )
+target_link_libraries(boxing ${catkin_LIBRARIES})
+add_dependencies(boxing ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

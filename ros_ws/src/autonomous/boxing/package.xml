@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package format="2">
-  <name>wall_separation</name>
+  <name>boxing</name>
   <version>0.0.0</version>
   <description>Separate left an right walls using voxelization, also remove outliers.</description>
 

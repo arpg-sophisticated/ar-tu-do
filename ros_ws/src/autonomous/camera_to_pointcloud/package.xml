@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package format="2">
+    <name>camera_to_pointcloud</name>
+    <version>0.0.0</version>
+    <description>
+        Converts a 3D Camera Pointcloud to a lidar-like pointcloud where
+        we just take a slice of the picture/depth cloud.
+    </description>
+
+    <!-- Maintainer -->
+    <maintainer email="f110-2@ls12.cs.uni-dortmund.de">PG F1/10 2</maintainer>
+
+        <!-- License -->
+    <license>MIT</license>
+    <license>GPLv3</license>
+
+        <!-- Dependencies -->
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>drive_msgs</depend>
+    <depend>roscpp</depend>
+    <depend>sensor_msgs</depend>
+</package>

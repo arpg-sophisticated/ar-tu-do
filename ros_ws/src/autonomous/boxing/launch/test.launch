@@ -31,7 +31,7 @@
         <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
     </include>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find wall_separation)/launch/rviz_config.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find boxing)/launch/rviz_config.rviz"/>
 
     <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
     <include file="$(find car_control)/launch/car_control.launch">
@@ -42,7 +42,7 @@
     </include>
     <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
-    <node name="wall_separation" pkg="wall_separation" type="wall_separation">
+    <node name="boxing" pkg="boxing" type="boxing">
 	<param name="voxel_size" type="double" value="0.2" />
     <param name="topic_laser_scan" type="string" value="/scan/lidar/cartesian" />
     <param name="topic_voxels" type="string" value="/scan/voxels" />
