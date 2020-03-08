@@ -1,7 +1,7 @@
 #pragma once
 
 #include "std_msgs/ColorRGBA.h"
-#include <../../boxing/include/voxel.h>
+#include "voxel.h"
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "dbscan.h"
 #include "rviz_geometry_publisher.h"
-#include <../../boxing/include/voxel.h>
+#include "voxel.h"
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>

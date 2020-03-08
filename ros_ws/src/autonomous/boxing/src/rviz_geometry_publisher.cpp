@@ -28,42 +28,6 @@ void RvizGeometryPublisher::drawLine(int id, geometry_msgs::Point point1, geomet
     this->m_marker_publisher.publish(line_list);
 }
 
-void RvizGeometryPublisher::drawVoxels(int id, std::vector<Voxel*> voxels, double width, double height,
-                                       double scoreFactor)
-{
-    visualization_msgs::Marker rects;
-    rects.type = visualization_msgs::Marker::CUBE_LIST;
-    rects.header.frame_id = this->m_frame;
-    rects.header.stamp = ros::Time::now();
-
-    rects.id = id;
-    rects.ns = "voxels";
-
-    for (auto voxel : voxels)
-    {
-        rects.points.push_back(createPoint(voxel->x, voxel->y, 0.0f));
-        float score = voxel->get_score() * scoreFactor;
-        if (score > 1.0f)
-            score = 1.0f;
-        std_msgs::ColorRGBA color;
-        color.r = 1.0f;
-        color.g = 0.0f;
-        color.b = 0.0f;
-        color.a = score;
-        rects.colors.push_back(color);
-    }
-
-    rects.pose.orientation.w = 1;
-
-    rects.scale.x = width;
-    rects.scale.y = height;
-    rects.scale.z = 0.02f;
-
-    rects.action = visualization_msgs::Marker::ADD;
-
-    this->m_marker_publisher.publish(rects);
-}
-
 void RvizGeometryPublisher::drawRect(int id, double x, double y, double width, double height, float intensity = 1.0f)
 {
     visualization_msgs::Marker rect;

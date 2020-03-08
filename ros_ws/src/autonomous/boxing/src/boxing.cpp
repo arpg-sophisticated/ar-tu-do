@@ -11,13 +11,13 @@
 #include <ros/console.h>
 
 /** Why does this exist nowhere else :'( */
-double euclideanLength(double vector[], size_t size)
+/*double euclideanLength(double vector[], size_t size)
 {
     double norm = 0;
     for (size_t i = 0; i < size; i++)
         norm += vector[i] * vector[i];
     return sqrt(norm);
-}
+}*/
 
 Boxing::Boxing()
     : m_private_node_handle("~")

@@ -1,6 +1,5 @@
 #pragma once
 #include "rviz_geometry_publisher.h"
-#include "voxel.h"
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>
@@ -22,7 +21,7 @@ class Boxing
     sensor_msgs::PointCloud2 voxelsCloud;
 
     RvizGeometryPublisher m_debug_geometry;
-    std::unordered_map<std::string, Voxel*> m_voxels; // TODO: Replace string representation with something proper
+
     public:
     Boxing();
     void input_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar);

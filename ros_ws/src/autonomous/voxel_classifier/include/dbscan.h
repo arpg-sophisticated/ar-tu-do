@@ -3,7 +3,7 @@
 #ifndef DBSCAN_H
 #define DBSCAN_H
 
-#include <../../boxing/include/voxel.h>
+#include "voxel.h"
 #include <cmath>
 #include <vector>
 
