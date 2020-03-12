@@ -34,9 +34,9 @@ def connect_to_database():
 def diff_pred(y_true, y_pred):
     return K.mean(abs(y_true-y_pred))
 def diff_velocity(y_true, y_pred):
-    return K.mean(abs((y_true[0]/10) -(y_pred[0]/10)))
+    return K.mean(abs((y_true[0]) -(y_pred[0])))
 def diff_angle(y_true, y_pred):
-    return K.mean(abs((y_true[1]/100)-(y_pred[1]/100)))
+    return K.mean(abs((y_true[1])-(y_pred[1])))
 
 weights = K.variable(value=np.array([[10, 100]]))
 
@@ -100,15 +100,59 @@ def build_model3():
     inputNumeric = Input(shape=(1,))
 
     png_branch = layers.Conv2D(11, (25, 25), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=(2, 2),strides=(2,2))(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(5, 5),strides=(2,2))(png_branch)
+    png_branch = layers.Conv2D(3, (15, 15), activation='relu')(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch)
     png_branch = layers.Flatten()(png_branch)
     png_branch = layers.Dense(20, activation='relu')(png_branch)
     png_branch = Model(inputs=inputPNG,outputs=png_branch)
 
+    png_branch2 = layers.Conv2D(17, (7, 7), activation='relu')(inputPNG)
+    png_branch2 = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch2)
+    png_branch2 = layers.Conv2D(17, (13, 13), activation='relu')(png_branch2)
+    png_branch2 = layers.Flatten()(png_branch2)
+    png_branch2 = layers.Dense(20)(png_branch2)
+    png_branch2 = Model(inputs=inputPNG,outputs=png_branch2)
+
     numeric_branch = layers.Dense(5)(inputNumeric)
     numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
 
-    combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
+    combined_branch = layers.concatenate([png_branch.output,png_branch2.output,numeric_branch.output])
+    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
+    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
+    combined_branch = layers.Dense(2)(combined_branch)
+
+    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
+
+    print(model.summary())
+
+    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
+    return model
+
+def build_model4():
+    inputPNG = Input(shape=(71, 71, 1))
+    inputNumeric = Input(shape=(1,))
+
+    png_branch = layers.Conv2D(7, (25, 25), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=(5, 5),strides=(2,2))(png_branch)
+    png_branch = layers.Conv2D(3, (15, 15), activation='relu')(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch)
+    png_branch = layers.Flatten()(png_branch)
+    png_branch = layers.Dense(20, activation='relu')(png_branch)
+    png_branch = Model(inputs=inputPNG,outputs=png_branch)
+
+    png_branch2 = layers.Conv2D(7, (7, 7), activation='relu')(inputPNG)
+    png_branch2 = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch2)
+    png_branch2 = layers.Conv2D(7, (13, 13), activation='relu')(png_branch2)
+    png_branch2 = layers.Flatten()(png_branch2)
+    png_branch2 = layers.Dense(20)(png_branch2)
+    png_branch2 = Model(inputs=inputPNG,outputs=png_branch2)
+
+    numeric_branch = layers.Dense(5)(inputNumeric)
+    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
+
+    combined_branch = layers.concatenate([png_branch.output,png_branch2.output,numeric_branch.output])
+    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
     combined_branch = layers.Dense(25, activation='relu')(combined_branch)
     combined_branch = layers.Dense(2)(combined_branch)
 
@@ -122,23 +166,28 @@ def build_model3():
 
 def train_model():   
 
-    model = build_model3()
+    model = build_model4()
 
     connect_to_database()
 
-    training_data_from_png = get_training_data_from_png()
     training_data_from_db = get_training_data_from_db()
 
-    print(training_data_from_db.shape)
+    training_data_from_png = get_training_data_from_png()
+
     training_data_numeric = training_data_from_db[:,0]
     training_data_label = training_data_from_db[:,1:]
 
-    print(training_data_numeric)
-
-    numpy_array = np.array([])
 
     trainXPNG = np.expand_dims(training_data_from_png ,-1)
     trainXNumeric = np.expand_dims(training_data_numeric ,-1)
+
+    # shuffle
+    p = np.random.permutation(len(training_data_label))
+
+    training_data_label = training_data_label[p]
+    trainXPNG = trainXPNG[p]
+    trainXNumeric = trainXNumeric[p]
+
     print("Shape of Training-Data-x-png:")
     print(trainXPNG.shape)
     print("Shape of Training-Data-x-numeric:")
@@ -146,7 +195,7 @@ def train_model():
     print("Shape of Training-Data-y:")
     print(training_data_label.shape)
     print("train model")
-    model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=32, epochs=50)
+    model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=32, epochs=100)
     save_model(model)
     
 def save_model(model):
@@ -164,12 +213,18 @@ def save_model(model):
 
 def get_training_data_from_db():
     print("executing db-query")
-    query = "select speed,calc_velocity*10,calc_angle*100 from training_data order by ts asc"
+    query = "select speed,calc_velocity,calc_angle from training_data order by ts asc"
     #query = "select calc_velocity,calc_angle from training_data"
 
     cursor.execute(query)
     print("Selecting rows from training_data table")
     records = np.asarray(cursor.fetchall(), dtype=np.float32)
+
+    #normalization
+    stdev =np.asarray([1.547,1.446,0.262])
+    avg =np.asarray([4.853,4.603,-0.094])
+    records = (records - avg) /stdev
+
     return records
 
 def get_training_data_from_png():
@@ -187,7 +242,8 @@ def get_training_data_from_png():
 
 train_model()
 #TODO: 
-# speed in db speichern
+# 
 # nn optimieren
+#   angle und velocity normalisieren
 # mehr daten aufzeichnen
 # zuordnung von drive-param zu voxel bei store

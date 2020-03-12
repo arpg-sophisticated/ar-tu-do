@@ -4,11 +4,13 @@ from sensor_msgs.msg import PointCloud2
 import sys
 import numpy
 import rospy
+import datetime
 from drive_msgs.msg import drive_param
 from drive_msgs.msg import gazebo_state_telemetry
 from tensorflow.keras import models
 import sensor_msgs.point_cloud2 as pc2
 import numpy as np
+
 
 
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
@@ -18,7 +20,9 @@ voxel_resolution = 0.1
 
 last_state_telemetry_message = None
 
-def voxel_callback(voxel_message):  
+def voxel_callback(voxel_message):
+      
+    print (str(datetime.datetime.now())+" createVoxelArray")
     voxel_arry = createDBVoxelArray(voxel_message)
     voxel_arry = np.expand_dims(voxel_arry ,-1)
     voxel_arry = np.expand_dims(voxel_arry ,0)
@@ -27,13 +31,23 @@ def voxel_callback(voxel_message):
         wheel_speed = last_state_telemetry_message.wheel_speed
     else:
         wheel_speed =0
-    print(wheel_speed)
     wheel_speed = np.array([wheel_speed])
-    prediction = model.predict([voxel_arry,wheel_speed])
-    message = drive_param()
-    message.velocity = prediction[0,0]/20 
-    message.angle = prediction[0,1]/100
 
+
+    print (str(datetime.datetime.now())+" predict")
+    prediction = model.predict([voxel_arry,wheel_speed])
+
+
+    velocity_stdev=1.446
+    angle_stdev=0.262
+    velocity_avg=4.603
+    angle_avg=-0.094
+
+    message = drive_param()
+    message.velocity = (prediction[0,0]*velocity_stdev)+velocity_avg
+    message.angle = (prediction[0,1]*angle_stdev)+angle_avg
+
+    print (str(datetime.datetime.now())+" publish")
     drive_parameters_publisher.publish(message)
 
 def state_telemetry_callback(state_telemetry_message):
@@ -67,14 +81,20 @@ def createDBVoxelArray(voxel_message):
     return voxel
 
 def load_model():
+    print("Start Loading model from disk")
     global model
-    json_file = open('/home/marvin/code/ar-tu-do/ros_ws/model06-03-2020_19:10.json', 'r')
+    json_file = open('/home/marvin/code/ar-tu-do/ros_ws/model11-03-2020_21:24.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
+
+    print("Load model.json-file")
     model = models.model_from_json(loaded_model_json)
+
     # load weights into new model
-    model.load_weights("/home/marvin/code/ar-tu-do/ros_ws/model06-03-2020_19:10.h5")
+    print("Load model.h5-file")
+    model.load_weights("/home/marvin/code/ar-tu-do/ros_ws/model11-03-2020_21:24.h5")
     print("Loaded model from disk")
+
 
 
 load_model()
