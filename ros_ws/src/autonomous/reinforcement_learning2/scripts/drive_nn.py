@@ -10,6 +10,8 @@ from drive_msgs.msg import gazebo_state_telemetry
 from tensorflow.keras import models, backend
 import sensor_msgs.point_cloud2 as pc2
 import numpy as np
+import os, rospkg
+rospack = rospkg.RosPack()
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
@@ -36,7 +38,7 @@ def voxel_callback(voxel_message):
 
 
     print (str(datetime.datetime.now())+" predict")
-    prediction = model.predict([voxel_arry,wheel_speed])
+    prediction = model.predict([voxel_arry,wheel_speed],use_multiprocessing=True)
 
 
     velocity_stdev=1.446
@@ -47,7 +49,7 @@ def voxel_callback(voxel_message):
     message = drive_param()
     message.velocity = (prediction[0,0]*velocity_stdev)+velocity_avg
 
-    message.velocity = message.velocity*0.2
+    message.velocity = message.velocity*0.1
     message.angle = (prediction[0,1]*angle_stdev)+angle_avg
 
     print("vel: "+ str(message.velocity) + ", angle: "+ str(message.angle))
@@ -88,7 +90,9 @@ def createDBVoxelArray(voxel_message):
 def load_model():
     print("Start Loading model from disk")
     global model
-    json_file = open('/home/marvin/code/ar-tu-do/ros_ws/model14-03-2020_01:45.json', 'r')
+    model_folder =os.path.join(rospack.get_path("reinforcement_learning2"), "model")
+
+    json_file = open(os.path.join(model_folder,'model13-03-2020_09:22.json'), 'r')
     loaded_model_json = json_file.read()
     json_file.close()
 
@@ -97,7 +101,7 @@ def load_model():
 
     # load weights into new model
     print("Load model.h5-file")
-    model.load_weights("/home/marvin/code/ar-tu-do/ros_ws/model14-03-2020_01:45.h5")
+    model.load_weights(os.path.join(model_folder,'model13-03-2020_09:22.h5'))
     print("Loaded model from disk")
     backend.set_learning_phase(0)
     #model.compile()

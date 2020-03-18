@@ -8,6 +8,7 @@ import glob
 import os
 import keras.backend as K
 from tensorflow.keras import datasets, layers, models, Input, Model
+import cv2
 
 picture_size = 71
 batch_size=32
@@ -77,21 +78,21 @@ def build_model_new():
     inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
 
-    png_branch = layers.Conv2D(7, (30, 30), activation='relu')(inputPNG)
+    png_branch = layers.Conv2D(11, (30, 30), activation='relu')(inputPNG)
     png_branch = layers.MaxPooling2D(pool_size=( 3,3),strides=(2,2))(png_branch)
 
     png_branch = layers.Conv2D(1, (5, 5), activation='relu')(png_branch)
-    png_branch = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2))(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(3,3),strides=(1,1))(png_branch)
 
     png_branch = layers.Flatten()(png_branch)
-    png_branch = layers.Dense(20, activation='relu')(png_branch)
+    png_branch = layers.Dense(256, activation='relu')(png_branch)
     png_branch = Model(inputs=inputPNG,outputs=png_branch)
 
-    numeric_branch = layers.Dense(5)(inputNumeric)
+    numeric_branch = layers.Dense(8)(inputNumeric)
     numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
 
     combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
-    combined_branch = layers.Dense(10, activation='relu')(combined_branch)
+    combined_branch = layers.Dense(128, activation='relu')(combined_branch)
     combined_branch = layers.Dense(2)(combined_branch)
 
     model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
@@ -104,7 +105,7 @@ def build_model_new():
 
 def train_model():   
 
-    model = build_model_gut()
+    model = build_model_new()
 
     connect_to_database()
 
@@ -170,7 +171,7 @@ def get_training_data_from_png():
     np.set_printoptions(threshold=sys.maxsize)
     data_list = []
     for im_path in sorted(glob.glob("/home/marvin/Pictures/*.png"),key=os.path.getmtime):
-        data_list.append(plt.imread(im_path)[:,:,0])
+        data_list.append(cv2.imread(im_path)[:,:,0])
         #print(plt.imread(im_path)[:,:,0])
         #print(im_path)
     
