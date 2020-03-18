@@ -50,30 +50,6 @@ def custom_loss(y_true, y_pred):
     y_pred = tf.matmul(y_pred,tf.transpose(weights))
     return K.square(y_true - y_pred)
 
-def build_model():
-    inputPNG = Input(shape=(21, 21, 1))
-    inputNumeric = Input(shape=(1,))
-
-    png_branch = layers.Conv2D(17, (7, 7), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch)
-    png_branch = layers.Conv2D(17, (13, 13), activation='relu')(png_branch)
-    png_branch = layers.Reshape((17,))(png_branch)
-    png_branch = Model(inputs=inputPNG,outputs=png_branch)
-
-    numeric_branch = layers.Dense(3)(inputNumeric)
-    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
-
-    combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
-    combined_branch = layers.Dense(20)(combined_branch)
-    combined_branch = layers.Dense(2)(combined_branch)
-
-    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
-
-    print(model.summary())
-
-    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
-    return model
-
 def build_model_gut():
     inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
@@ -97,73 +73,7 @@ def build_model_gut():
     model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
     return model
 
-def build_model3():
-    inputPNG = Input(shape=(picture_size, picture_size, 1))
-    inputNumeric = Input(shape=(1,))
-
-    png_branch = layers.Conv2D(11, (25, 25), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=(5, 5),strides=(2,2))(png_branch)
-    png_branch = layers.Conv2D(3, (15, 15), activation='relu')(png_branch)
-    png_branch = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch)
-    png_branch = layers.Flatten()(png_branch)
-    png_branch = layers.Dense(20, activation='relu')(png_branch)
-    png_branch = Model(inputs=inputPNG,outputs=png_branch)
-
-    png_branch2 = layers.Conv2D(17, (7, 7), activation='relu')(inputPNG)
-    png_branch2 = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch2)
-    png_branch2 = layers.Conv2D(17, (13, 13), activation='relu')(png_branch2)
-    png_branch2 = layers.Flatten()(png_branch2)
-    png_branch2 = layers.Dense(20)(png_branch2)
-    png_branch2 = Model(inputs=inputPNG,outputs=png_branch2)
-
-    numeric_branch = layers.Dense(5)(inputNumeric)
-    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
-
-    combined_branch = layers.concatenate([png_branch.output,png_branch2.output,numeric_branch.output])
-    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
-    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
-    combined_branch = layers.Dense(2)(combined_branch)
-
-    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
-
-    print(model.summary())
-
-    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
-    return model
-
-def build_model4():
-    inputPNG = Input(shape=(picture_size, picture_size, 1))
-    inputNumeric = Input(shape=(1,))
-
-    png_branch = layers.Conv2D(7, (30, 30), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=( 3,3),strides=(2,2))(png_branch)
-    png_branch = layers.Flatten()(png_branch)
-    png_branch = layers.Dense(20, activation='relu')(png_branch)
-    png_branch = Model(inputs=inputPNG,outputs=png_branch)
-
-    png_branch2 = layers.Conv2D(7, (6, 6), activation='relu')(inputPNG)
-    png_branch2 = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2))(png_branch2)
-    png_branch2 = layers.Conv2D(4, (3, 3), activation='relu')(png_branch2)
-    png_branch2 = layers.MaxPooling2D(pool_size=(2,2),strides=(1,1))(png_branch2)
-    png_branch2 = layers.Flatten()(png_branch2)
-    png_branch2 = layers.Dense(20)(png_branch2)
-    png_branch2 = Model(inputs=inputPNG,outputs=png_branch2)
-
-    numeric_branch = layers.Dense(5)(inputNumeric)
-    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
-
-    combined_branch = layers.concatenate([png_branch.output,png_branch2.output,numeric_branch.output])
-    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
-    combined_branch = layers.Dense(2)(combined_branch)
-
-    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
-
-    print(model.summary())
-
-    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
-    return model
-
-def build_model5():
+def build_model_new():
     inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
 
