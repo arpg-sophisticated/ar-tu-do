@@ -7,10 +7,11 @@ import rospy
 import datetime
 from drive_msgs.msg import drive_param
 from drive_msgs.msg import gazebo_state_telemetry
-from tensorflow.keras import models
+from tensorflow.keras import models, backend
 import sensor_msgs.point_cloud2 as pc2
 import numpy as np
 
+numpy.set_printoptions(threshold=sys.maxsize)
 
 
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
@@ -31,7 +32,7 @@ def voxel_callback(voxel_message):
         wheel_speed = last_state_telemetry_message.wheel_speed
     else:
         wheel_speed =0
-    wheel_speed = np.array([wheel_speed])
+    wheel_speed = np.array([(wheel_speed*1.547)+4.853])
 
 
     print (str(datetime.datetime.now())+" predict")
@@ -45,7 +46,11 @@ def voxel_callback(voxel_message):
 
     message = drive_param()
     message.velocity = (prediction[0,0]*velocity_stdev)+velocity_avg
+
+    message.velocity = message.velocity*0.2
     message.angle = (prediction[0,1]*angle_stdev)+angle_avg
+
+    print("vel: "+ str(message.velocity) + ", angle: "+ str(message.angle))
 
     print (str(datetime.datetime.now())+" publish")
     drive_parameters_publisher.publish(message)
@@ -83,7 +88,7 @@ def createDBVoxelArray(voxel_message):
 def load_model():
     print("Start Loading model from disk")
     global model
-    json_file = open('/home/marvin/code/ar-tu-do/ros_ws/model11-03-2020_21:24.json', 'r')
+    json_file = open('/home/marvin/code/ar-tu-do/ros_ws/model14-03-2020_01:45.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
 
@@ -92,16 +97,17 @@ def load_model():
 
     # load weights into new model
     print("Load model.h5-file")
-    model.load_weights("/home/marvin/code/ar-tu-do/ros_ws/model11-03-2020_21:24.h5")
+    model.load_weights("/home/marvin/code/ar-tu-do/ros_ws/model14-03-2020_01:45.h5")
     print("Loaded model from disk")
-
+    backend.set_learning_phase(0)
+    #model.compile()
 
 
 load_model()
 
 rospy.init_node('drive_nn', anonymous=True)
 
-rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback)
+rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback, queue_size=1)
 rospy.Subscriber(TOPIC_STATE_TELEMETRY, gazebo_state_telemetry, state_telemetry_callback)
 drive_parameters_publisher = rospy.Publisher(TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 

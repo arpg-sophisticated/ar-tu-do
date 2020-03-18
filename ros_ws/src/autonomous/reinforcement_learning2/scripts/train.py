@@ -9,6 +9,11 @@ import os
 import keras.backend as K
 from tensorflow.keras import datasets, layers, models, Input, Model
 
+picture_size = 71
+batch_size=32
+epochs=100
+
+
 def connect_to_database():
     try:
         global connection
@@ -69,23 +74,20 @@ def build_model():
     model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
     return model
 
-def build_model2():
-    inputPNG = Input(shape=(21, 21, 1))
+def build_model_gut():
+    inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
 
-    png_branch = layers.Conv2D(30, (5, 5), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=(5, 5),strides=(1,1))(png_branch)
-    png_branch = layers.Conv2D(20, (5, 5), activation='relu')(png_branch)
-    png_branch = layers.MaxPooling2D(pool_size=(2, 2),strides=(1,1))(png_branch)
+    png_branch = layers.Conv2D(7, (25, 25), activation='relu')(inputPNG)
     png_branch = layers.Flatten()(png_branch)
-    png_branch = layers.Dense(20)(png_branch)
+    png_branch = layers.Dense(20, activation='relu')(png_branch)
     png_branch = Model(inputs=inputPNG,outputs=png_branch)
 
     numeric_branch = layers.Dense(5)(inputNumeric)
     numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
 
     combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
-    combined_branch = layers.Dense(25)(combined_branch)
+    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
     combined_branch = layers.Dense(2)(combined_branch)
 
     model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
@@ -96,7 +98,7 @@ def build_model2():
     return model
 
 def build_model3():
-    inputPNG = Input(shape=(71, 71, 1))
+    inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
 
     png_branch = layers.Conv2D(11, (25, 25), activation='relu')(inputPNG)
@@ -130,20 +132,19 @@ def build_model3():
     return model
 
 def build_model4():
-    inputPNG = Input(shape=(71, 71, 1))
+    inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
 
-    png_branch = layers.Conv2D(7, (25, 25), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=(5, 5),strides=(2,2))(png_branch)
-    png_branch = layers.Conv2D(3, (15, 15), activation='relu')(png_branch)
-    png_branch = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch)
+    png_branch = layers.Conv2D(7, (30, 30), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=( 3,3),strides=(2,2))(png_branch)
     png_branch = layers.Flatten()(png_branch)
     png_branch = layers.Dense(20, activation='relu')(png_branch)
     png_branch = Model(inputs=inputPNG,outputs=png_branch)
 
-    png_branch2 = layers.Conv2D(7, (7, 7), activation='relu')(inputPNG)
-    png_branch2 = layers.MaxPooling2D(pool_size=(3, 3),strides=(1,1))(png_branch2)
-    png_branch2 = layers.Conv2D(7, (13, 13), activation='relu')(png_branch2)
+    png_branch2 = layers.Conv2D(7, (6, 6), activation='relu')(inputPNG)
+    png_branch2 = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2))(png_branch2)
+    png_branch2 = layers.Conv2D(4, (3, 3), activation='relu')(png_branch2)
+    png_branch2 = layers.MaxPooling2D(pool_size=(2,2),strides=(1,1))(png_branch2)
     png_branch2 = layers.Flatten()(png_branch2)
     png_branch2 = layers.Dense(20)(png_branch2)
     png_branch2 = Model(inputs=inputPNG,outputs=png_branch2)
@@ -153,7 +154,34 @@ def build_model4():
 
     combined_branch = layers.concatenate([png_branch.output,png_branch2.output,numeric_branch.output])
     combined_branch = layers.Dense(25, activation='relu')(combined_branch)
-    combined_branch = layers.Dense(25, activation='relu')(combined_branch)
+    combined_branch = layers.Dense(2)(combined_branch)
+
+    model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
+
+    print(model.summary())
+
+    model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
+    return model
+
+def build_model5():
+    inputPNG = Input(shape=(picture_size, picture_size, 1))
+    inputNumeric = Input(shape=(1,))
+
+    png_branch = layers.Conv2D(7, (30, 30), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=( 3,3),strides=(2,2))(png_branch)
+
+    png_branch = layers.Conv2D(1, (5, 5), activation='relu')(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2))(png_branch)
+
+    png_branch = layers.Flatten()(png_branch)
+    png_branch = layers.Dense(20, activation='relu')(png_branch)
+    png_branch = Model(inputs=inputPNG,outputs=png_branch)
+
+    numeric_branch = layers.Dense(5)(inputNumeric)
+    numeric_branch = Model(inputs=inputNumeric,outputs=numeric_branch)
+
+    combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
+    combined_branch = layers.Dense(10, activation='relu')(combined_branch)
     combined_branch = layers.Dense(2)(combined_branch)
 
     model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
@@ -166,7 +194,7 @@ def build_model4():
 
 def train_model():   
 
-    model = build_model4()
+    model = build_model_gut()
 
     connect_to_database()
 
@@ -195,7 +223,7 @@ def train_model():
     print("Shape of Training-Data-y:")
     print(training_data_label.shape)
     print("train model")
-    model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=32, epochs=100)
+    model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=batch_size, epochs=epochs)
     save_model(model)
     
 def save_model(model):
