@@ -120,8 +120,20 @@ def get_scan_as_cartesian(laser_scan):
     if usable_range < laser_range:
         skip_left = int((-laser_scan.angle_min - usable_range / 2) / laser_range * ranges.shape[0])  # nopep8
         skip_right = int((laser_scan.angle_max - usable_range / 2) / laser_range * ranges.shape[0])  # nopep8
-        angles = angles[skip_left:-1 - skip_right]
-        ranges = ranges[skip_left:-1 - skip_right]
+        not_skipped_ranges_before = []
+        not_skipped_angles_before = []
+        for a, r in zip(angles[:skip_left], ranges[:skip_left]):
+            if r < 0:
+                not_skipped_ranges_before.append(r)
+                not_skipped_angles_before.append(a)
+        not_skipped_ranges_after = []
+        not_skipped_angles_after = []
+        for a, r in zip(angles[skip_right:], ranges[skip_right:]):
+            if r < 0:
+                not_skipped_ranges_after.append(r)
+                not_skipped_angles_after.append(a)
+        angles = np.concatenate((not_skipped_angles_before, angles[skip_left:-1 - skip_right], not_skipped_angles_after), axis=None)
+        ranges = np.concatenate((not_skipped_ranges_before, ranges[skip_left:-1 - skip_right], not_skipped_ranges_after), axis=None)
 
     inf_mask = np.isinf(ranges)
     if inf_mask.any():
@@ -217,7 +229,7 @@ This position is important to calculate the error for the pid-controller.
 def calc_predicted_car_position(remaining_distance, offset_distance):
     prediction_distance = min(0.1 + last_speed * 0.35, 2.0)
     if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
-        prediction_distance = remaining_distance + offset_distance
+        prediction_distance = remaining_distance
     # steering_radius = calc_steering_radius(calc_angle_moving_average())
     # circle_section_angle = prediction_distance / steering_radius
     # print steering_radius, circle_section_angle, Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
@@ -466,7 +478,7 @@ delta_time: passed time since the last call of follow_walls
 def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall, curve_type, remaining_distance, delta_time):
     global last_speed
     show_steering_angle()
-    predicted_car_position, prediction_distance = calc_predicted_car_position(remaining_distance, -0.5)
+    predicted_car_position, prediction_distance = calc_predicted_car_position(remaining_distance, CAR_WIDTH)
     target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance)
 
     distance_to_target = math.sqrt(target_position.x**2 + target_position.y**2)
@@ -515,6 +527,16 @@ def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall,
                           target_position], color=ColorRGBA(1, 0.4, 0, 1))
 
 
+def calc_nearest_point_to_point(point, points):
+    return points[np.argmin(np.array([calc_distance(point, p) for p in points]))]
+
+
+def is_curve_entry_in_front(curve_entry_point, lowest_point, threshold):
+    if lowest_point[0] - curve_entry_point[0] == 0:
+        return True
+    return abs((lowest_point[1] - curve_entry_point[1]) / (lowest_point[0] - curve_entry_point[0])) > threshold
+
+
 def handle_scan(laser_scan, delta_time):
     if parameters is None:
         return
@@ -548,27 +570,40 @@ def handle_scan(laser_scan, delta_time):
 
     curve_entry_point = None
     curve_type = None
+    upper_wall = None
     if min_range_in_front < 30:
         # With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the track.
         radius_proportions_left = left_circle.radius / right_circle.radius
         radius_proportions_right = right_circle.radius / left_circle.radius
         if radius_proportions_left > 1.2 and right_circle.center.x < 0:
             curve_entry_point = left_wall[np.argmax(left_wall[:, 1])]
-            upper_wall = np.array([point for point in right_wall if point[1] >= curve_entry_point[1] - 1.5])
-            right_wall = np.array([point for point in right_wall if point[1] < curve_entry_point[1]])
-            right_circle = Circle.fit(right_wall)
-            curve_type = CURVE_TYPE_LEFT
+            if is_curve_entry_in_front(curve_entry_point, calc_nearest_point_to_point([0, 0], left_wall), 1):
+                upper_wall = np.array([point for point in right_wall if point[1] >= curve_entry_point[1] - 1.5])
+                right_wall = np.array([point for point in right_wall if point[1] <= curve_entry_point[1]])
+                if len(right_wall) == 0:
+                    right_wall = upper_wall[0: 1]
+                try:
+                    right_circle = Circle.fit(right_wall)
+                except:
+                    print right_wall, upper_wall
+                curve_type = CURVE_TYPE_LEFT
         elif radius_proportions_right > 1.2 and right_circle.center.x > 0:
             curve_entry_point = right_wall[np.argmax(right_wall[:, 1])]
-            upper_wall = np.array([point for point in left_wall if point[1] >= curve_entry_point[1] - 1.5])
-            left_wall = np.array([point for point in left_wall if point[1] < curve_entry_point[1]])
-            left_circle = Circle.fit(left_wall)
-            curve_type = CURVE_TYPE_RIGHT
+            if is_curve_entry_in_front(curve_entry_point, calc_nearest_point_to_point([0, 0], right_wall), 1):
+                upper_wall = np.array([point for point in left_wall if point[1] >= curve_entry_point[1] - 1.5])
+                left_wall = np.array([point for point in left_wall if point[1] <= curve_entry_point[1]])
+                if len(left_wall) == 0:
+                    left_wall = upper_wall[-2: -1]
+                try:
+                    left_circle = Circle.fit(left_wall)
+                except:
+                    print left_wall, upper_wall
+                curve_type = CURVE_TYPE_RIGHT
 
     upper_circle = None
     remaining_distance = None
-    if curve_entry_point is not None and len(upper_wall) > 0:
-        remaining_distance = math.sqrt(curve_entry_point[0]**2 + curve_entry_point[1]**2)
+    if curve_entry_point is not None and upper_wall is not None and len(upper_wall) > 0:
+        remaining_distance = curve_entry_point[1]
         upper_circle = Circle.fit(upper_wall)
         show_line_in_rviz(
             6, [Point(-2, remaining_distance), Point(2, remaining_distance)], color=ColorRGBA(0.2, 0.5, 0.8, 1))
