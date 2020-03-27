@@ -461,8 +461,8 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
 #     return np.stack((x_points, y_points), axis=1)
 
 def show_steering_angle():
-    show_line_in_rviz(35, [Point(0, 0), Point(math.cos(calc_angle_moving_average()), math.sin(calc_angle_moving_average()))],
-                      color=ColorRGBA(1, 1, 1, 0.3), line_width=0.005)
+    show_line_in_rviz(35, [Point(0, 0), Point(math.sin(calc_angle_moving_average()), math.cos(calc_angle_moving_average()))],
+                      color=ColorRGBA(1, 0, 0, 0.3))
 
 """
 Determines speed and steering angle for the car based on a wall following algorithm.
