@@ -5,7 +5,14 @@ from collections import namedtuple
 
 from circle_fit import hyper_fit
 
-Point = namedtuple("Point", ["x", "y"])
+
+class Point():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def as_list(self):
+        return [self.x, self.y]
 
 
 class Circle():
