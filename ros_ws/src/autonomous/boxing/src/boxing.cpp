@@ -1,10 +1,10 @@
 #include "boxing.h"
 #include "sensor_msgs/PointCloud2.h"
 #include <cmath>
+#include <cstdlib>
 #include <math.h>
-#include <pcl/filters/approximate_voxel_grid.h>
+#include <pcl/filters/extract_indices.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-#include <pcl/filters/voxel_grid.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -18,6 +18,13 @@
         norm += vector[i] * vector[i];
     return sqrt(norm);
 }*/
+// mysterious code stolen from https://stackoverflow.com/a/15012792
+bool floatCompare(double x, double y)
+{
+    double maxXYOne = std::max({ 1.0, std::fabs(x), std::fabs(y) });
+
+    return std::fabs(x - y) <= std::numeric_limits<double>::epsilon() * maxXYOne;
+}
 
 Boxing::Boxing()
     : m_private_node_handle("~")
@@ -26,7 +33,7 @@ Boxing::Boxing()
     std::string topicLaserScan;
     std::string topicVoxel;
 
-    if (!this->m_private_node_handle.getParamCached("topic_laser_scan", topicLaserScan))
+    if (!this->m_private_node_handle.getParamCached("topic_input_cloud", topicLaserScan))
         topicLaserScan = TOPIC_INPUT_POINTCLOUD;
 
     if (!this->m_private_node_handle.getParamCached("topic_voxels", topicVoxel))
@@ -49,7 +56,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
     double stddevMulThresh;
     if (!this->m_private_node_handle.getParamCached("sor_stddev_mul_thresh", stddevMulThresh))
-        voxelResolution = 3.0;
+        stddevMulThresh = 3.0;
 
     bool removeOutliers;
     if (!this->m_private_node_handle.getParamCached("sor_enabled", removeOutliers))
@@ -61,41 +68,94 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
     // Convert to PCL data type
     pcl::fromROSMsg(*pointCloud, *(inputCloud));
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_voxelized_ptr(new pcl::PointCloud<pcl::PointXYZ>);
-
-    // Perform the actual filtering
-    pcl::ApproximateVoxelGrid<pcl::PointXYZ> vox;
-    vox.setInputCloud(inputCloud);
-    vox.setLeafSize(voxelResolution * 0.5, voxelResolution * 0.5, voxelResolution * 0.5);
-    vox.filter(*cloud_voxelized_ptr);
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sor_ptr(new pcl::PointCloud<pcl::PointXYZ>);
     if (removeOutliers)
     {
         pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-        sor.setInputCloud(cloud_voxelized_ptr);
+        sor.setInputCloud(inputCloud);
         sor.setMeanK(meanK);
         sor.setStddevMulThresh(stddevMulThresh);
         sor.filter(*cloud_sor_ptr);
     }
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud = removeOutliers ? cloud_sor_ptr : cloud_voxelized_ptr;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud = removeOutliers ? cloud_sor_ptr : inputCloud;
 
     // now quantize this cloud for our system. this could probably also be implemented as a proper filter
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr quantized_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    *quantized_cloud += *output_cloud;
+    float largest_intensity = 0;
+
+    pcl::PointCloud<pcl::PointXYZI>::Ptr quantized_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+    quantized_cloud->clear();
     quantized_cloud->header.frame_id = output_cloud->header.frame_id;
-    for (size_t i = 0; i < quantized_cloud->points.size(); i++)
+    for (size_t i = 0; i < output_cloud->points.size(); i++)
     {
-        quantized_cloud->points[i].x =
-            quantized_cloud->at(i).x - remainderf(quantized_cloud->points[i].x, voxelResolution);
-        quantized_cloud->points[i].y =
-            quantized_cloud->at(i).y - remainderf(quantized_cloud->points[i].y, voxelResolution);
-        quantized_cloud->points[i].z =
-            quantized_cloud->at(i).z - remainderf(quantized_cloud->points[i].z, voxelResolution);
+        pcl::PointXYZ& point = output_cloud->at(i);
+        float x = point.x - remainderf(point.x, voxelResolution);
+        float y = point.y - remainderf(point.y, voxelResolution);
+        float z = point.z - remainderf(point.z, voxelResolution);
+
+        // search the point we want to increment
+        bool found = false;
+        for (size_t j = 0; j < quantized_cloud->points.size(); j++)
+        {
+            pcl::PointXYZI& foundPoint = quantized_cloud->points[j];
+            if (floatCompare((double)foundPoint.x, (double)x) && floatCompare((double)foundPoint.y, (double)y) &&
+                floatCompare((double)foundPoint.z, (double)z))
+            {
+                found = true;
+                quantized_cloud->points[j].intensity++;
+
+                if (quantized_cloud->points[j].intensity > largest_intensity)
+                {
+                    largest_intensity = quantized_cloud->points[j].intensity;
+                }
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            quantized_cloud->points.resize(quantized_cloud->points.size() + 1);
+            quantized_cloud->points[quantized_cloud->points.size() - 1].x = x;
+            quantized_cloud->points[quantized_cloud->points.size() - 1].y = y;
+            quantized_cloud->points[quantized_cloud->points.size() - 1].z = z;
+            quantized_cloud->points[quantized_cloud->points.size() - 1].intensity = 1;
+            if (largest_intensity < 1)
+            {
+                largest_intensity = 1;
+            }
+        }
     }
 
+    for (size_t i = 0; i < quantized_cloud->points.size(); i++)
+    {
+        quantized_cloud->points[i].intensity = quantized_cloud->points[i].intensity / largest_intensity;
+    }
+
+    double minimum_score;
+    if (!this->m_private_node_handle.getParamCached("filter_by_score_minimum_score", minimum_score))
+        minimum_score = 0.5;
+
+    bool filter_by_score;
+    if (!this->m_private_node_handle.getParamCached("filter_by_score_enabled", filter_by_score))
+        filter_by_score = false;
+
+    if (filter_by_score)
+    {
+        pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+        pcl::ExtractIndices<pcl::PointXYZI> extract;
+        for (size_t i = 0; i < quantized_cloud->points.size(); i++)
+        {
+            if (quantized_cloud->points[i].intensity < (float)minimum_score) // e.g. remove all pts below zAvg
+            {
+                inliers->indices.push_back(i);
+            }
+        }
+        extract.setInputCloud(quantized_cloud);
+        extract.setIndices(inliers);
+        extract.setNegative(true);
+        extract.filter(*quantized_cloud);
+    }
     // Convert to ROS data type
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(*quantized_cloud, output);
