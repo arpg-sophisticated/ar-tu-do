@@ -50,6 +50,19 @@
 
     <include file="$(find imu_velocity)/launch/car_imu_velocity.launch" />
 
+    <include file="$(find boxing)/launch/boxing.launch">
+        <arg name="voxel_size" value="0.2" />
+        <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
+        <arg name="topic_voxels" value="/scan/voxels" />
+ 
+        <arg name="filter_by_score_enabled" value="true" />
+        <arg name="filter_by_score_minimum_score" value="0.005" />
+ 
+        <arg name="sor_enabled" value="false" />
+        <arg name="sor_mean_k" value="2" />
+        <arg name="sor_stddev_mul_thresh" value="3.0" />
+    </include>
+ 
     <include file="$(find car_tf)/launch/car_transformer.launch" />
 
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
