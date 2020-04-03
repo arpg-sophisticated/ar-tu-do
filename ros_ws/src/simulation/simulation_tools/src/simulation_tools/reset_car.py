@@ -26,6 +26,19 @@ def set_pose(position, orientation):
 
     set_model_state(state)
 
+def set_pose_from_get_model_state_response(getModelStateResponse):
+    state = ModelState()
+    state.model_name = "racer"
+    state.pose.position.x = getModelStateResponse.pose.position.x
+    state.pose.position.y = getModelStateResponse.pose.position.y
+    state.pose.position.z = 0
+
+    state.pose.orientation.x = getModelStateResponse.pose.orientation.x
+    state.pose.orientation.z = getModelStateResponse.pose.orientation.z
+    state.pose.orientation.w = getModelStateResponse.pose.orientation.w
+    state.pose.orientation.y = getModelStateResponse.pose.orientation.y
+    set_model_state(state)
+
 
 def reset(progress=0, angle=0, offset_from_center=0, forward=True):
     position = track.get_position(progress * track.length, offset_from_center)

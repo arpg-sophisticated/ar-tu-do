@@ -6,20 +6,25 @@ import numpy
 import rospy
 import datetime
 from drive_msgs.msg import drive_param
+from std_msgs.msg import Empty
 from drive_msgs.msg import gazebo_state_telemetry
 from tensorflow.keras import models, backend
 import sensor_msgs.point_cloud2 as pc2
 import numpy as np
 import os, rospkg
+from utilities import createDBVoxelArray
+
+
+import simulation_tools.reset_car as reset_car
+
 rospack = rospkg.RosPack()
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
-
+TOPIC_CRASH = "/crash"
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_STATE_TELEMETRY = "/gazebo/state_telemetry"
 TOPIC_VOXEL = "/scan/voxels"
-voxel_resolution = 0.1
 
 last_state_telemetry_message = None
 
@@ -62,30 +67,7 @@ def state_telemetry_callback(state_telemetry_message):
     last_state_telemetry_message = state_telemetry_message
 
 
-def createDBVoxelArray(voxel_message):
 
-    voxel_array_size = 71
-    voxel = numpy.zeros((voxel_array_size, voxel_array_size), dtype=bool)
-
-    p_gen = pc2.read_points(voxel_message, field_names = ("x", "y", "z", "score"), skip_nans=True)
-
-    for p in p_gen:
-        x= p[0]
-        y= p[1]
-        z= p[2]
-        score= p[3]
-        x_index = int(round(x/voxel_resolution +((voxel_array_size-1)/2)))
-        y_index = int(round(y/voxel_resolution +((voxel_array_size-1)/2)))
-
-        shift_view = int(round(voxel_array_size/3)) #Lidar schaut nicht nach hinten. Voxel array kann verschoben werden
-        x_index = x_index - shift_view
-
-        #print ("x: "+str(x) +"  y: "+str(y))
-        #print ("x_index: "+str(x_index) +"  y_index: "+str(y_index))
-        if (x_index<voxel_array_size) and (y_index<voxel_array_size) and (x_index>=0) and (y_index>=0):
-            voxel[x_index,y_index] = 1        #TODO bisher nicht wirklich effizient
-   
-    return voxel
 
 def load_model():
     print("Start Loading model from disk")
@@ -106,10 +88,17 @@ def load_model():
     backend.set_learning_phase(0)
     #model.compile()
 
+def on_crash(crash_message):
+    print("--------------reset car--------------")
+    reset_car.reset(progress=0.25)
 
 load_model()
 
 rospy.init_node('drive_nn', anonymous=True)
+
+reset_car.register_service()
+
+rospy.Subscriber(TOPIC_CRASH, Empty, on_crash)
 
 rospy.Subscriber(TOPIC_VOXEL, PointCloud2, voxel_callback, queue_size=1)
 rospy.Subscriber(TOPIC_STATE_TELEMETRY, gazebo_state_telemetry, state_telemetry_callback)

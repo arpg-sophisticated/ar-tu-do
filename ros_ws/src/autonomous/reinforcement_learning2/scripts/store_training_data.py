@@ -52,7 +52,7 @@ def connect_to_database():
         print ("Error while connecting to PostgreSQL", error)
 
 def save_image_to_disc(voxel, current_time_formated):
-    plt.imsave('/home/marvin/Pictures/'+current_time_formated+'.png',voxel, cmap=cm.gray)
+    plt.imsave('/home/Marvin/training_data/ar-tu-do_71x71/'+current_time_formated+'.png',voxel, cmap=cm.gray)
 
 def write_entry_to_db(current_time,current_speed,voxel,velocity,angle):
     current_time_formated = current_time.strftime("%d-%m-%Y %H:%M:%S.%f")

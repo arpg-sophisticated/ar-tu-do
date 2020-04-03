@@ -7,7 +7,8 @@ import sys
 import glob
 import os
 import keras.backend as K
-from tensorflow.keras import datasets, layers, models, Input, Model
+import autokeras as ak
+from tensorflow.keras import datasets, layers, models, Input, Model, optimizers
 import cv2
 
 picture_size = 71
@@ -44,8 +45,6 @@ def diff_velocity(y_true, y_pred):
 def diff_angle(y_true, y_pred):
     return K.mean(abs((y_true[1])-(y_pred[1])))
 
-weights = K.variable(value=np.array([[10, 100]]))
-
 def custom_loss(y_true, y_pred):
     y_true = tf.matmul(y_true,tf.transpose(weights))
     y_pred = tf.matmul(y_pred,tf.transpose(weights))
@@ -78,11 +77,14 @@ def build_model_new():
     inputPNG = Input(shape=(picture_size, picture_size, 1))
     inputNumeric = Input(shape=(1,))
 
-    png_branch = layers.Conv2D(11, (30, 30), activation='relu')(inputPNG)
-    png_branch = layers.MaxPooling2D(pool_size=( 3,3),strides=(2,2))(png_branch)
+    png_branch = layers.Conv2D(16, (32, 32), activation='relu')(inputPNG)
+    png_branch = layers.MaxPooling2D(pool_size=( 4,4),strides=(1,1))(png_branch)
 
-    png_branch = layers.Conv2D(1, (5, 5), activation='relu')(png_branch)
-    png_branch = layers.MaxPooling2D(pool_size=(3,3),strides=(1,1))(png_branch)
+    png_branch = layers.Conv2D(32, (8, 8), activation='relu')(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(4,4),strides=(1,1))(png_branch)
+    
+    png_branch = layers.Conv2D(64, (4, 4), activation='relu')(png_branch)
+    png_branch = layers.MaxPooling2D(pool_size=(4,4),strides=(1,1))(png_branch)
 
     png_branch = layers.Flatten()(png_branch)
     png_branch = layers.Dense(256, activation='relu')(png_branch)
@@ -99,14 +101,12 @@ def build_model_new():
 
     print(model.summary())
 
+    #adam=optimizers.Adam(learning_rate=0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False, name='Adam')
+
     model.compile(optimizer='adam',loss='mean_squared_error', metrics=[diff_pred,diff_velocity,diff_angle])
     return model
 
-
-def train_model():   
-
-    model = build_model_new()
-
+def get_training_data():
     connect_to_database()
 
     training_data_from_db = get_training_data_from_db()
@@ -116,7 +116,16 @@ def train_model():
     training_data_numeric = training_data_from_db[:,0]
     training_data_label = training_data_from_db[:,1:]
 
+    #boost difficult curve 265 - 375
+    print ('png'+str(training_data_from_png.shape))
+    print ('numeric'+str(training_data_numeric.shape))
+    print ('label'+str(training_data_label.shape))
+    for i in range(20):
+        training_data_from_png = np.concatenate((training_data_from_png,training_data_from_png[265:375]))
+        training_data_numeric = np.concatenate((training_data_numeric,training_data_numeric[265:375]))
+        training_data_label = np.concatenate((training_data_label,training_data_label[265:375]))
 
+    #prep for model
     trainXPNG = np.expand_dims(training_data_from_png ,-1)
     trainXNumeric = np.expand_dims(training_data_numeric ,-1)
 
@@ -127,6 +136,18 @@ def train_model():
     trainXPNG = trainXPNG[p]
     trainXNumeric = trainXNumeric[p]
 
+    return (training_data_label,trainXPNG,trainXNumeric)
+
+def train_model():   
+
+    model = build_model_gut()
+
+    training_data = get_training_data()
+
+    training_data_label = training_data[0]
+    trainXPNG = training_data[1]
+    trainXNumeric = training_data[2]
+
     print("Shape of Training-Data-x-png:")
     print(trainXPNG.shape)
     print("Shape of Training-Data-x-numeric:")
@@ -136,6 +157,26 @@ def train_model():
     print("train model")
     model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=batch_size, epochs=epochs)
     save_model(model)
+
+def train_model_automl():
+    training_data = get_training_data()
+
+    training_data_label = training_data[0]
+    trainXPNG = training_data[1]
+    trainXNumeric = training_data[2]
+
+    trainX = [trainXPNG,trainXNumeric]
+
+    am = ak.AutoModel(
+    inputs=[ak.ImageInput(), ak.StructuredDataInput()],
+    outputs=[
+        ak.RegressionHead(metrics=['mse']),
+        ak.RegressionHead(metrics=['mse'])
+    ],
+    max_trials=10)
+
+    am.fit(trainX, [training_data_label[:,0],training_data_label[:,1]], epochs=10)
+    save_model(am.export_model())
     
 def save_model(model):
     # serialize model to JSON
@@ -163,23 +204,24 @@ def get_training_data_from_db():
     stdev =np.asarray([1.547,1.446,0.262])
     avg =np.asarray([4.853,4.603,-0.094])
     records = (records - avg) /stdev
-
+    #np.save("/home/marvin/db_data.npy",records)
     return records
 
 def get_training_data_from_png():
     print("reading pictures")
     np.set_printoptions(threshold=sys.maxsize)
     data_list = []
-    for im_path in sorted(glob.glob("/home/marvin/Pictures/*.png"),key=os.path.getmtime):
+    for im_path in sorted(glob.glob("/home/marvin/training_data/ar-tu-do_71x71/*.png"),key = lambda date: datetime.datetime.strptime(date[-30:-4], '%d-%m-%Y %H:%M:%S.%f')):
         data_list.append(cv2.imread(im_path)[:,:,0])
+        #print(im_path)
         #print(plt.imread(im_path)[:,:,0])
         #print(im_path)
     
     np_array = np.asarray(data_list, dtype=np.float32)
-    
+    #np.save("/home/marvin/pictures.npy",np_array)
     return np_array
 
-train_model()
+train_model_automl()
 #TODO: 
 # 
 # nn optimieren
