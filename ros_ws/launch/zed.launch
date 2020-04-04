@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <param name="range_max" value="20"/> 
             <remap from="scan" to="scan_camera"/>
             <param name="output_frame_id" value="laser"/>
-            <remap from="image" to="$(arg zed_node_name)/depth/depth_registered"/>
+	    <remap from="image" to="/zed/zed/$(arg zed_node_name)/depth/depth_registered"/>
         </node>
     </group>
 

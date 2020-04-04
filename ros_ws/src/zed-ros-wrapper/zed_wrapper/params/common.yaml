@@ -3,75 +3,68 @@
 ---
 
 # Dynamic parameters cannot have a namespace
-auto_exposure:              true                                # Dynamic
-exposure:                   100                                 # Dynamic
-gain:                       100                                 # Dynamic
-confidence:                 100                                 # Dynamic
-mat_resize_factor:          1.0                                 # Dynamic
-point_cloud_freq:           30.0                                # Dynamic - frequency of the pointcloud publishing (equal or less to `frame_rate` value)
+brightness:                 4                                   # Dynamic
+contrast:                   4                                   # Dynamic
+hue:                        0                                   # Dynamic
+saturation:                 4                                   # Dynamic
+sharpness:                  4                                   # Dynamic
+gamma:                      8                                   # Dynamic - Requires SDK >=v3.1
+auto_exposure_gain:         true                                # Dynamic
+gain:                       100                                 # Dynamic - works only if `auto_exposure_gain` is false
+exposure:                   100                                 # Dynamic - works only if `auto_exposure_gain` is false
+auto_whitebalance:          true                                # Dynamic
+whitebalance_temperature:   42                                  # Dynamic - works only if `auto_whitebalance` is false
+depth_confidence:           80                                  # Dynamic
+depth_texture_conf:         100                                 # Dynamic
+pub_frame_rate:             30.0                                # Dynamic - frequency of publishing of video and depth data
+point_cloud_freq:           30.0                                # Dynamic - frequency of the pointcloud publishing (equal or less to `grab_frame_rate` value)
 
 general:
-    camera_flip:                false
-    zed_id:                     -1
+    camera_name:                zed                             # A name for the camera (can be different from camera model and node name)
+    zed_id:                     0
     serial_number:              0
-    resolution:                 3                                   # '0': HD2K, '1': HD1080, '2': HD720, '3': VGA
-    frame_rate:                 30
+    resolution:                 3                               # '0': HD2K, '1': HD1080, '2': HD720, '3': VGA
+    grab_frame_rate:            30                              # Frequency of frame grabbing for internal SDK operations
     gpu_id:                     -1
-    #    base_frame:                 'base_link'                         # must be equal to the frame_id used in the URDF file
-    base_frame:                 'camera'                            # must be equal to the frame_id used in the URDF file
-    camera_frame:               'zed_camera_center'                 # must be equal to the frame_id used in the URDF file
-    left_camera_frame:          'zed_left_camera_frame'             # must be equal to the frame_id used in the URDF file
-    left_camera_optical_frame:  'zed_left_camera_optical_frame'     # must be equal to the frame_id used in the URDF file
-    right_camera_frame:         'zed_right_camera_frame'            # must be equal to the frame_id used in the URDF file
-    right_camera_optical_frame: 'zed_right_camera_optical_frame'    # must be equal to the frame_id used in the URDF file
-    verbose:                    false
-#    verbose:                    true
-    svo_compression:            4                                   # `0`: RAW (no compression), `1`: LOSSLESS (PNG/ZSTD), `2`: LOSSY (JPEG), `3`: AVCHD (H264 SDK v2.7), `4`: HEVC (H265 SDK v2.7)
-    self_calib:                 true                                # enable/disable self calibration at starting
+    base_frame:                 'base_link'                     # must be equal to the frame_id used in the URDF file
+    verbose:                    false                           # Enable info message by the ZED SDK
+    svo_compression:            0                               # `0`: LOSSLESS, `1`: AVCHD, `2`: HEVC
+    self_calib:                 false                            # enable/disable self calibration at starting
+    camera_flip:                false
 
 video:
-    rgb_topic_root:             'rgb'                               # default `rgb/image_rect_color`, `rgb/camera_info`, `rgb_raw/image_raw_color`, `rgb_raw/camera_info`
-    left_topic_root:            'left'                              # default `left/image_rect_color`, `left/camera_info`, `left_raw/image_raw_color`, `left_raw/camera_info`
-    right_topic_root:           'right'                             # default `right/image_rect_color`, `right/camera_info`, `right_raw/image_raw_color`, `right_raw/camera_info`
-    stereo_topic_root:          'stereo'                            # default `stereo/image_rect_color`, `stereo/camera_info`, `stereo_raw/image_raw_color`, `stereo_raw/camera_info`
-    color_enhancement:          true                                # [FUTURE USE] This parameter enhances color spreading on R/G/B channel and increase gamma correction on black areas for a better gray segmentation in black areas. Recommended for computer's vision applications.
+    img_downsample_factor:      0.25                            # Resample factor for images [0.01,1.0] The SDK works with native image sizes, but publishes rescaled image.
+    extrinsic_in_camera_frame:  true                            # if `false` extrinsic parameter in `camera_info` will use ROS native frame (X FORWARD, Z UP) instead of the camera frame (Z FORWARD, Y DOWN) [`true` use old behavior as for version < v3.1]
 
 depth:
-    quality:                    1                                   # '0': NONE, '1': PERFORMANCE, '2': MEDIUM, '3': QUALITY, '4': ULTRA
-    sensing_mode:               1                                   # '0': STANDARD, '1': FILL
-    depth_stabilization:        1                                   # `0`: disabled, `1`: enabled
-    openni_depth_mode:          1                                   # '0': 32bit float meters, '1': 16bit uchar millimeters
-    depth_topic_root:           'depth'                             # default `depth/depth_registered` or `depth/depth_raw_registered` if `openni_depth_mode` is true
-    point_cloud_topic_root:     'point_cloud'
-    disparity_topic:            'disparity/disparity_image'
-    confidence_root:            'confidence'                        # default `confidence/confidence_image` and `confidence/confidence_map`
+    quality:                    3                               # '0': NONE, '1': PERFORMANCE, '2': QUALITY, '3': ULTRA
+    sensing_mode:               1                               # '0': STANDARD, '1': FILL (not use FILL for robotic applications)
+    depth_stabilization:        1                               # `0`: disabled, `1`: enabled
+    openni_depth_mode:          0                               # '0': 32bit float meters, '1': 16bit uchar millimeters
+    depth_downsample_factor:    0.5                            # Resample factor for depth data matrices [0.01,1.0] The SDK works with native data sizes, but publishes rescaled matrices (depth map, point cloud, ...)
 
-
-tracking:
-#    publish_tf:                 true                                # publish `odom -> base_link` TF
-    publish_tf:                 false                                # publish `odom -> base_link` TF
-#    publish_map_tf:             true                                # publish `map -> odom` TF
-    publish_map_tf:             false                                # publish `map -> odom` TF
-    world_frame:                'map'                               # the reference fixed frame (same as `map_frame` or `odometry_frame`)
+pos_tracking:
+    publish_tf:                 true                                # publish `odom -> base_link` TF
+    #    publish_tf:                 false                                # publish `odom -> base_link` TF
+    publish_map_tf:             true                                # publish `map -> odom` TF
+    #    publish_map_tf:             false                                # publish `map -> odom` TF
     map_frame:                  'map'
     odometry_frame:             'odom'
-    odometry_db:                ''
-    spatial_memory:             true                                # Enable to detect loop closure
-    floor_alignment:            false                               # Enable to automatically calculate camera/floor offset
-    initial_base_pose:          [0.0,0.0,0.0, 0.0,0.0,0.0]          # [X, Y, Z, R, P, Y]
-    pose_topic:                 'pose'
-    publish_pose_covariance:    true                                # Enable to publish the `pose_with_covariance` message
-    fixed_covariance:           false                               # Set the covariance for pose and odometry to a diagonal matrix with `fixed_cov_value` on the diagonal
-    fixed_cov_value:            1e-6                                # Value used on the diagonal of the fixed covariance matrix (`fixed_covariance -> true`)
-    odometry_topic:             'odom'
-    init_odom_with_first_valid_pose: true                           # Enable to initialize the odometry with the first valid pose
-    path_pub_rate:              2.0                                 # Path positions punlishing frequency
-    path_max_count:             -1                                  # use '-1' for unlimited path size
-    two_d_mode:                 false                               # Force navigation on a plane. If true the Z value will be fixed to "fixed_z_value", roll and pitch to zero
-    fixed_z_value:              1.0                                 # Value to be used for Z coordinate if `two_d_mode` is true
+    area_memory_db_path:        ''
+    area_memory:                true                            # Enable to detect loop closure
+    floor_alignment:            false                           # Enable to automatically calculate camera/floor offset
+    initial_base_pose:          [0.0,0.0,0.0, 0.0,0.0,0.0]      # Initial position of the `base_frame` -> [X, Y, Z, R, P, Y]
+    init_odom_with_first_valid_pose: true                       # Enable to initialize the odometry with the first valid pose
+    path_pub_rate:              2.0                             # Camera trajectory publishing frequency
+    path_max_count:             -1                              # use '-1' for unlimited path size
+    #two_d_mode:                 false                           # Force navigation on a plane. If true the Z value will be fixed to "fixed_z_value", roll and pitch to zero
+    two_d_mode:                 true                           # Force navigation on a plane. If true the Z value will be fixed to "fixed_z_value", roll and pitch to zero
+    fixed_z_value:              0.00                            # Value to be used for Z coordinate if `two_d_mode` is true
 
 mapping:
-    mapping_enabled:            false                                # True to enable mapping and fused point cloud pubblication
-    resolution:                 1                                   # `0`: HIGH, `1`: MEDIUM, `2`: LOW
-    fused_pointcloud_freq:      1.0                                 # frequency of the publishing of the fused colored point cloud
+    mapping_enabled:            true                            # True to enable mapping and fused point cloud pubblication
+    resolution:                 0.05                            # maps resolution in meters [0.01f, 0.2f]
+    max_mapping_range:          -1                              # maximum depth range while mapping in meters (-1 for automatic calculation) [2.0, 20.0]
+    fused_pointcloud_freq:      30.0                             # frequency of the publishing of the fused colored point cloud
+
 
