@@ -3,10 +3,10 @@
     <arg name="world" default="racetrack_decorated_2"/>
     <arg name="paused" default="false"/>
     <arg name="use_sim_time" default="true"/>
-    <arg name="gui" default="true"/>
+    <arg name="gui" default="false"/>
     <arg name="debug" default="false"/>
     <arg name="verbose" default="true"/>
-    <arg name="use_gpu" default="true"/>
+    <arg name="use_gpu" default="false"/>
     <arg name="joystick_type" default="xbox360"/>
     <arg name="visualize_lidar" default="false"/>
     <arg name="emergency_stop" default="true"/>
@@ -31,15 +31,7 @@
         <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
     </include>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
-
-    <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
-    <!-- <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/> -->
-    <include file="$(find wallfollowing3)/launch/autonomous_driving.launch"/>
-
-    <group if="$(arg emergency_stop)">
-        <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
-    </group>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find boxing)/launch/rviz_config.rviz"/>
 
     <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
     <include file="$(find car_control)/launch/car_control.launch">
@@ -48,22 +40,17 @@
     <include file="$(find teleoperation)/launch/remote_control.launch">
         <arg name="joystick_type" value="$(arg joystick_type)"/>
     </include>
+    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
-    <include file="$(find imu_velocity)/launch/car_imu_velocity.launch" />
+    <node name="boxing" pkg="boxing" type="boxing">
+	<param name="voxel_size" type="double" value="0.2" />
+    <param name="topic_laser_scan" type="string" value="/scan/lidar/cartesian" />
+    <param name="topic_voxels" type="string" value="/scan/voxels" />
+    <param name="sor_enabled" type="bool" value="false" />
+    <param name="sor_mean_k" type="int" value="2" />
+    <param name="sor_stddev_mul_thresh" type="double" value="3.0" />
+    </node>
 
-    <include file="$(find boxing)/launch/boxing.launch">
-        <arg name="voxel_size" value="0.2" />
-        <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
-        <arg name="topic_voxels" value="/scan/voxels" />
- 
-        <arg name="filter_by_score_enabled" value="true" />
-        <arg name="filter_by_score_minimum_score" value="0.005" />
- 
-        <arg name="sor_enabled" value="false" />
-        <arg name="sor_mean_k" value="2" />
-        <arg name="sor_stddev_mul_thresh" value="3.0" />
-    </include>
- 
     <include file="$(find car_tf)/launch/car_transformer.launch" />
 
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
