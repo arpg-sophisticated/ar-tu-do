@@ -237,41 +237,41 @@ def calc_predicted_car_position(remaining_distance, offset_distance):
     return Point(0, prediction_distance), prediction_distance
 
 
-# def calc_circle_intersections(circle_a, circle_b):
-#     # calc vector between the two circles
-#     ab = Point(circle_b.center.x - circle_a.center.x, circle_b.center.y - circle_a.center.y)
-#     distance = math.sqrt(ab.x**2 + ab.y**2)
-#     if distance == 0:
-#         # no distance between centers
-#         return []
-#     x = (circle_a.radius**2 + distance**2 - circle_b.radius**2) / (2 * distance)
-#     y = circle_a.radius**2 - x**2
-#     if y < 0:
-#         # no intersection
-#         return []
-#     elif y > 0:
-#         y = math.sqrt(y)
-#     # compute unit vectors
-#     ex = Point(ab.x / distance, ab.y / distance)
-#     ey = Point(-ex.y, ex.x)
-#     # compute intersection
-#     Q1 = Point(circle_a.center.x + x * ex.x, circle_a.center.y + x * ex.y)
-#     if y == 0:
-#         # only one intersection
-#         return [Q1]
-#     Q2 = Point(Q1.x - y * ey.x, Q1.y - y * ey.y)
-#     Q1 = Point(Q1.x + y * ey.x, Q1.y + y * ey.y)
-#     return [Q1, Q2]
+def calc_circle_intersections(circle_a, circle_b):
+    # calc vector between the two circles
+    ab = Point(circle_b.center.x - circle_a.center.x, circle_b.center.y - circle_a.center.y)
+    distance = math.sqrt(ab.x**2 + ab.y**2)
+    if distance == 0:
+        # no distance between centers
+        return []
+    x = (circle_a.radius**2 + distance**2 - circle_b.radius**2) / (2 * distance)
+    y = circle_a.radius**2 - x**2
+    if y < 0:
+        # no intersection
+        return []
+    elif y > 0:
+        y = math.sqrt(y)
+    # compute unit vectors
+    ex = Point(ab.x / distance, ab.y / distance)
+    ey = Point(-ex.y, ex.x)
+    # compute intersection
+    Q1 = Point(circle_a.center.x + x * ex.x, circle_a.center.y + x * ex.y)
+    if y == 0:
+        # only one intersection
+        return [Q1]
+    Q2 = Point(Q1.x - y * ey.x, Q1.y - y * ey.y)
+    Q1 = Point(Q1.x + y * ey.x, Q1.y + y * ey.y)
+    return [Q1, Q2]
 
 
-# def calc_circle_tangent(circle_a, outside_point):
-#     distance = math.sqrt((circle_a.center.x - outside_point.x)**2 + (circle_a.center.y - outside_point.y)**2) / 2
-#     circle_b = Circle(Point((circle_a.center.x - outside_point.x) / 2, (circle_a.center.y - outside_point.y) / 2), distance)
-#     intersections = calc_circle_intersections(circle_a, circle_b)
-#     intersections.sort(key=lambda intersection: intersection.y, reverse=True)
-#     if len(intersections) > 0:
-#         return intersections[0]
-#     return None
+def calc_circle_tangent(circle_a, outside_point):
+    distance = math.sqrt((circle_a.center.x - outside_point.x)**2 + (circle_a.center.y - outside_point.y)**2) / 2
+    circle_b = Circle(Point((circle_a.center.x - outside_point.x) / 2, (circle_a.center.y - outside_point.y) / 2), distance)
+    intersections = calc_circle_intersections(circle_a, circle_b)
+    intersections.sort(key=lambda intersection: intersection.y, reverse=True)
+    if len(intersections) > 0:
+        return intersections[0]
+    return None
 
 
 """
@@ -396,42 +396,42 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
     show_line_in_rviz(2, [left_point, right_point],
                       color=ColorRGBA(1, 1, 1, 0.3), line_width=0.005)
 
-    # safety_distance = 1.5 * CAR_WIDTH
-    # left_tangent_point = None
-    # right_tangent_point = None
-    # start_position = None
-    # # left curve
-    # if left_circle.center.x < 0 and right_circle.center.x < 0 and (left_circle.radius < 1000 or right_circle.radius < 1000): #calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], left_wall) < CAR_WIDTH
-    #     # left_tangent_point = calc_closest_collision_point(left_wall, -1, safety_distance)
-    #     left_tangent_point = calc_polygon_tangent_point(left_wall, -1)
-    #     if left_tangent_point is not None:
-    #         start_position = calc_shortest_distance_point_to_vector([0, 0], left_tangent_point, left_wall)
-    #         target_position = calc_orthogonal_point([0, 0], left_tangent_point, start_position, -1, safety_distance)
-    #         # target_position = Point(left_tangent_point[0] + safety_distance, left_tangent_point[1])
-    # # right curve
-    # if left_circle.center.x > 0 and right_circle.center.x > 0 and (left_circle.radius < 1000 or right_circle.radius < 1000): #calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], right_wall) < CAR_WIDTH
-    #     # right_tangent_point = calc_closest_collision_point(right_wall, 1, safety_distance)
-    #     right_tangent_point = calc_polygon_tangent_point(right_wall, 1)
-    #     if right_tangent_point is not None:
-    #         start_position = calc_shortest_distance_point_to_vector([0, 0], right_tangent_point, right_wall)
-    #         target_position = calc_orthogonal_point([0, 0], right_tangent_point, start_position, 1, safety_distance)
-    #         # target_position = Point(right_tangent_point[0] - safety_distance, right_tangent_point[1])
+    safety_distance = 1.5 * CAR_WIDTH
+    left_tangent_point = None
+    right_tangent_point = None
+    start_position = None
+    # left curve
+    if left_circle.center.x < 0 and right_circle.center.x < 0 and (left_circle.radius < 1000 or right_circle.radius < 1000): #calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], left_wall) < CAR_WIDTH
+        # left_tangent_point = calc_closest_collision_point(left_wall, -1, safety_distance)
+        left_tangent_point = calc_circle_tangent(Circle(left_circle.center, left_circle.radius + safety_distance), Point(0, 0))
+        if left_tangent_point is not None:
+            # start_position = calc_shortest_distance_point_to_vector([0, 0], left_tangent_point, left_wall)
+            # target_position = calc_orthogonal_point([0, 0], left_tangent_point, start_position, -1, safety_distance)
+            target_position = Point(left_tangent_point[0], left_tangent_point[1])
+    # right curve
+    if left_circle.center.x > 0 and right_circle.center.x > 0 and (left_circle.radius < 1000 or right_circle.radius < 1000): #calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], right_wall) < CAR_WIDTH
+        # right_tangent_point = calc_closest_collision_point(right_wall, 1, safety_distance)
+        right_tangent_point = calc_circle_tangent(Circle(right_circle.center, right_circle.radius + safety_distance), Point(0, 0))
+        if right_tangent_point is not None:
+            # start_position = calc_shortest_distance_point_to_vector([0, 0], right_tangent_point, right_wall)
+            # target_position = calc_orthogonal_point([0, 0], right_tangent_point, start_position, 1, safety_distance)
+            target_position = Point(right_tangent_point[0], right_tangent_point[1])
 
-    # if left_tangent_point is not None:
-    #     show_line_in_rviz(20, [Point(0, 0), Point(left_tangent_point[0], left_tangent_point[1])],
-    #                     color=ColorRGBA(1, 1, 1, 1.0))
-    # else:
-    #     delete_marker(20)
-    # if right_tangent_point is not None:
-    #     show_line_in_rviz(21, [Point(0, 0), Point(right_tangent_point[0], right_tangent_point[1])],
-    #                     color=ColorRGBA(0.5, 0.5, 0.5, 1.0))
-    # else:
-    #     delete_marker(21)
-    # if start_position is not None:
-    #     show_line_in_rviz(22, [target_position, Point(start_position[0], start_position[1])],
-    #                     color=ColorRGBA(0, 1.0, 0, 1.0))
-    # else:
-    #     delete_marker(22)
+    if left_tangent_point is not None:
+        show_line_in_rviz(20, [Point(0, 0), Point(left_tangent_point[0], left_tangent_point[1])],
+                        color=ColorRGBA(1, 1, 1, 1.0))
+    else:
+        delete_marker(20)
+    if right_tangent_point is not None:
+        show_line_in_rviz(21, [Point(0, 0), Point(right_tangent_point[0], right_tangent_point[1])],
+                        color=ColorRGBA(0.5, 0.5, 0.5, 1.0))
+    else:
+        delete_marker(21)
+    if start_position is not None:
+        show_line_in_rviz(22, [target_position, Point(start_position[0], start_position[1])],
+                        color=ColorRGBA(0, 1.0, 0, 1.0))
+    else:
+        delete_marker(22)
 
     return target_position
 
