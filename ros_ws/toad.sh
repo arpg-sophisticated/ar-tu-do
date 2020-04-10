@@ -118,9 +118,9 @@ case $1 in
                     exit 1
                 fi
                 export DISPLAY=$(getActiveDisplay)
-                ARGUMENTS=""
+                ARGUMENTS="world:=$LAUNCHTRACK"
                 if [[ "$3" =~ "nogui" ]]; then
-                    ARGUMENTS="gui:=false "
+                    ARGUMENTS="$ARGUMENTS gui:=false "
                 fi
                 if [[ "$3" =~ "fast" ]]; then
                     ARGUMENTS="$ARGUMENTS fast:=true "
@@ -367,7 +367,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                       	 sudo apt-get upgrade -y
+			fi
                     else
                         echo "Skipping"
                     fi
@@ -455,7 +457,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                          sudo apt-get upgrade -y
+			fi
                     fi
                     RESULT=""
                     if [[ $CI == 'yes' ]]; then
@@ -505,7 +509,7 @@ case $1 in
                         sudo apt-get install -y python-pip
                         sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
                         sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit vpython slack-cli
+                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
                     else
                         echo "Skipping"
                     fi

@@ -38,4 +38,13 @@ Launches all necessary nodes that listen for drive_parameters and translate them
       required="true" />
     
     <node pkg="tf" type="static_transform_publisher" name="imu_to_base" args="0 0 0 0 0 0 base_link base_imu_link 10"/>	
+
+    <!-- Acceleration Controller node -->
+    <node
+      pkg="car_control"
+      type="acceleration_controller"
+      name="acceleration_controller"
+      output="screen"
+      required="true" />
+	
 </launch>

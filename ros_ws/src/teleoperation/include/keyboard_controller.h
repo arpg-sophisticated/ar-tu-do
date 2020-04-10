@@ -61,7 +61,7 @@ class KeyboardController
     // How fast the steering value changes, in units per second
     double m_steering_speed = 6;
     // How fast the velocity changes, in units per second
-    double m_acceleration = 0.4;
+    double m_acceleration = 2.0;
     // How fast the velocity changes when decelerating, in units per second
     double m_braking = 2;
 
@@ -74,7 +74,7 @@ class KeyboardController
     // When no throttle key is pressed, the velocity will change towards 0 at this rate, in units per second
     double m_throttle_gravity = 3;
 
-    double m_max_throttle = 0.35;
+    double m_max_throttle = 5.0;
 
     static constexpr size_t KEY_COUNT = 6;
     std::array<Keycode, KEY_COUNT> m_key_codes = { { Keycode::W, Keycode::A, Keycode::S, Keycode::D, Keycode::SPACE,

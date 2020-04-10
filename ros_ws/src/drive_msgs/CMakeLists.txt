@@ -19,6 +19,7 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp
 add_message_files(
   FILES
   drive_param.msg
+  gazebo_state_telemetry.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -26,7 +27,6 @@ generate_messages(
   DEPENDENCIES
   std_msgs
 )
-
 
 ###################################
 ## catkin specific configuration ##

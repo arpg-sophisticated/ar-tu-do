@@ -34,7 +34,7 @@
           </light>
 
   <include>
-    <uri>model://racecar_description/models/barca_track</uri>
+    <uri>model://barca_track</uri>
     <pose>-4 2 -.5 0 0 -1.57</pose>
     <name>barca_track</name>
   </include>
