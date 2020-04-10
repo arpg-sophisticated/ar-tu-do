@@ -4,18 +4,16 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Status1
         - /RobotModel1/Links1/left_wheel_back1
         - /RobotModel1/Links1/left_wheel_front1
-        - /Camera1/Visibility1
+        - /Camera (Left)1/Visibility1
         - /Imu1/Box properties1
         - /Imu1/Axes properties1
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
-        - /ZED (Point Cloud)1
       Splitter Ratio: 0.5305555462837219
-    Tree Height: 723
+    Tree Height: 795
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -35,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: LaserScan (Lidar)
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -153,9 +151,9 @@ Visualization Manager:
       Max Intensity: 0
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: LaserScan
+      Name: LaserScan (Lidar)
       Position Transformer: XYZ
-      Queue Size: 10
+      Queue Size: 2
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
@@ -165,21 +163,102 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: Intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4.973723888397217
+      Min Color: 0; 0; 0
+      Min Intensity: 0.40060657262802124
+      Name: LaserScan (Camera)
+      Position Transformer: XYZ
+      Queue Size: 2
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /scan_camera
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: false
+      Value: true
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
       Image Topic: /racer/camera1/image_raw
-      Name: Camera
+      Name: Camera (Left)
       Overlay Alpha: 0.5
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
       Value: true
       Visibility:
+        Camera (Depth): true
+        Camera (Right): true
         EmergencyStop: true
         Grid: true
         Imu: true
-        LaserScan: true
+        LaserScan (Camera): true
+        LaserScan (Lidar): true
+        RobotModel: true
+        Value: false
+        Wallfollowing: true
+        ZED (Depth Cloud): true
+        ZED (Point Cloud): true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /racer/camera1/image_raw
+      Name: Camera (Right)
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+      Visibility:
+        Camera (Depth): true
+        Camera (Left): true
+        EmergencyStop: true
+        Grid: true
+        Imu: true
+        LaserScan (Camera): true
+        LaserScan (Lidar): true
+        RobotModel: true
+        Value: false
+        Wallfollowing: true
+        ZED (Depth Cloud): true
+        ZED (Point Cloud): true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /racer/camera1/depth/image_raw
+      Name: Camera (Depth)
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+      Visibility:
+        Camera (Left): true
+        Camera (Right): true
+        EmergencyStop: true
+        Grid: true
+        Imu: true
+        LaserScan (Camera): true
+        LaserScan (Lidar): true
         RobotModel: true
         Value: false
         Wallfollowing: true
@@ -244,7 +323,7 @@ Visualization Manager:
       Decay Time: 0
       Depth Map Topic: /racer/camera1/depth/image_raw
       Depth Map Transport Hint: raw
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -255,14 +334,14 @@ Visualization Manager:
         Occlusion Time-Out: 30
         Value: false
       Position Transformer: XYZ
-      Queue Size: 5
+      Queue Size: 2
       Selectable: true
-      Size (Pixels): 3
-      Style: Flat Squares
+      Size (Pixels): 1
+      Style: Boxes
       Topic Filter: true
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -275,7 +354,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -292,7 +371,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -321,35 +400,39 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 7.269558906555176
+      Distance: 5.235725402832031
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.9351493120193481
-        Y: -0.3329565227031708
-        Z: 2.0073254108428955
+        X: 0.5365167856216431
+        Y: -0.3531646132469177
+        Z: 0.7078697681427002
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.10020311176776886
+      Pitch: 0.3347965478897095
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.7284164428710938
+      Yaw: 2.410221815109253
     Saved: ~
 Window Geometry:
-  Camera:
+  Camera (Depth):
+    collapsed: false
+  Camera (Left):
+    collapsed: false
+  Camera (Right):
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1443
+  Height: 2096
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a00000549fc020000000afb0000001200530065006c0065006300740069006f006e00000000280000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000310000000c900fffffffb0000000a00560069006500770073000000011f0000011e000000a400fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d0065007200610100000353000002330000001600ffffff000000010000010f00000357fc0200000002fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065000000000000000780000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000006930000054900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000388000007d6fc020000000cfb0000001200530065006c0065006300740069006f006e00000000280000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000358000000c900fffffffb0000000a00560069006500770073000000011f0000011e000000a400fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001a00430061006d00650072006100200028004c0065006600740029010000039b0000017c0000001600fffffffb0000001c00430061006d00650072006100200028005200690067006800740029010000051d000001790000001600fffffffb0000001c00430061006d00650072006100200028004400650070007400680029010000069c000001770000001600ffffff000000010000010f00000357fc0200000002fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065000000000000000780000002eb00fffffffb0000000800540069006d0065010000000000000450000000000000000000000b2f000007d600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -358,6 +441,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 2051
-  X: 1280
+  Width: 3773
+  X: 67
   Y: 27
