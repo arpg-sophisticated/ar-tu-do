@@ -7,6 +7,14 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 ![](doc/racing_example.gif "Racing with a wallfollowing algorithm")
 ![](doc/racing_example_real.gif "Racing with the real car in our lab")
 
+## Newsflash
+
+Important: Since we included the IMU, there are now 2 USB2Serial devices in the system. Please ensure that
+- VESC is always detected as ttyACM0
+- IMU as ttyACM1
+
+On Ubuntu 16.04. we used a file in /etc/udev/rules.d to ensure that, after update to 18.04. we didn't need that anymore as the system detects the devices by the order of the USB plugs on the hub.
+
 ## Features
 
 We provide several LIDAR based driving algorithms:
