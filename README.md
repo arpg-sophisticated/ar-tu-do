@@ -9,6 +9,14 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 
 ## Newsflash
 
+### Connector Monitor/Supply/Board
+
+These pictures show, how to connect these three parts correctly.
+
+| ![](doc/connector1.jpg "Connector Monitor") | ![](doc/connector1.jpg "Connector Supply") | ![](doc/connector3.jpg "Connector Board") |
+
+### USB2Serial
+
 Important: Since we included the IMU, there are now 2 USB2Serial devices in the system. Please ensure that
 - VESC is always detected as ttyACM0
 - IMU as ttyACM1
