@@ -13,7 +13,9 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 
 These pictures show, how to connect these three parts correctly.
 
-| ![](doc/connector1.jpg "Connector Monitor") | ![](doc/connector1.jpg "Connector Supply") | ![](doc/connector3.jpg "Connector Board") |
+![](doc/connector1.jpg "Connector Monitor")
+![](doc/connector2.jpg "Connector Supply")
+![](doc/connector3.jpg "Connector Board") |
 
 ### USB2Serial
 
