@@ -15,8 +15,11 @@ import numpy as np
 import os, rospkg
 from utilities import createDBVoxelArray
 import simulation_tools.reset_car as reset_car
+from simulation_tools.track import track
+from simulation_tools.reset_car import Point
 import queue
 import random
+
 
 rospack = rospkg.RosPack()
 
@@ -28,11 +31,34 @@ TOPIC_STATE_TELEMETRY = "/gazebo/state_telemetry"
 TOPIC_VOXEL = "/scan/voxels"
 
 voxel_resolution = 0.1
-reset_amount =100
+reset_amount =70
 
 last_state_telemetry_message = None
 
+def send_stop_message():
+    message = drive_param()
+    message.velocity = 0
+    message.angle = 0
+    drive_parameters_publisher.publish(message)
+
 def voxel_callback(voxel_message):
+    global wait_after_reset
+    global in_reset_mode
+    global on_training
+    if(in_reset_mode>1):
+        send_stop_message()
+        in_reset_mode -=1
+        print("."),
+        return
+    if(in_reset_mode==1):
+        reset_car_to_reset_point()
+        in_reset_mode -=1
+    if(wait_after_reset >0):
+        send_stop_message()
+        wait_after_reset -=1
+        return
+    if(on_training):
+        return
 
     check_for_training()
       
@@ -60,7 +86,6 @@ def voxel_callback(voxel_message):
     message.angle = (prediction[0,1]*angle_stdev)+angle_avg
 
     add_state_to_queue(voxel_arry,wheel_speed,message)
-
 
     global callbacks_since_reset
     callbacks_since_reset +=1
@@ -98,32 +123,49 @@ def load_model():
     #model.compile()
 
 def on_crash(crash_message):
-    reset_car_with_queue()
+    global in_reset_mode
+    if(in_reset_mode ==0 and wait_after_reset ==0):
+        in_reset_mode = 20
+        print("Waiting for reset "),
     
-def reset_car_with_queue():
+def reset_car_to_reset_point(clear_queue=True, mutate=True,to_start=False):
     global last_reset_time
     global failing_part
     global callbacks_since_reset
+    global farest_segment
+    global reset_point
+    global state_queue
+
+    if(reset_point is None):
+        reset_point = state_queue.get()[0]
+        farest_segment = get_position_segment()
     failing_part = True
     callbacks_since_reset =0
     #avoid multiple reset
     if((datetime.datetime.now()-last_reset_time).total_seconds()>1):
-        print("--------------reset car--------------")
-        reset_car.set_pose_from_get_model_state_response(state_queue.get()[0])
+        print("reset car")
+        send_stop_message()
+        if(to_start):
+            reset_car.reset()
+        else:
+            reset_car.set_pose_from_get_model_state_response(reset_point)
         last_reset_time=datetime.datetime.now()
-        with state_queue.mutex:
-            state_queue.queue.clear()
-        add_state_to_queue(None,None,None)
-        mutate_output_layer()
+        if(clear_queue):
+            with state_queue.mutex:
+                state_queue.queue.clear()
+        if(mutate):
+            mutate_output_layer()
+        global wait_after_reset
+        wait_after_reset=50
         
 def mutate_output_layer():
+    print('mutate output layer')
+
     global output_layer_weights
-    layers = model.layers
-    output_layer_weights = layers[-1].get_weights()[0]
-    output_layer_bias = layers[-1].get_weights()[1]
+    global output_layer_bias
 
     angle_manipulation = np.random.rand(output_layer_weights.shape[0]) #create random numpy array 0-1 (angle)
-    angle_manipulation= angle_manipulation - 0.5
+    angle_manipulation= (angle_manipulation - 0.5) / 2
     velocity_manipulation = np.zeros(output_layer_weights.shape[0]) # velocity
 
     manipulation = np.concatenate((velocity_manipulation,angle_manipulation),axis=0)
@@ -135,14 +177,25 @@ def mutate_output_layer():
 
 def check_for_training():
     global failing_part
-    # there was a part we failed at, but now we are driving for a while so we mastered the part
-    if(failing_part and callbacks_since_reset>=(reset_amount*1.5)):
-        print("--------------train from queue--------------")
-        #train_from_queue()
-        reset_car_with_queue()
-        model.layers[-1].set_weights(output_layer_weights)
-        train()
-        failing_part = False
+    global farest_segment
+    global output_layer_weights
+    global output_layer_bias
+    global reset_point
+    global failing_part
+   
+    if(failing_part and callbacks_since_reset>=(reset_amount*2)):
+        if(farest_segment < get_position_segment()):
+            print("------passed fail part------")
+            reset_car_to_reset_point(clear_queue=False,mutate=False,to_start=True)
+            model.layers[-1].set_weights([output_layer_weights,output_layer_bias])
+            train()
+            output_layer_weights = model.layers[-1].get_weights()[0]
+            output_layer_bias = model.layers[-1].get_weights()[1]
+            failing_part = False
+            reset_point = None
+        else:
+            print("-----too slow, reset!------")
+            reset_car_to_reset_point()
 
 def register_get_model_state():
     print("register get Model State")
@@ -151,22 +204,50 @@ def register_get_model_state():
     get_model_state = rospy.ServiceProxy(
         '/gazebo/get_model_state', GetModelState)
 
-#def add_recent_position_to_queue():    
-#    model_state_response = get_model_state('racer','')
-#    if(state_queue.full()):
-#        state_queue.get()
-#    state_queue.put(model_state_response)
+def train():
+    print("--------------train from queue--------------")
+    global on_training
+    on_training =True
+    global state_queue
+    state_list = list(state_queue.queue)
+
+    voxel_array_elements = [state[1] for state in state_list]
+    wheel_speed_elements = [state[2] for state in state_list]
+    message_elements = [[state[3].velocity,state[3].angle] for state in state_list]
+
+    voxel_array_array = np.squeeze(np.asarray(voxel_array_elements),axis =1)
+    wheel_speed_array = np.asarray(wheel_speed_elements)
+    message_array = np.asarray(message_elements)
+
+
+    model.compile(optimizer='adam',loss='mean_squared_error')
+    model.fit([voxel_array_array,wheel_speed_array], message_array, batch_size=8, epochs=10)
+
+    print("--------------training finished--------------")
+    on_training =False
+    with state_queue.mutex:
+        state_queue.queue.clear()
 
 def add_state_to_queue(voxel_arry,wheel_speed,message):
+    global state_queue
     model_state_response = get_model_state('racer','')
     if(state_queue.full()):
         state_queue.get()
     state_queue.put((model_state_response,voxel_arry,wheel_speed,message))
+    car_position =Point(model_state_response.pose.position.x,model_state_response.pose.position.y)
+
+    print(track.localize(car_position))
     
+def get_position_segment():
+    model_state_response = get_model_state('racer','')
+    return reset_car.localize(model_state_response.pose.position.x,model_state_response.pose.position.y).segment
+
 def init_reset_car():
     global state_queue
     global reset_point_count
     global last_reset_time
+    global reset_point
+    reset_point = None
     last_reset_time=datetime.datetime.now()
     state_queue = queue.Queue(maxsize=reset_amount) 
     register_get_model_state()
@@ -180,13 +261,25 @@ def init_rl():
     #dqn = rl.agents.dqn.DQNAgent(model=model, nb_actions=num_actions, memory=memory, nb_steps_warmup=10, target_model_update=1e-2, policy=policy)
    global failing_part
    global callbacks_since_reset
+   global farest_segment
+   global wait_after_reset
+   global in_reset_mode
+   global output_layer_weights
+   global output_layer_bias
+   global on_training
+   on_training = False
+   layers = model.layers
+   output_layer_weights = layers[-1].get_weights()[0]
+   output_layer_bias = layers[-1].get_weights()[1]
+   in_reset_mode =0
+   wait_after_reset =0
+   farest_segment = 0
    layers = model.layers
    output_layer_shape = layers[-1].get_weights()[0].shape
    print ("------------shape of output layer: "+str(output_layer_shape))
 
    callbacks_since_reset =0
    failing_part = False
-
 
 load_model()
 

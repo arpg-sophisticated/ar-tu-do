@@ -47,6 +47,8 @@ def reset(progress=0, angle=0, offset_from_center=0, forward=True):
         angle += math.pi
     set_pose(position.point, angle)
 
+def localize(x,y):
+    return track.localize(Point(x,y))
 
 def reset_random(max_angle=0, max_offset_from_center=0, forward=True):
     reset(random.random(), (random.random() * 2 - 1) * max_angle,
