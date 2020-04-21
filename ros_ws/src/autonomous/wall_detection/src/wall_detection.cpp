@@ -14,45 +14,56 @@ void WallDetection::wallDetection_callback(
   printf("Cloud: width = %d, height = %d\n", inputVoxels->width,
          inputVoxels->height);
 
-  std::map<int, std::vector<pcl::PointXYZ>> clustersUsed;
+  // std::map<int,std::vector<pcl::PointXYZ>> clustersUsed;
+
+  std::unordered_map<int, std::vector<pcl::PointXYZ> *> clustersUsed;
 
   for (size_t i = 0; i < inputVoxels->points.size(); i++) {
-    if (clustersUsed.find(inputVoxels->points[i].z) != clustersUsed.end()) {
-      for (auto itr = clustersUsed.find(i); itr != clustersUsed.end(); itr++) {
+    // if (clustersUsed.find(inputVoxels->points[i].z)!= clustersUsed.end())
+    if (clustersUsed.count(inputVoxels->points[i].z) > 0) {
+      // for (auto itr = clustersUsed.find(i); itr != clustersUsed.end(); itr++)
+      // {
+      //   std::cout << itr->first
+      //      << "\t" << itr->second->size() << '\n';
+      //   itr->second->push_back( pcl::PointXYZ(inputVoxels->points[i].x,
+      //       inputVoxels->points[i].y,inputVoxels->points[i].z));
 
-        std::cout << itr->first << "\t" << itr->second.size() << '\n';
+      //   std::cout << "Erster if Fall\n";
+      //   std::cout << "Der Liste wurde ein neues Element hinzugefügt und
+      //   beträgt nun die Läne: "<< itr->second.size() <<"\n";
 
-        itr->second.push_back(pcl::PointXYZ(inputVoxels->points[i].x,
-                                            inputVoxels->points[i].y,
-                                            inputVoxels->points[i].z));
+      // }
+      clustersUsed[inputVoxels->points[i].z]->push_back(
+          pcl::PointXYZ(inputVoxels->points[i].x, inputVoxels->points[i].y,
+                        inputVoxels->points[i].z));
+      std::cout << "Der Liste wurde ein neues Element hinzugefügt und beträgt "
+                   "nun die Läne: "
+                << clustersUsed[inputVoxels->points[i].z]->size() << "\n";
 
-        std::cout << "Erster if Fall\n";
-        std::cout << "Der Liste wurde ein neues Element hinzugefügt und "
-                     "beträgt nun die Läne: "
-                  << itr->second.size() << "\n";
-      }
     } else {
       std::cout << "Erster Add der Liste\n";
-      std::vector<pcl::PointXYZ> tmp;
-      tmp.push_back(pcl::PointXYZ(inputVoxels->points[i].x,
-                                  inputVoxels->points[i].y,
-                                  inputVoxels->points[i].z));
+      std::vector<pcl::PointXYZ> *tmp = new std::vector<pcl::PointXYZ>();
+      tmp->push_back(pcl::PointXYZ(inputVoxels->points[i].x,
+                                   inputVoxels->points[i].y,
+                                   inputVoxels->points[i].z));
       clustersUsed.insert({inputVoxels->points[i].z, tmp});
 
       std::cout << clustersUsed.size() << "\n";
     }
 
-    std::cout << "Punkt Nr. " << i << "\n";
-    // std::cout << inputVoxels->points[i].x << " : " <<
-    // inputVoxels->points[i].y <<"\n";
+    std::cout << "Punkt Nr. " << i << " --------- " << inputVoxels->points[i].x
+              << "|" << inputVoxels->points[i].y << "|"
+              << inputVoxels->points[i].z << "\n";
   }
 
-  std::cout << clustersUsed.size() << "\n";
+  std::cout << clustersUsed.size() << "mit "
+            << "\n";
 
-  for (size_t i = 0; i < clustersUsed.at(2).size(); i++) {
-    std::cout << clustersUsed.at(2)[0].x << "|" << clustersUsed.at(2)[0].y
-              << "|" << clustersUsed.at(2)[0].z << "\n";
-  }
+  // for (size_t i = 0; i < clustersUsed.at(2).size(); i++)
+  // {
+  //   std::cout << clustersUsed.at(2)[0].x << "|" << clustersUsed.at(2)[0].y <<
+  //   "|" << clustersUsed.at(2)[0].z <<"\n" ;
+  // }
 
   // BOOST_FOREACH (const pcl::PointXYZ& pt, inputVoxels->points)
   //    printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
