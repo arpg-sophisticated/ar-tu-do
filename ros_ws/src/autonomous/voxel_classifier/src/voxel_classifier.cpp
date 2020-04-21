@@ -32,6 +32,8 @@ void VoxelClassifier::voxel_callback(
   voxels.clear();
   float voxelResolution = 0.2f;
 
+  m_frame = voxelPointcloud->header.frame_id;
+
   for (size_t i = 0; i < voxelPointcloud->width; i++) {
     Voxel tmp;
     uint32_t tmp_score;
@@ -60,7 +62,7 @@ void VoxelClassifier::voxel_callback(
 
 void VoxelClassifier::cluster_publish() {
   PointCloud::Ptr msg(new PointCloud);
-  msg->header.frame_id = "some_tf_frame";
+  msg->header.frame_id = m_frame;
   msg->height = 1;
   msg->width = voxels.size();
   // msg->points.push_back (pcl::PointXYZ(1.0, 2.0, 3.0));

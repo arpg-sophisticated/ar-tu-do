@@ -25,7 +25,7 @@ private:
   RvizGeometryPublisher m_debug_geometry;
   ros::Publisher m_marker_publisher;
   ros::Publisher m_cluster_publisher;
-  const std::string m_frame;
+  std::string m_frame;
 
 public:
   VoxelClassifier();
