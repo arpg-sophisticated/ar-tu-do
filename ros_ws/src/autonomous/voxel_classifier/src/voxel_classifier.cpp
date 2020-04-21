@@ -8,6 +8,9 @@ VoxelClassifier::VoxelClassifier()
                        LIDAR_FRAME) {
   this->m_voxel_subscriber = m_node_handle.subscribe<sensor_msgs::PointCloud2>(
       TOPIC_VOXEL_, 1, &VoxelClassifier::voxel_callback, this);
+
+  this->m_cluster_publisher =
+      m_node_handle.advertise<PointCloud>(TOPIC_CLUSTER_, 1);
 }
 /*std::vector<Point> VoxelClassifier::transformPoints(){
   vector<Point> r_points;
@@ -52,6 +55,22 @@ void VoxelClassifier::voxel_callback(
   this->m_debug_geometry.drawVoxels(0, voxels, voxelResolution, voxelResolution,
                                     1 / 10.0f);
   printResults(voxels, voxels.size());
+  cluster_publish();
+}
+
+void VoxelClassifier::cluster_publish() {
+  PointCloud::Ptr msg(new PointCloud);
+  msg->header.frame_id = "some_tf_frame";
+  msg->height = 1;
+  msg->width = voxels.size();
+  // msg->points.push_back (pcl::PointXYZ(1.0, 2.0, 3.0));
+
+  for (size_t i = 0; i < voxels.size(); i++) {
+    msg->points.push_back(
+        pcl::PointXYZ(voxels[i].x, voxels[i].y, voxels[i].clusterID));
+  }
+  pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
+  m_cluster_publisher.publish(msg);
 }
 
 void VoxelClassifier::printResults(vector<Voxel> &points, int num_points) {
