@@ -15,8 +15,7 @@ void WallDetection::wallDetection_callback(
   frameID = inputVoxels->header.frame_id;
 
   float voxelResolution = 0.2f;
-  this->m_debug_geometry.drawVoxels(0, inputVoxels, voxelResolution,
-                                    voxelResolution, 1 / 10.0f);
+
   printf("Cloud: width = %d, height = %d\n", inputVoxels->width,
          inputVoxels->height);
 
@@ -59,6 +58,10 @@ void WallDetection::wallDetection_callback(
             << "\n";
 
   publish(clustersUsed[test.first], clustersUsed[test.second]);
+
+  // this->m_debug_geometry.drawVoxels(0, (clustersUsed[test.first]*) ,
+  // voxelResolution,
+  //                                   voxelResolution, 1 / 10.0f);
   // for (size_t i = 0; i < clustersUsed.at(2).size(); i++)
   // {
   //   std::cout << clustersUsed.at(2)[0].x << "|" << clustersUsed.at(2)[0].y <<
@@ -71,29 +74,36 @@ void WallDetection::wallDetection_callback(
 
 void WallDetection::publish(std::vector<pcl::PointXYZ> *wallLeft,
                             std::vector<pcl::PointXYZ> *wallRight) {
-  pcl::PointCloud<pcl::PointXYZI>::Ptr msg(new pcl::PointCloud<pcl::PointXYZI>);
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr msg(
+      new pcl::PointCloud<pcl::PointXYZRGB>);
   msg->header.frame_id = frameID;
   msg->height = 1;
   msg->width = wallLeft->size() + wallRight->size();
   // msg->points.push_back (pcl::PointXYZ(1.0, 2.0, 3.0));
 
   for (size_t i = 0; i < wallLeft->size(); i++) {
-    pcl::PointXYZI tmp;
+    pcl::PointXYZRGB tmp;
     tmp.x = (*wallLeft)[i].x;
     tmp.y = (*wallLeft)[i].y;
     tmp.z = 0.0;
-    tmp.intensity = 1;
+    tmp.r = 255;
+    tmp.b = 0;
+    tmp.g = 0;
+    // tmp.intensity = 1;
 
     msg->points.push_back(tmp);
 
     // pcl::PointXYZI(wallLeft[i]., voxels[i].y, voxels[i].clusterID));
   }
   for (size_t i = 0; i < wallRight->size(); i++) {
-    pcl::PointXYZI tmp;
+    pcl::PointXYZRGB tmp;
     tmp.x = (*wallRight)[i].x;
     tmp.y = (*wallRight)[i].y;
     tmp.z = 0.0;
-    tmp.intensity = 2;
+    tmp.r = 0;
+    tmp.g = 255;
+    tmp.b = 0;
+    // tmp.intensity = 0;
 
     msg->points.push_back(tmp);
 
