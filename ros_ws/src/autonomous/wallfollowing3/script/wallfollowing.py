@@ -623,7 +623,7 @@ last_scan = None
 
 def laser_callback(scan_message):
     global last_scan # total_scan_count, total_scan_time
-    t_start = time.time()
+    # t_start = time.time()
     scan_time = scan_message.header.stamp.to_sec()
     if last_scan is not None and abs(scan_time - last_scan) > 0.0001 and scan_time > last_scan:  # nopep8
         delta_time = scan_time - last_scan

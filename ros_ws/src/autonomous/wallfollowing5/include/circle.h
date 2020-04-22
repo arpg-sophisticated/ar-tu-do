@@ -20,15 +20,11 @@ class Circle
         m_radius = radius;
     };
 
-    double getRadius()
-    {
-        return m_radius;
-    }
-    Point getCenter()
-    {
-        return m_center;
-    }
-    std::vector<Point> create_array(double start_angle, double end_angle, int sample_count = 50);
+    double getRadius() { return m_radius; }
+    Point getCenter() { return m_center; }
+
+    std::vector<Point>& create_array(double start_angle, double end_angle, int sample_count = 50);
     double get_angle(Point point);
-    Point get_closest_point(Point point);
+    Point& get_closest_point(Point& point);
+    
 };
