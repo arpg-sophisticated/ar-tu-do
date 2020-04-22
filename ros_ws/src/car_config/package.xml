@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package format="2">
-  <name>car_control</name>
+  <name>car_config</name>
   <version>0.0.0</version>
-  <description>The "car_control" package relays the drive commands to the physical car.</description>
+  <description>The car_config package describes for example physical properties of the car.</description>
+
 
   <!-- Maintainer -->
   <maintainer email="f110@ls12.cs.uni-dortmund.de">PG F1/10</maintainer>
@@ -14,11 +15,6 @@
   <!-- Dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>drive_msgs</depend>
   <depend>roscpp</depend>
-  <depend>rospy</depend>
   <depend>std_msgs</depend>
-  <depend>vesc_sim</depend>
-  <depend>car_config</depend>
-  <depend>rviz_imu_plugin</depend>
 </package>

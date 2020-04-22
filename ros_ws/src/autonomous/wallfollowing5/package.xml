@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package format="2">
-  <name>wallfollowing4</name>
+  <name>wallfollowing5</name>
   <version>0.0.0</version>
   <description>Wallfollowing implemented in Python based on modelling walls as circles</description>
 
@@ -18,6 +18,7 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
-  <depend>dynamic_reconfigure</depend>
+  <depend>sensor_msgs</depend>
+  <depend>car_config</depend>
 
 </package>

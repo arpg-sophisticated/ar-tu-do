@@ -1,4 +1,5 @@
 #pragma once
+#include "physical_properties.h"
 #include <car_config.h>
 #include <drive_msgs/drive_param.h>
 #include <ros/ros.h>

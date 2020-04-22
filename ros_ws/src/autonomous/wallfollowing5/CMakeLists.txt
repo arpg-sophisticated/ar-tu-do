@@ -1,24 +1,21 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(wallfollowing4)
+project(wallfollowing5)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
   drive_msgs
   roscpp
   rospy
   std_msgs
+  car_config
 )
 
-generate_dynamic_reconfigure_options(
-  cfg/wallfollowing4.cfg
-)
 
 ## Errors and Warnings
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp -Wdouble-promotion -Wformat -Wnonnull -Wmain -Wswitch-bool -Winvalid-memory-model -Wunknown-pragmas -Warray-bounds -Wfloat-equal -Wlogical-op -Wpacked ")
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp -Wformat -Wnonnull -Wmain -Wswitch-bool -Winvalid-memory-model -Wunknown-pragmas -Warray-bounds -Wfloat-equal -Wlogical-op -Wpacked ")
 # -Wpedantic cant be used because of ROS
 
 ###################################
@@ -27,7 +24,7 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp
 
 ## Declare things to be passed to dependent projects
 catkin_package(
-  CATKIN_DEPENDS dynamic_reconfigure drive_msgs roscpp rospy std_msgs
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config
 )
 
 
@@ -40,3 +37,14 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+
+add_executable(wallfollowing   
+  src/wallfollowing.cpp
+  src/speed_controller.cpp
+  src/rviz_geometry.cpp
+  src/circle.cpp
+)
+
+target_link_libraries(wallfollowing ${catkin_LIBRARIES})
+add_dependencies(wallfollowing ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
