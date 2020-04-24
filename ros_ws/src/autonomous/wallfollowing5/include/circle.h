@@ -1,12 +1,7 @@
 #pragma once
+#include "geometric_math.h"
 #include <cmath>
 #include <vector>
-
-struct Point
-{
-    double x;
-    double y;
-};
 
 class Circle
 {
@@ -20,11 +15,17 @@ class Circle
         m_radius = radius;
     };
 
-    double getRadius() { return m_radius; }
-    Point getCenter() { return m_center; }
+    double getRadius()
+    {
+        return m_radius;
+    }
+    Point getCenter()
+    {
+        return m_center;
+    }
 
-    std::vector<Point>& create_array(double start_angle, double end_angle, int sample_count = 50);
-    double get_angle(Point point);
-    Point& get_closest_point(Point& point);
-    
+    std::vector<Point>& createArray(double start_angle, double end_angle, int sample_count = 50);
+    double getAngle(Point point);
+    Point getClosestPoint(Point& point);
+    static Circle hyperFit(std::vector<Point> points);
 };

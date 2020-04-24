@@ -1,6 +1,7 @@
 #pragma once
 
 #include "circle.h"
+#include "geometric_math.h"
 #include <ros/ros.h>
 #include <vector>
 #include <visualization_msgs/Marker.h>
@@ -26,7 +27,7 @@ class RvizGeometry
     public:
     RvizGeometry();
 
-    void showLineInRviz(int id, std::vector<Point> points, ColorRGBA color, float line_width = 0.02);
-    void showCircleInRviz(int id, Circle circle, std::vector<Point> wall, ColorRGBA color);
-    void delete_marker(int id);
+    void showLineInRviz(int id, std::vector<Point>& points, ColorRGBA color, float line_width = 0.02);
+    void showCircleInRviz(int id, Circle& circle, std::vector<Point>& wall, ColorRGBA color);
+    void deleteMarker(int id);
 };

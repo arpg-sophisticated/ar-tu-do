@@ -4,15 +4,26 @@ Wallfollowing::Wallfollowing()
 {
     m_laserscan_subscriber =
         m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &Wallfollowing::laserScanCallback, this);
-    m_drive_parameters_publisher =
-        m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
+    m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
 }
 
-void Wallfollowing::followWalls(ProcessedTrack& processedTrack)
+Point& Wallfollowing::determinePredictedCarPosition(ProcessedTrack& processedTrack)
 {
 }
 
-void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
+Point& Wallfollowing::determineTargetCarPosition(ProcessedTrack& processedTrack)
+{
+}
+
+void Wallfollowing::followWalls(ProcessedTrack& processedTrack, double delta_time)
+{
+}
+
+void Wallfollowing::handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time)
+{
+}
+
+std::vector<Point>& Wallfollowing::getScanAsCartesian(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
 }
 
@@ -26,11 +37,13 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
-    double scan_time = laserscan.header.stamp.toSec();
+    std::vector<Point> pointcloud;
+    double scan_time = laserscan->header.stamp.toSec();
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
     {
         double delta_time = scan_time - m_last_scan_time;
-        handle_scan(scan_message, delta_time);
+        // getScanAsCartesian();
+        // handleLaserPointcloud(scan_message, delta_time);
     }
     m_last_scan_time = scan_time;
 }

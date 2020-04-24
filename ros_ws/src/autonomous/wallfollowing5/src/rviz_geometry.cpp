@@ -5,7 +5,7 @@ RvizGeometry::RvizGeometry()
     m_marker_publisher = m_node_handle.advertise<visualization_msgs::Marker>(RVIZ_TOPIC, 1);
 }
 
-void RvizGeometry::showLineInRviz(int id, std::vector<Point> points, ColorRGBA color, float line_width)
+void RvizGeometry::showLineInRviz(int id, std::vector<Point>& points, ColorRGBA color, float line_width)
 {
     visualization_msgs::Marker message;
     message.header.frame_id = RVIZ_FRAME;
@@ -35,16 +35,16 @@ void RvizGeometry::showLineInRviz(int id, std::vector<Point> points, ColorRGBA c
     m_marker_publisher.publish(message);
 }
 
-void RvizGeometry::showCircleInRviz(int id, Circle circle, std::vector<Point> wall, ColorRGBA color)
+void RvizGeometry::showCircleInRviz(int id, Circle& circle, std::vector<Point>& wall, ColorRGBA color)
 {
 
-    double start_angle = circle.get_angle(wall.front());
-    double end_angle = circle.get_angle(wall.back());
-    std::vector<Point> points = circle.create_array(start_angle, end_angle);
+    double start_angle = circle.getAngle(wall.front());
+    double end_angle = circle.getAngle(wall.back());
+    std::vector<Point> points = circle.createArray(start_angle, end_angle);
     showLineInRviz(id, points, color);
 }
 
-void RvizGeometry::delete_marker(int id)
+void RvizGeometry::deleteMarker(int id)
 {
     visualization_msgs::Marker message;
     message.header.frame_id = RVIZ_FRAME;

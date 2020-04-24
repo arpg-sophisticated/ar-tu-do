@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   car_config
+  vesc_sim
 )
 
 
@@ -24,7 +25,7 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp
 
 ## Declare things to be passed to dependent projects
 catkin_package(
-  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim
 )
 
 
@@ -46,6 +47,8 @@ add_executable(wallfollowing
   src/circle.cpp
   src/pid_controller.cpp
   src/process_track.cpp
+  src/geometric_math.cpp
+  src/steering_controller.cpp
 )
 
 target_link_libraries(wallfollowing ${catkin_LIBRARIES})

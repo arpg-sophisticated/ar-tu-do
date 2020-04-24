@@ -1,6 +1,6 @@
 #include "circle.h"
 
-std::vector<Point> Circle::create_array(double start_angle, double end_angle, int sample_count)
+std::vector<Point>& Circle::createArray(double start_angle, double end_angle, int sample_count)
 {
     std::vector<Point> points;
     double angle_step = std::abs(end_angle - start_angle) / sample_count;
@@ -12,15 +12,20 @@ std::vector<Point> Circle::create_array(double start_angle, double end_angle, in
     return points;
 }
 
-double Circle::get_angle(Point point)
+double Circle::getAngle(Point point)
 {
     return std::atan2(point.x - m_center.x, point.y - m_center.y);
 }
 
-Point Circle::get_closest_point(Point point)
+Point Circle::getClosestPoint(Point& point)
 {
     double x = point.x - m_center.x;
     double y = point.y - m_center.y;
     double distance = std::sqrt(x * x + y * y);
     return Point{ m_center.x + x * m_radius / distance, m_center.y + y * m_radius / distance };
+}
+
+Circle Circle::hyperFit(std::vector<Point> points)
+{
+    return Circle({ 0, 0 }, 1);
 }

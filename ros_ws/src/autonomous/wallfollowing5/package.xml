@@ -19,6 +19,7 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>vesc_sim</depend>
   <depend>car_config</depend>
 
 </package>
