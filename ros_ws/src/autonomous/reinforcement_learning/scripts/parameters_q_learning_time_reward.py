@@ -9,8 +9,9 @@ import rospy
 from rospkg import RosPack
 
 # General parameters
-ACTIONS = [(0.3, 2.0), (0.3, 0.0), (0, 0.0), (-0.3, 0.0), (-0.3, 2.0)]
+ACTIONS = [(0.15, 2.0), (0.15, 0.0), (0, 0.0),(0, 2.0), (-0.15, 0.0), (-0.15, 2.0)]
 ACTION_COUNT = len(ACTIONS)
+NULL_ACTION_INDEX =2
 
 START_POINTS = [0,10,20,30,40]
 
@@ -20,7 +21,7 @@ LASER_SAMPLE_COUNT = 8
 
 
 MODEL_FILENAME = os.path.join(RosPack().get_path(
-    "reinforcement_learning"), "q_learning.to")
+    "reinforcement_learning"), "q_learning_time_reward.to")
 
 # Training parameters
 

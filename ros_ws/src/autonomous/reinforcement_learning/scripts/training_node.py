@@ -104,7 +104,9 @@ class TrainingNode(ReinforcementLearningNode):
         self.episode_length = 0
         self.cumulative_reward = 0
 
-        if self.episode_count % 50 == 0:
+        print("Episode count: "+ str(self.episode_count))
+
+        if self.episode_count % 5 == 0:
             self.policy.save()
             rospy.loginfo("Model parameters saved.")
 

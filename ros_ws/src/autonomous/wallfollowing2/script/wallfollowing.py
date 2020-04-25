@@ -16,7 +16,7 @@ import numpy as np
 from dynamic_reconfigure.server import Server
 from wallfollowing2.cfg import wallfollowing2Config
 
-TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
+TOPIC_DRIVE_PARAMETERS_WF = "/input/drive_param/autonomousWF"
 TOPIC_LASER_SCAN = "/scan"
 
 last_speed = 0
@@ -221,7 +221,7 @@ pid = PIDController(1, 1, 1)
 
 rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 drive_parameters_publisher = rospy.Publisher(
-    TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
+    TOPIC_DRIVE_PARAMETERS_WF, drive_param, queue_size=1)
 
 Server(wallfollowing2Config, dynamic_configuration_callback)
 

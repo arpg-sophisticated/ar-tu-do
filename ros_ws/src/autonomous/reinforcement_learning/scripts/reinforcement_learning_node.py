@@ -21,7 +21,7 @@ class ReinforcementLearningNode():
         self.actions = actions
         self.drive_parameters_publisher = rospy.Publisher(
             TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
-        rospy.Subscriber(TOPIC_SCAN, LaserScan, self.on_receive_laser_scan)
+        rospy.Subscriber(TOPIC_SCAN, LaserScan, self.on_receive_laser_scan,queue_size=1)
 
     def perform_action(self, action_index):
         if action_index < 0 or action_index >= len(self.actions):

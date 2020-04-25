@@ -40,41 +40,84 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.lastWFmessage = None
         self.target_segment = None
 
+        self.sleep_after_crash =0
+        self.sleep_after_reset =0
+        self.sleep_after_reached_target=0
+        
+        self.reached_target = False
+
+        self.car_crashed =False
+
         rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, drive_param, self.wallfollowing_drive_param_callback)
 
         if CONTINUE:
             self.policy.load()
 
     def wallfollowing_drive_param_callback(self,message):
+        if(self.lastLasermessage is None):
+            return
         self.lastWFmessage = message
 
-    # override implemented function of traning_node
-    def on_receive_laser_scan(self, message):
+        if(self.sleeping()):
+            self.perform_action(NULL_ACTION_INDEX,False)
+            print("."),
+            return
         if(self.lastWFmessage == None):
             return
 
-        new_state = self.convert_laser_message_to_tensor(message)
+        new_state = self.convert_laser_message_to_tensor(self.lastLasermessage)
 
-        if self.state is not None:
-            self.on_complete_step(self.state, self.action, new_state)
         if self.is_terminal_step:
-            self.episode_memory.clear()
-            self.reset_car_to_rnd_trackpoint()
-        if self.reached_target_segment():
-            playsound('/home/marvin/Downloads/woosh.mp3')            
+            print("-- TERMINAL STEP --")
             self.assign_rewards_and_to_memory()
             self.replay()
-            self.reset_car_to_rnd_trackpoint()
+            self.episode_memory.clear()
+            self.reset_car_to_rnd_segment()
+            return
+        
+        if self.state is not None:
+            self.on_complete_step(self.state, self.action, new_state)
+        if self.reached_target_segment():
+            playsound('/home/marvin/Downloads/woosh_trimmed.mp3')  
+            print("-- REACHED TARGET --")    
+            self.perform_action(NULL_ACTION_INDEX,False)
+            self.sleep_after_reached_target=100
+            self.reached_target = True
+            self.is_terminal_step = True   
         else:
             self.state = new_state
             self.action = self.select_action(new_state)
-            self.perform_action(self.action)
+            self.perform_action(self.action,True)
             self.episode_length += 1
             self.total_step_count += 1
 
+
+
+    def sleeping(self):
+        sleep = self.sleep_after_reached_target+self.sleep_after_crash+self.sleep_after_reset
+        sleeping=sleep>0
+        if(sleeping):
+            if(self.sleep_after_crash>0):
+                self.sleep_after_crash -=1
+            if(self.sleep_after_reached_target>0):
+                self.sleep_after_reached_target -=1
+            if(self.sleep_after_reset>0):
+                self.sleep_after_reset -=1
+        return sleeping
+
+    # override implemented function of traning_node
+    def on_receive_laser_scan(self, message):
+        self.lastLasermessage=message
+
     def reached_target_segment(self):
+        print("Position: "+str(self.car_position))
+        print("------ "+str(track.get_closest_segment(self.car_position))+" ------")
         if(self.target_segment is not None):
-            return track.localize(self.car_position).segment==self.target_segment
+            tmp_target_segment = self.target_segment #target_segment at the beginning of the round could be smaller then current segment
+            current_segment = track.get_closest_segment(self.car_position)
+            if(self.target_segment<10 and current_segment>=10):
+                tmp_target_segment=tmp_target_segment+track.size
+            return current_segment >=tmp_target_segment
         return False
 
     def assign_rewards_and_to_memory(self):
@@ -84,18 +127,24 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.cumulative_reward += reward
         self.episode_memory.clear()
 
-    def reset_car_to_rnd_trackpoint(self):
-        self.drive_forward = random.random() > 0.5
-        start_segment = START_POINTS[random.randint(0,4)]
-        self.target_segment = (start_segment+10)%50
-        reset_car.reset_to_trackpoint(start_segment)
+    def reset_car_to_rnd_segment(self):
+        print("--RESET--")
+        self.sleep_after_reset = 100
+        self.drive_forward = random.random() > 0.5 #TODO: bisher nicht benutzt
+        start_segment =  START_POINTS[random.randint(0,4)]
+        self.target_segment = (start_segment+10)%(track.size)
+        self.car_position=reset_car.reset_to_segment(start_segment)
+        print("---- start_segment = "+str(start_segment)+ ",target_segment = "+str(self.target_segment)+" ----")
         self.is_terminal_step = False
         self.state = None
         if self.episode_length != 0:
+            print("Episode Length: "+ str(self.episode_length))
             self.on_complete_episode()
         self.episode_starttime= datetime.now()
+        self.reached_target = False
 
     def replay(self): #TODO: this was done every step, now we are doing it after an episode, raise stepsize of update?
+        print("---- replay (memory size: "+ str(len(self.memory))+")----")
         if len(self.memory) < 500 or len(self.memory) < BATCH_SIZE:
             return
 
@@ -142,21 +191,30 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             return output.max(0)[1].item()
 
     # override implemented function of ReinforcementLearningNode
-    def perform_action(self, action_index):
+    def perform_action(self, action_index, addWFMessage):
         if action_index < 0 or action_index >= len(self.actions):
             raise Exception("Invalid action: " + str(action_index))
 
         angle, velocity = self.actions[action_index]
         message = drive_param()
         # add WFdrivemessages
-        message.angle = angle +self.lastWFmessage.angle
-        message.velocity = velocity+ self.lastWFmessage.velocity
+        if(addWFMessage):
+            message.angle = angle +self.lastWFmessage.angle
+            message.velocity = velocity+ self.lastWFmessage.velocity
+        else:
+            message.angle = angle
+            message.velocity = velocity
         self.drive_parameters_publisher.publish(message)
 
     def get_reward(self):
         print("Episode Starttime: "+str(self.episode_starttime))
         print("Episode Endtime: "+str(datetime.now()))
-        return 2
+        if(self.reached_target):
+            print("reward 2")
+            return 2
+        else:
+            print("reward 0")
+            return 0
 
     def get_episode_summary(self):
         return TrainingNode.get_episode_summary(self) + ' ' \
@@ -167,7 +225,13 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     def on_complete_step(self, state, action, next_state):
         self.episode_memory.append((state, action, next_state, self.is_terminal_step))  # nopep8
-        self.replay()
+
+    def on_crash(self,_):
+        if(not self.is_terminal_step):
+            print("--CRASH--")
+            self.perform_action(NULL_ACTION_INDEX,False)
+            self.is_terminal_step = True
+            self.sleep_after_crash =100
 
 
 rospy.init_node('q_learning_training', anonymous=True)

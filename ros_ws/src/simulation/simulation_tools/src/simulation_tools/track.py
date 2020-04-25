@@ -50,13 +50,21 @@ class TrackPosition():
 class Track():
     def __init__(self, points):
         self.points = points[:-1, :]
+        print("Points: ")
+        print(self.points)
         self.size = points.shape[0] - 1
         relative = points[1:, :] - points[:-1, :]
+        print("relatives: ")
+        print(relative)
         self.segment_length = np.linalg.norm(relative, axis=1)
         self.length = np.sum(self.segment_length)
         self.forward = relative / self.segment_length[:, np.newaxis]
+        print("forward: ")
+        print(self.forward)
         self.right = np.array(
             [self.forward[:, 1], -self.forward[:, 0]]).transpose()
+        print("right: ")
+        print(self.right)
         self.cumulative_distance = np.zeros(points.shape[0])
         self.cumulative_distance[1:] = np.cumsum(self.segment_length)
 
@@ -69,6 +77,11 @@ class Track():
         distances[(y < 0) | (y > self.segment_length)] = float("Inf")
         segment = np.argmin(distances)
         return TrackPosition(segment, x[segment], y[segment], point, self)
+
+    def get_closest_segment(self, point):
+        local = np.array([point.x, point.y]) - self.points
+        distances = np.sqrt(np.multiply(local[:,0],local[:,0]) + np.multiply(local[:,1],local[:,1]))
+        return np.argmin(distances)
 
     def get_position(self, total_distance, distance_to_center=0):
         ''' Returns a TrackPosition object based on the on-track distance from the start
@@ -83,6 +96,15 @@ class Track():
             segment_distance + self.right[segment, 1] * distance_to_center
         return TrackPosition(segment, distance_to_center,  # nopep8
             segment_distance, Point(x, y), self)  # nopep8
+
+    def get_position_from_segment(self, segment, distance_to_center=0):
+        ''' Returns a TrackPosition object based on the on-track distance from the start
+        line and the distance to the center of the track. '''
+        
+        x = self.points[segment, 0]
+        y = self.points[segment, 1]
+        return TrackPosition(segment, distance_to_center,  # nopep8
+            0, Point(x, y), self)  # nopep8
 
 
 world_name = rospy.get_param("world_name")
