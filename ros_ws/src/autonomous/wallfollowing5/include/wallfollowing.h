@@ -2,6 +2,8 @@
 
 #include "car_config.h"
 #include "circle.h"
+#include "config.h"
+#include "geometric_math.h"
 #include "physical_properties.h"
 #include "process_track.h"
 #include "sensor_msgs/LaserScan.h"
@@ -28,10 +30,10 @@ class Wallfollowing
     public:
     Wallfollowing();
 
-    Point& determinePredictedCarPosition(ProcessedTrack& processedTrack);
-    Point& determineTargetCarPosition(ProcessedTrack& processedTrack);
+    Point determinePredictedCarPosition(ProcessedTrack& processedTrack);
+    Point determineTargetCarPosition(ProcessedTrack& processedTrack);
     void followWalls(ProcessedTrack& processedTrack, double delta_time);
-    std::vector<Point>& getScanAsCartesian(const sensor_msgs::LaserScan::ConstPtr& laserscan);
+    void getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan);
     void handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time);
 
     void publishDriveParameters(double angle, double velocity);

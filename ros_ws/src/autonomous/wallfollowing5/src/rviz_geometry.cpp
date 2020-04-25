@@ -11,7 +11,7 @@ void RvizGeometry::showLineInRviz(int id, std::vector<Point>& points, ColorRGBA 
     message.header.frame_id = RVIZ_FRAME;
     message.header.stamp = ros::Time::now();
     message.ns = RVIZ_NAMESPACE;
-    message.type = visualization_msgs::Marker::ADD;
+    message.action = visualization_msgs::Marker::ADD;
     message.pose.orientation.w = 1.0;
 
     message.id = id;
@@ -25,8 +25,8 @@ void RvizGeometry::showLineInRviz(int id, std::vector<Point>& points, ColorRGBA 
     for (auto& point : points)
     {
         geometry_msgs::Point p;
-        p.x = point.x;
-        p.y = point.y;
+        p.y = -point.x;
+        p.x = point.y;
         p.z = 0;
 
         message.points.push_back(p);
@@ -37,11 +37,8 @@ void RvizGeometry::showLineInRviz(int id, std::vector<Point>& points, ColorRGBA 
 
 void RvizGeometry::showCircleInRviz(int id, Circle& circle, std::vector<Point>& wall, ColorRGBA color)
 {
-
-    double start_angle = circle.getAngle(wall.front());
-    double end_angle = circle.getAngle(wall.back());
-    std::vector<Point> points = circle.createArray(start_angle, end_angle);
-    showLineInRviz(id, points, color);
+    std::vector<Point> points = circle.createArray(wall, 50);
+    showLineInRviz(id, points, color, 0.02);
 }
 
 void RvizGeometry::deleteMarker(int id)

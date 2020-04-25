@@ -10,5 +10,9 @@ struct Point
 
 namespace GeometricFunctions
 {
+    const double PI = std::acos(-1);
+
     double distance(Point& a, Point& b);
-};
+
+    double toRadians(double degrees);
+}; // namespace GeometricFunctions

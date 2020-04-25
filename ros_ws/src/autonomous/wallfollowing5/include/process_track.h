@@ -1,6 +1,7 @@
 #pragma once
 
 #include "circle.h"
+#include "circle_fit.h"
 #include "geometric_math.h"
 #include "rviz_geometry.h"
 #include <functional>

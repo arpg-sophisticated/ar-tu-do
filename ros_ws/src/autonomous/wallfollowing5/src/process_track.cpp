@@ -78,14 +78,14 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
     unsigned int wall_split_index = findLeftRightBorder(pointcloud);
     for (unsigned int i = 0; i < wall_split_index; i++)
     {
-        storage->left_wall.push_back(pointcloud[i]);
+        storage->right_wall.push_back(pointcloud[i]);
     }
     for (unsigned int i = wall_split_index; i < pointcloud.size(); i++)
     {
-        storage->right_wall.push_back(pointcloud[i]);
+        storage->left_wall.push_back(pointcloud[i]);
     }
-    storage->left_circle = Circle::hyperFit(storage->left_wall);
-    storage->right_circle = Circle::hyperFit(storage->right_wall);
+    storage->left_circle = CircleFit::hyperFit(storage->left_wall);
+    storage->right_circle = CircleFit::hyperFit(storage->right_wall);
 
     storage->car_position = { 0, 0 };
     // With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the
@@ -105,7 +105,7 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
             // if len(right_wall) == 0:
             //     right_wall = upper_wall[0: 1]
             // try:
-            storage->right_circle = Circle::hyperFit(storage->right_wall);
+            storage->right_circle = CircleFit::hyperFit(storage->right_wall);
             // except:
             //     print right_wall, upper_wall
             storage->curve_type = CURVE_TYPE_LEFT;
@@ -124,7 +124,7 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
             // if len(left_wall) == 0:
             //     left_wall = upper_wall[-2: -1]
             // try:
-            storage->left_circle = Circle::hyperFit(storage->left_wall);
+            storage->left_circle = CircleFit::hyperFit(storage->left_wall);
             // except:
             //     print left_wall, upper_wall
             storage->curve_type = CURVE_TYPE_RIGHT;
@@ -138,7 +138,7 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)
     {
         double remaining_distance = storage->curve_entry.y;
-        storage->upper_circle = Circle::hyperFit(storage->upper_wall);
+        storage->upper_circle = CircleFit::hyperFit(storage->upper_wall);
         std::vector<Point> curve_entry_line = { Point{ -2, remaining_distance }, Point{ 2, remaining_distance } };
         m_rviz_geometry.showLineInRviz(6, curve_entry_line, ColorRGBA{ 0.2, 0.5, 0.8, 1 });
         m_rviz_geometry.showCircleInRviz(7, storage->upper_circle, storage->upper_wall, ColorRGBA{ 0, 1, 1, 1 });

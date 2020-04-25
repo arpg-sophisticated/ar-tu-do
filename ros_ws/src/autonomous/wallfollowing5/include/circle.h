@@ -15,6 +15,12 @@ class Circle
         m_radius = radius;
     };
 
+    Circle()
+    {
+        m_center = Point{ 0, 0 };
+        m_radius = 0;
+    };
+
     double getRadius()
     {
         return m_radius;
@@ -24,8 +30,7 @@ class Circle
         return m_center;
     }
 
-    std::vector<Point>& createArray(double start_angle, double end_angle, int sample_count = 50);
-    double getAngle(Point point);
+    std::vector<Point> createArray(std::vector<Point>& pointcloud, int sample_count = 50);
+    double getAngle(Point& point);
     Point getClosestPoint(Point& point);
-    static Circle hyperFit(std::vector<Point> points);
 };

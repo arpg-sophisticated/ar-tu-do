@@ -45,6 +45,7 @@ add_executable(wallfollowing
   src/speed_controller.cpp
   src/rviz_geometry.cpp
   src/circle.cpp
+  src/circle_fit.cpp
   src/pid_controller.cpp
   src/process_track.cpp
   src/geometric_math.cpp
