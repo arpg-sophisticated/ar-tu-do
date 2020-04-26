@@ -34,11 +34,6 @@ class ProcessTrack
 {
     RvizGeometry m_rviz_geometry;
 
-    public:
-    ProcessTrack()
-    {
-    }
-
     private:
     std::vector<Point> cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select);
     unsigned int findLeftRightBorder(std::vector<Point>& pointcloud);
@@ -47,5 +42,5 @@ class ProcessTrack
     Point getCurveEntry(std::vector<Point>& wall);
 
     public:
-    void processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);
+    bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);
 };

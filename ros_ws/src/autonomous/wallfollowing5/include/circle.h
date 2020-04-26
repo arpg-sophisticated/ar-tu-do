@@ -33,4 +33,6 @@ class Circle
     std::vector<Point> createArray(std::vector<Point>& pointcloud, int sample_count = 50);
     double getAngle(Point& point);
     Point getClosestPoint(Point& point);
+    std::vector<Point> calcIntersections(Circle& circle);
+    std::vector<Point> calcTangents(Point& outside_point);
 };

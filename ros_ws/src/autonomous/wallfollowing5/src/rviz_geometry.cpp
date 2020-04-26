@@ -37,7 +37,7 @@ void RvizGeometry::showLineInRviz(int id, std::vector<Point>& points, ColorRGBA 
 
 void RvizGeometry::showCircleInRviz(int id, Circle& circle, std::vector<Point>& wall, ColorRGBA color)
 {
-    std::vector<Point> points = circle.createArray(wall, 50);
+    std::vector<Point> points = circle.createArray(wall, 100);
     showLineInRviz(id, points, color, 0.02);
 }
 

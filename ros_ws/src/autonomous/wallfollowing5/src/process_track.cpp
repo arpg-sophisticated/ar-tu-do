@@ -73,7 +73,7 @@ Point ProcessTrack::getCurveEntry(std::vector<Point>& wall)
     return max_y_point;
 }
 
-void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud)
+bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud)
 {
     unsigned int wall_split_index = findLeftRightBorder(pointcloud);
     for (unsigned int i = 0; i < wall_split_index; i++)
@@ -83,6 +83,10 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
     for (unsigned int i = wall_split_index; i < pointcloud.size(); i++)
     {
         storage->left_wall.push_back(pointcloud[i]);
+    }
+    if (!CircleFit::pointcloudIsValid(storage->left_wall) || !CircleFit::pointcloudIsValid(storage->right_wall))
+    {
+        return false;
     }
     storage->left_circle = CircleFit::hyperFit(storage->left_wall);
     storage->right_circle = CircleFit::hyperFit(storage->right_wall);
@@ -135,10 +139,23 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
         storage->curve_type = CURVE_TYPE_STRAIGHT;
     }
 
+    if (!CircleFit::pointcloudIsValid(storage->left_wall) || !CircleFit::pointcloudIsValid(storage->right_wall))
+    {
+        return false;
+    }
+
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)
     {
         double remaining_distance = storage->curve_entry.y;
-        storage->upper_circle = CircleFit::hyperFit(storage->upper_wall);
+        if (CircleFit::pointcloudIsValid(storage->upper_wall))
+        {
+            storage->upper_circle = CircleFit::hyperFit(storage->upper_wall);
+        }
+        else
+        {
+            storage->curve_type = CURVE_TYPE_STRAIGHT;
+        }
+
         std::vector<Point> curve_entry_line = { Point{ -2, remaining_distance }, Point{ 2, remaining_distance } };
         m_rviz_geometry.showLineInRviz(6, curve_entry_line, ColorRGBA{ 0.2, 0.5, 0.8, 1 });
         m_rviz_geometry.showCircleInRviz(7, storage->upper_circle, storage->upper_wall, ColorRGBA{ 0, 1, 1, 1 });
@@ -151,4 +168,6 @@ void ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
 
     m_rviz_geometry.showCircleInRviz(0, storage->left_circle, storage->left_wall, ColorRGBA{ 0.5, 1, 1, 1 });
     m_rviz_geometry.showCircleInRviz(1, storage->right_circle, storage->right_wall, ColorRGBA{ 0, 1, 1, 1 });
+
+    return true;
 }

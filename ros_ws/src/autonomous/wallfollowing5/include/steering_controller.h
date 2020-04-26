@@ -2,6 +2,7 @@
 #include "geometric_math.h"
 #include "pid_controller.h"
 #include "rviz_geometry.h"
+#include <cmath>
 
 class SteeringController
 {

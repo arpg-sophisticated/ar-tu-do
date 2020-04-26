@@ -6,6 +6,8 @@ namespace Config
     static const float SAFETY_MARGIN = 0.25;
     // The size of the part of the laser scan that should be used by the algorithm, in degrees.
     static const float USABLE_LASER_RANGE = 220;
+
+    static const bool USE_CIRCLE_TANGENTS = true;
 } // namespace Config
 
 namespace PID

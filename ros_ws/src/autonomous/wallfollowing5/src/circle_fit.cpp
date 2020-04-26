@@ -24,6 +24,11 @@ real CircleFit::calcSigma(std::vector<Point>& pointcloud, real center_x, real ce
     return std::sqrt(sum / pointcloud.size());
 }
 
+bool CircleFit::pointcloudIsValid(std::vector<Point>& pointcloud)
+{
+    return pointcloud.size() >= 3;
+}
+
 Circle CircleFit::hyperFit(std::vector<Point>& pointcloud, int iter_max)
 {
     unsigned long n = pointcloud.size();

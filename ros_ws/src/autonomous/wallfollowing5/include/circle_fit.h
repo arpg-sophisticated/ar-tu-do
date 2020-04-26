@@ -15,5 +15,6 @@ class CircleFit
     static real calcSigma(std::vector<Point>& pointcloud, real center_x, real center_y, real radius);
 
     public:
+    static bool pointcloudIsValid(std::vector<Point>& pointcloud);
     static Circle hyperFit(std::vector<Point>& pointcloud, int iter_max = 99);
 };

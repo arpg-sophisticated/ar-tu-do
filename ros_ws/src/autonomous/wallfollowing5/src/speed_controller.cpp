@@ -37,19 +37,19 @@ double SpeedController::calcBrakingDistance(double distance, double target_speed
         (2 * PhysicalProperties::ACCELERATION + 2 * PhysicalProperties::ACCELERATION);
 }
 
-double SpeedController::calcSpeed(Circle* left_circle, Circle* right_circle, Circle* upper_circle,
-                                  double remaining_distance)
+double SpeedController::calcSpeed(ProcessedTrack& processed_track)
 {
-    double radius = min(left_circle->getRadius(), right_circle->getRadius());
+    double remaining_distance = processed_track.curve_entry.y;
+    double radius = min(processed_track.left_circle.getRadius(), processed_track.right_circle.getRadius());
     double speed = calcMaxCurveSpeed(radius);
-    if (remaining_distance >= 0 && upper_circle != nullptr)
+    if (processed_track.curve_type != CURVE_TYPE_STRAIGHT)
     {
         double safety_margin = 0.25;
         if (remaining_distance < 5)
         {
             safety_margin = 0.05 * remaining_distance;
         }
-        double target_speed = calcMaxCurveSpeed(upper_circle->getRadius());
+        double target_speed = calcMaxCurveSpeed(processed_track.upper_circle.getRadius());
         double braking_distance = calcBrakingDistance(remaining_distance, target_speed) + safety_margin;
         if (remaining_distance > braking_distance)
         {
@@ -60,6 +60,7 @@ double SpeedController::calcSpeed(Circle* left_circle, Circle* right_circle, Cir
             speed = target_speed;
         }
     }
+    m_last_determined_speed = speed;
     return speed;
 }
 
