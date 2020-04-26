@@ -178,6 +178,10 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
     m_last_scan_time = scan_time;
 }
 
+void Wallfollowing::clusterCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
+{
+}
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "wallfollowing");
