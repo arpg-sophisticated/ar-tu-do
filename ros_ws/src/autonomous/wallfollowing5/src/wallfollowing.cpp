@@ -178,7 +178,7 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
     m_last_scan_time = scan_time;
 }
 
-void Wallfollowing::clusterCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
+void Wallfollowing::clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster)
 {
 }
 

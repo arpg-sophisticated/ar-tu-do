@@ -8,6 +8,7 @@
 #include "process_track.h"
 #include "rviz_geometry.h"
 #include "sensor_msgs/LaserScan.h"
+#include "sensor_msgs/PointCloud2.h"
 #include "speed_controller.h"
 #include "steering_controller.h"
 #include <cmath>
@@ -42,4 +43,5 @@ class Wallfollowing
 
     void publishDriveParameters(double angle, double velocity);
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan);
+    void clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster);
 };
