@@ -29,6 +29,5 @@
   <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
   <include file="$(find reinforcement_learning)/launch/drive_q_learning_time_reward.launch">
-    <!--<arg name="plot_window" value="$(arg plot_window)"/>-->
   </include>
 </launch>
