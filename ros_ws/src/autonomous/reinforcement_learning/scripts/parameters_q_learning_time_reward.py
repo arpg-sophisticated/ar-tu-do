@@ -27,7 +27,7 @@ MODEL_FILENAME = os.path.join(RosPack().get_path(
 
 # Start by loading previously trained parameters.
 # If this is False, training will start from scratch
-CONTINUE = False
+CONTINUE = True
 
 DISCOUNT_FACTOR = 0.99  # aka gamma
 
@@ -43,7 +43,6 @@ EPISODE_MEMORY_SIZE = 5000
 MAX_EPISODE_TIME_IN_SECONDS = 10
 
 BATCH_SIZE = 128
-#LEARNING_RATE = 0.0001
 LEARNING_RATE = 0.0001
 
 # Probability to select a random episode starts at EPS_START
