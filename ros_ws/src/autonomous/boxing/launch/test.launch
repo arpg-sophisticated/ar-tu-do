@@ -43,7 +43,6 @@
     <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
     <include file="$(find boxing)/launch/boxing.launch">
-	  <arg name="voxel_size" value="0.2" />
       <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
       <arg name="topic_voxels" value="/scan/voxels" />
     

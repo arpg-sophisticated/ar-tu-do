@@ -1,5 +1,4 @@
 <launch>
-    <arg name="voxel_size" />
     <arg name="topic_input_cloud" />
     <arg name="topic_voxels" />
     <arg name="filter_by_score_enabled" />
@@ -9,7 +8,6 @@
     <arg name="sor_stddev_mul_thresh" />
 
     <node name="boxing" pkg="boxing" type="boxing">
-        <param name="voxel_size" type="double" value="$(arg voxel_size)" />
         <param name="topic_input_cloud" type="string" value="$(arg topic_input_cloud)" />
         <param name="topic_voxels" type="string" value="$(arg topic_voxels)" />
 

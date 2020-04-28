@@ -1,9 +1,13 @@
 #pragma once
+
 #include "rviz_geometry_publisher.h"
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>
 #include <unordered_map>
+
+#include <dynamic_reconfigure/server.h>
+#include <boxing/boxingConfig.h>
 
 constexpr const char* TOPIC_INPUT_POINTCLOUD = "/scan/lidar/cartesian";
 constexpr const char* TOPIC_VISUALIZATION = "/wall_separation_visualization";
@@ -21,6 +25,9 @@ class Boxing
     sensor_msgs::PointCloud2 voxelsCloud;
 
     RvizGeometryPublisher m_debug_geometry;
+    dynamic_reconfigure::Server<boxing::boxingConfig> m_dyn_cfg_server;
+
+    float m_voxel_size;
 
     public:
     Boxing();
