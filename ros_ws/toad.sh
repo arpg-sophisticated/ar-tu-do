@@ -275,6 +275,21 @@ case $1 in
                     sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
                 fi
             ;;
+            record)
+                case $3 in
+                    camera)
+                        BAGNAME="camera-$(date +%s).bag"
+                        mkdir -p rosbags > /dev/null 2>&1
+                        echo "This will record camera data to file $BAGNAME"
+                        source $PATHROS
+                        source $PATHSETUP
+                        rosbag record -O rosbags/$BAGNAME /camera/left/camera_info /camera/right/camera_info /camera/left/image_raw/compressed /camera/right/image_raw/compressed /tf
+                    ;;
+                    *)
+                        toadHelpCar
+                    ;;
+                esac
+            ;;
             control)
                 source $PATHROS
                 source $PATHSETUP
@@ -352,7 +367,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                       	 sudo apt-get upgrade -y
+			fi
                     else
                         echo "Skipping"
                     fi
@@ -440,7 +457,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                          sudo apt-get upgrade -y
+			fi
                     fi
                     RESULT=""
                     if [[ $CI == 'yes' ]]; then
