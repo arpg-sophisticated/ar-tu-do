@@ -42,14 +42,14 @@ Boxing::Boxing()
     this->m_input_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicLaserScan, 1, &Boxing::input_callback, this);
     this->m_voxel_publisher = m_node_handle.advertise<sensor_msgs::PointCloud2>(topicVoxel, 1, true);
+
+    m_dyn_cfg_server.setCallback([&](boxing::boxingConfig& cfg, uint32_t) {
+        m_voxel_size = cfg.voxel_size;
+    });
 }
 
 void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
 {
-    double voxelResolution;
-    if (!this->m_private_node_handle.getParamCached("voxel_size", voxelResolution))
-        voxelResolution = 0.2;
-
     int meanK;
     if (!this->m_private_node_handle.getParamCached("sor_mean_k", meanK))
         meanK = 2;
@@ -90,9 +90,9 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
     for (size_t i = 0; i < output_cloud->points.size(); i++)
     {
         pcl::PointXYZ& point = output_cloud->at(i);
-        float x = point.x - remainderf(point.x, voxelResolution);
-        float y = point.y - remainderf(point.y, voxelResolution);
-        float z = point.z - remainderf(point.z, voxelResolution);
+        float x = point.x - remainderf(point.x, m_voxel_size);
+        float y = point.y - remainderf(point.y, m_voxel_size);
+        float z = point.z - remainderf(point.z, m_voxel_size);
 
         // search the point we want to increment
         bool found = false;
