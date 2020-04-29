@@ -53,6 +53,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
             raise Exception("Invalid action: " + str(action_index))
 
         angle, velocity = self.actions[action_index]
+        print(str(angle)+", "+ str(velocity))
         message = drive_param()
         # add WFdrivemessages
         if(addWFMessage):

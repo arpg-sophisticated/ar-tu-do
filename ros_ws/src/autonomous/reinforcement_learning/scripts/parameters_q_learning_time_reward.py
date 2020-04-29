@@ -49,7 +49,7 @@ LEARNING_RATE = 0.0001
 # and reaches EPS_END once EPS_DECAY episodes are completed.
 EPS_START = 1.0
 EPS_END = 0.3
-EPS_DECAY = 10000
+EPS_DECAY = 100000
 
 
 class NeuralQEstimator(nn.Module):
