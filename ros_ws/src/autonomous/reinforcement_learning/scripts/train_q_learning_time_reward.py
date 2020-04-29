@@ -87,6 +87,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.replay()
             self.episode_memory.clear()
             self.reset_car_to_segment(random.randint(0,4))
+            #self.reset_car_to_segment(1)
             return
         
         if self.state is not None:
@@ -230,7 +231,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             math.exp(-1. * self.total_step_count / EPS_DECAY)
 
     def select_action(self, state):
-        use_epsilon_greedy = self.episode_count % 2 == 0
+        use_epsilon_greedy = self.episode_count % 4 > 0
         if use_epsilon_greedy and random.random() < self.get_epsilon_greedy_threshold():
             return random.randrange(ACTION_COUNT)
 
@@ -250,11 +251,12 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         message = drive_param()
         # add WFdrivemessages
         if(addWFMessage):
-            message.angle = angle +self.lastWFmessage.angle
-            message.velocity = velocity+ self.lastWFmessage.velocity
+            message.angle = angle + self.lastWFmessage.angle
+            message.velocity = velocity + self.lastWFmessage.velocity
         else:
             message.angle = angle
             message.velocity = velocity
+        print(str(angle)+", "+ str(velocity))
         self.drive_parameters_publisher.publish(message)
 
     def get_reward(self):
@@ -266,18 +268,19 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("episode time: " +str(episode_time))
 
             time_difference = wallfollowing_episode_time - episode_time
+            print("----------------------------DIFFERENCE "+ str(time_difference)+ " -----------------------" )
 
-
-
-            reward =  0.2 +((1+time_difference)**2)-1
-
+            reward =  (((1+time_difference-0.15)**3)-1)/10.0
+            if(reward<=-1):
+                reward=0
             print("reward "+str(reward))
             return reward
         else:
-            print("reward -2")
-            return -2
+            print("reward 0")
+            return 0
 
     def get_episode_summary(self):
+        return
         return TrainingNode.get_episode_summary(self) + ' ' \
             + ("memory: {0:d} / {1:d}, ".format(len(self.memory), MEMORY_SIZE) if len(self.memory) < MEMORY_SIZE else "") \
             + "ε-greedy: " + str(int(self.get_epsilon_greedy_threshold() * 100)) + "% random, " \
