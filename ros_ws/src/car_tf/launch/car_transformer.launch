@@ -3,14 +3,17 @@
 <!-- 
 Launches all necessary nodes that transform various frames
 -->
-
+    <arg name="topic_input" default="/scan" />
+    <arg name="topic_output" default="/scan/lidar/cartesian" />
     <!-- tf_laserscan_to_pointcloud node -->
     <node
       respawn="true"
       pkg="car_tf"
       type="laserscan_transformer"
-      name="laserscan_transformer"
-      output="screen" >
+      name="$(anon laserscan_transformer)"
+        output="screen" >
+        <param name="topic_input" type="string" value="$(arg topic_input)" />
+        <param name="topic_output" type="string" value="$(arg topic_output)" />
     </node>
 	
 </launch>

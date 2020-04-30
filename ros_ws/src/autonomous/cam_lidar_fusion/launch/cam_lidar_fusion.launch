@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!--
+        Launches all necessary nodes that transform various frames
+    -->
+    <arg name="topic_input_cam" default="/scan/cam/cartesian" />
+    <arg name="topic_input_lidar" default="/scan/lidar/cartesian" />
+    <arg name="topic_output_fused" default="/scan/fusion/cartesian" />
+        <!-- tf_laserscan_to_pointcloud node -->
+    <node
+        respawn="true"
+        pkg="cam_lidar_fusion"
+        type="node"
+        name="$(anon cam_lidar_fusion_node)"
+        output="screen" >
+    <param name="topic_input_cam" type="string" value="$(arg topic_input_cam)" />
+    <param name="topic_input_lidar" type="string" value="$(arg topic_input_lidar)" />
+    <param name="topic_output_fused" type="string" value="$(arg topic_output_fused)" />
+</node>
+
+</launch>
