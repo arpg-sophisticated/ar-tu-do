@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <unordered_map>
 
-#include <dynamic_reconfigure/server.h>
 #include <boxing/boxingConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 constexpr const char* TOPIC_INPUT_POINTCLOUD = "/scan/lidar/cartesian";
 constexpr const char* TOPIC_VISUALIZATION = "/wall_separation_visualization";
@@ -28,6 +28,13 @@ class Boxing
     dynamic_reconfigure::Server<boxing::boxingConfig> m_dyn_cfg_server;
 
     float m_voxel_size;
+
+    bool m_filter_by_min_score_enabled;
+    float m_filter_by_min_score;
+
+    bool m_sor_enabled;
+    float m_sor_mean_k;
+    float m_sor_stddev_mul_thresh;
 
     public:
     Boxing();
