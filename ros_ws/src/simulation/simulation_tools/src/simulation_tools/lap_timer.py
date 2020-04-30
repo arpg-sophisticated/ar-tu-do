@@ -47,17 +47,17 @@ class Timer():
             if self.next_checkpoint >= len(self.checkpoints):
                 self.next_checkpoint = 0
             if self.next_checkpoint == 1:
-                if  not self.firstround:
+                if not self.firstround:
                     self.pass_checkpoint(self.next_checkpoint)
                     self.complete_lap()
-                self.start_lap()          
+                self.start_lap()
             else:
                 self.pass_checkpoint(self.next_checkpoint)
 
     def start_lap(self):
         self.firstround = False
         rospy.loginfo("Lap started (" + self.name + ")")
-        self.start = rospy.Time.now()  
+        self.start = rospy.Time.now()
         self.checkpoint_start_time = self.start
 
     def complete_lap(self):
@@ -65,7 +65,8 @@ class Timer():
         duration = time - self.start
         self.history.append(duration)
         if len(self.history) == 1:
-            rospy.loginfo("Lap " + str(len(self.history)) + " (" + self.name + "): " + format_duration(duration))
+            rospy.loginfo("Lap " + str(len(self.history)) +
+                          " (" + self.name + "): " + format_duration(duration))
         else:
             average = rospy.Duration(sum([item.to_sec() for item in self.history]) / len(self.history))  # nopep8
             rospy.loginfo("Lap " + str(len(self.history)) + " (" + self.name + "): " +  # nopep8
@@ -76,13 +77,18 @@ class Timer():
     def pass_checkpoint(self, next_checkpoint):
         checkpoint_time = rospy.Time.now()
         checkpoint_duration = checkpoint_time - self.checkpoint_start_time
-        checkpoint_label = str((self.next_checkpoint-1)%len(self.checkpoints))
+        checkpoint_label = str((self.next_checkpoint - 1) %
+                               len(self.checkpoints))
         if checkpoint_label == "0":
             checkpoint_label = str(len(self.checkpoints))
 
-
-        rospy.loginfo("checkpoint " + checkpoint_label + ": " + format_duration(checkpoint_duration))
+        rospy.loginfo(
+            "checkpoint " +
+            checkpoint_label +
+            ": " +
+            format_duration(checkpoint_duration))
         self.checkpoint_start_time = checkpoint_time
+
 
 world_name = rospy.get_param('world_name')
 if world_name not in [
@@ -107,14 +113,14 @@ if world_name == 'racetrack_decorated_2_big':
         area.center = Point(area.center.x * 2.5, area.center.y * 2.5)
         area.extents = Point(area.extents.x * 2.5, area.extents.y * 2.5)
 
-#Timer for forward track
+# Timer for forward track
 forward_track_timer = Timer("forward", (
     FINISH_LINE_2,
     CHECKPOINT_1,
     CHECKPOINT_2,
     CHECKPOINT_3))
 
-#Timer for backward track
+# Timer for backward track
 reverse_track_timer = Timer("reverse", (
     FINISH_LINE_1,
     CHECKPOINT_3,
@@ -129,7 +135,7 @@ def model_state_callback(message):
     # update Timer
     position = Point(message.pose[1].position.x, message.pose[1].position.y)
     forward_track_timer.update(position)
-    #reverse_track_timer.update(position)
+    # reverse_track_timer.update(position)
 
 
 rospy.init_node('lap_timer', anonymous=True)
