@@ -38,7 +38,7 @@
     <!--<include file="./launch/zed.launch"/>-->
 
     <!-- laserscan from kinect -->
-    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" >
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" respawn="true">
         <param name="scan_height" value="5"/> 
         <param name="scan_time" value="0.0333"/>  
         <param name="range_min" value="0.3"/>  
