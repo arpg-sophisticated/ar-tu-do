@@ -45,22 +45,16 @@ Boxing::Boxing()
 
     m_dyn_cfg_server.setCallback([&](boxing::boxingConfig& cfg, uint32_t) {
         m_voxel_size = cfg.voxel_size;
+        m_filter_by_min_score_enabled = cfg.m_filter_by_min_score_enabled;
+        m_filter_by_min_score = cfg.filter_by_min_score;
+        m_sor_enabled = cfg.sor_enabled;
+        m_sor_mean_k = cfg.sor_mean_k;
+        m_sor_stddev_mul_thresh = cfg.sor_stddev_mul_thresh;
     });
 }
 
 void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
 {
-    int meanK;
-    if (!this->m_private_node_handle.getParamCached("sor_mean_k", meanK))
-        meanK = 2;
-
-    double stddevMulThresh;
-    if (!this->m_private_node_handle.getParamCached("sor_stddev_mul_thresh", stddevMulThresh))
-        stddevMulThresh = 3.0;
-
-    bool removeOutliers;
-    if (!this->m_private_node_handle.getParamCached("sor_enabled", removeOutliers))
-        removeOutliers = false;
 
     // Container for original & filtered data
     pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -69,16 +63,16 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
     pcl::fromROSMsg(*pointCloud, *(inputCloud));
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sor_ptr(new pcl::PointCloud<pcl::PointXYZ>);
-    if (removeOutliers)
+    if (m_sor_enabled)
     {
         pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
         sor.setInputCloud(inputCloud);
-        sor.setMeanK(meanK);
-        sor.setStddevMulThresh(stddevMulThresh);
+        sor.setMeanK(m_sor_mean_k);
+        sor.setStddevMulThresh(m_sor_stddev_mul_thresh);
         sor.filter(*cloud_sor_ptr);
     }
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud = removeOutliers ? cloud_sor_ptr : inputCloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud = m_sor_enabled ? cloud_sor_ptr : inputCloud;
 
     // now quantize this cloud for our system. this could probably also be implemented as a proper filter
 
@@ -132,21 +126,13 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
         quantized_cloud->points[i].intensity = quantized_cloud->points[i].intensity / largest_intensity;
     }
 
-    double minimum_score;
-    if (!this->m_private_node_handle.getParamCached("filter_by_score_minimum_score", minimum_score))
-        minimum_score = 0.5;
-
-    bool filter_by_score;
-    if (!this->m_private_node_handle.getParamCached("filter_by_score_enabled", filter_by_score))
-        filter_by_score = false;
-
-    if (filter_by_score)
+    if (m_filter_by_min_score_enabled)
     {
         pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
         pcl::ExtractIndices<pcl::PointXYZI> extract;
         for (size_t i = 0; i < quantized_cloud->points.size(); i++)
         {
-            if (quantized_cloud->points[i].intensity < (float)minimum_score) // e.g. remove all pts below zAvg
+            if (quantized_cloud->points[i].intensity < m_filter_by_min_score) // e.g. remove all pts below zAvg
             {
                 inliers->indices.push_back(i);
             }
