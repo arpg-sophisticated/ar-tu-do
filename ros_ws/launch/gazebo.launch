@@ -31,11 +31,14 @@
         <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
     </include>
     
+    <!-- transform laserscan to cartesian -->
+    <include file="$(find car_tf)/launch/car_transformer.launch" />
+
     <!-- zed camera launch file -->
     <!--<include file="./launch/zed.launch"/>-->
 
     <!-- laserscan from kinect -->
-    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" >
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" respawn="true">
         <param name="scan_height" value="5"/> 
         <param name="scan_time" value="0.0333"/>  
         <param name="range_min" value="0.3"/>  
@@ -43,7 +46,34 @@
         <remap from="scan" to="scan_camera"/>
         <param name="output_frame_id" value="laser"/>
         <remap from="image" to="/racer/camera1/depth/image_raw"/>
-    </node>
+    </node> <!-- we convert this laserscan back to a pointcloud for easier merging -->
+    <include file="$(find car_tf)/launch/car_transformer.launch">
+        <arg name="topic_input" value="/scan_camera" />
+        <arg name="topic_output" value="/scan/cam/cartesian" />
+    </include>
+    <!-- why the hassle you may ask...
+         the depthimage_to_laserscan package offers a lot of options which are really useful for our case.
+         if it turns out that this conversion is to computationally intensive, we have to find another way
+         e.g. directly use the cameras pointcloud. we may have to do that in the future anyways...
+        -->
+    <include file="$(find cam_lidar_fusion)/launch/cam_lidar_fusion.launch">
+        <arg name="topic_input_cam" value="/scan/cam/cartesian"/>
+        <arg name="topic_input_lidar" value="/scan/lidar/cartesian"/>
+        <arg name="topic_output_fused" value="/scan/fusion/cartesian"/>
+    </include>
+    
+    <include file="$(find boxing)/launch/boxing.launch">
+        <arg name="voxel_size" value="0.2" />
+        <arg name="topic_input_cloud" value="/scan/fusion/cartesian" />
+        <arg name="topic_voxels" value="/scan/voxels" />
+ 
+        <arg name="filter_by_score_enabled" value="true" />
+        <arg name="filter_by_score_minimum_score" value="0.005" />
+ 
+        <arg name="sor_enabled" value="false" />
+        <arg name="sor_mean_k" value="2" />
+        <arg name="sor_stddev_mul_thresh" value="3.0" />
+    </include>
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
 
@@ -64,21 +94,6 @@
     </include>
 
     <include file="$(find imu_velocity)/launch/car_imu_velocity.launch" />
-
-    <include file="$(find boxing)/launch/boxing.launch">
-        <arg name="voxel_size" value="0.2" />
-        <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
-        <arg name="topic_voxels" value="/scan/voxels" />
- 
-        <arg name="filter_by_score_enabled" value="true" />
-        <arg name="filter_by_score_minimum_score" value="0.005" />
- 
-        <arg name="sor_enabled" value="false" />
-        <arg name="sor_mean_k" value="2" />
-        <arg name="sor_stddev_mul_thresh" value="3.0" />
-    </include>
- 
-    <include file="$(find car_tf)/launch/car_transformer.launch" />
 
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
     </node>
