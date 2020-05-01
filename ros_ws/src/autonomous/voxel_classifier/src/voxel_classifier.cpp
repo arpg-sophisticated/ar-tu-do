@@ -4,11 +4,21 @@
 #define EPSILON (0.47 * 0.47)
 
 VoxelClassifier::VoxelClassifier()
+    : m_private_node_handle("~")
 {
-    this->m_voxel_subscriber =
-        m_node_handle.subscribe<sensor_msgs::PointCloud2>(TOPIC_VOXEL_, 1, &VoxelClassifier::voxel_callback, this);
+    std::string topicVoxels;
+    std::string topicClusters;
 
-    this->m_cluster_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_CLUSTER_, 1);
+    if (!this->m_private_node_handle.getParamCached("topic_input_voxels", topicVoxels))
+        topicVoxels = TOPIC_VOXEL_;
+
+    if (!this->m_private_node_handle.getParamCached("topic_output_clusters", topicClusters))
+        topicClusters = TOPIC_CLUSTER_;
+
+    this->m_voxel_subscriber =
+        m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicVoxels, 1, &VoxelClassifier::voxel_callback, this);
+
+    this->m_cluster_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicClusters, 1);
 }
 
 void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& voxelPointcloud)

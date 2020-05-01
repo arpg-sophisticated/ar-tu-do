@@ -12,13 +12,12 @@ typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 constexpr const char* TOPIC_VOXEL_ = "/scan/voxels";
 constexpr const char* TOPIC_CLUSTER_ = "/scan/cluster";
-constexpr const char* TOPIC_VISUALIZATION_Cluster = "/wall_separation_visualization_cluster";
-constexpr const char* LIDAR_FRAME = "laser";
 
 class VoxelClassifier
 {
     private:
     ros::NodeHandle m_node_handle;
+    ros::NodeHandle m_private_node_handle;
     ros::Subscriber m_voxel_subscriber;
     ros::Publisher m_marker_publisher;
     ros::Publisher m_cluster_publisher;

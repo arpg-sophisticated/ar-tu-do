@@ -18,6 +18,8 @@ class WallDetection
 {
     private:
     ros::NodeHandle m_node_handle;
+    ros::NodeHandle m_private_node_handle;
+
     ros::Subscriber m_voxel_subscriber;
     ros::Publisher m_wall_publisher;
     ros::Publisher m_obstacles_publisher;

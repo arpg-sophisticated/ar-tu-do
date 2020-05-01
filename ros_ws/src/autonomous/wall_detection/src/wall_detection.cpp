@@ -1,14 +1,28 @@
 #include "wall_detection.h"
 
 WallDetection::WallDetection()
+    : m_private_node_handle("~")
 {
+    std::string topicClusters;
+    std::string topicWalls;
+    std::string topicObstacles;
+
+    if (!this->m_private_node_handle.getParamCached("topic_input_clusters", topicClusters))
+        topicClusters = TOPIC_VOXEL_;
+
+    if (!this->m_private_node_handle.getParamCached("topic_output_walls", topicWalls))
+        topicWalls = TOPIC_WALLS_;
+
+    if (!this->m_private_node_handle.getParamCached("topic_output_obstacles", topicObstacles))
+        topicObstacles = topicObstacles;
+
     this->m_voxel_subscriber =
-        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_VOXEL_, 1,
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZI>>(topicClusters, 1,
                                                                  &WallDetection::wallDetection_callback, this);
 
-    this->m_wall_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_WALLS_, 1);
+    this->m_wall_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicWalls, 1);
 
-    this->m_obstacles_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_OBSTACLES_, 1);
+    this->m_obstacles_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicObstacles, 1);
 }
 
 void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& inputVoxels)
