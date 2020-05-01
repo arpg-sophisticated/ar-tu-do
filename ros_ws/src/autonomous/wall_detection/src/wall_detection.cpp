@@ -17,8 +17,6 @@ void WallDetection::wallDetection_callback(
 
   frameID = inputVoxels->header.frame_id;
 
-  float voxelResolution = 0.2f;
-
   printf("Cloud: width = %d, height = %d\n", inputVoxels->width,
          inputVoxels->height);
 
@@ -39,12 +37,9 @@ void WallDetection::wallDetection_callback(
 
     } else {
       // std::cout << "Erster Add der Liste\n";
-      // std::vector<pcl::PointXYZI> *tmp = new std::vector<pcl::PointXYZ>();
-      // tmp->push_back(pcl::PointXYZ(inputVoxels->points[i].x,
-      //                              inputVoxels->points[i].y,
-      //                              inputVoxels->points[i].z));
-      clustersUsed.insert(
-          {inputVoxels->points[i].intensity, inputVoxels->points[i]});
+      std::vector<pcl::PointXYZI> *tmp = new std::vector<pcl::PointXYZI>();
+      tmp->push_back(inputVoxels->points[i]);
+      clustersUsed.insert({inputVoxels->points[i].intensity, tmp});
 
       std::cout << clustersUsed.size() << "\n";
     }
@@ -83,7 +78,7 @@ void WallDetection::publishObstacles(
   for (auto itr = mapClusters.begin(); itr != mapClusters.end(); ++itr) {
     if (itr->first != wallIDs.first || itr->first != wallIDs.second) {
       for (size_t i = 0; i < itr->second->size(); i++) {
-        msg->push_back(itr->second[i]);
+        msg->push_back((*itr->second)[i]);
       }
     }
 
