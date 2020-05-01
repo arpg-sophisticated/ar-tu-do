@@ -34,6 +34,7 @@ private:
 
 public:
   WallDetection();
-  void wallDetection_callback(const PointCloud::ConstPtr &inputVoxels);
+  void wallDetection_callback(
+      const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &inputVoxels);
   PointCloud pointCloudOfID(const PointCloud::ConstPtr &inputVoxels, int ID);
 };

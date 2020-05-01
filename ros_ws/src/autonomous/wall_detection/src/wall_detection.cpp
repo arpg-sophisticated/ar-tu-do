@@ -1,8 +1,9 @@
 #include "wall_detection.h"
 
 WallDetection::WallDetection() {
-  this->m_voxel_subscriber = m_node_handle.subscribe<PointCloud>(
-      TOPIC_VOXEL_, 1, &WallDetection::wallDetection_callback, this);
+  this->m_voxel_subscriber =
+      m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZI>>(
+          TOPIC_VOXEL_, 1, &WallDetection::wallDetection_callback, this);
 
   this->m_wall_publisher =
       m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_WALLS_, 1);
@@ -13,11 +14,11 @@ WallDetection::WallDetection() {
 }
 
 void WallDetection::wallDetection_callback(
-    const PointCloud::ConstPtr &inputVoxels) {
+    const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &inputVoxels) {
 
   frameID = inputVoxels->header.frame_id;
 
-  printf("Cloud: width = %d, height = %d\n", inputVoxels->width,
+  printf("Cloasdasddaud: width = %d, height = %d\n", inputVoxels->width,
          inputVoxels->height);
 
   // std::map<int,std::vector<pcl::PointXYZ>> clustersUsed;
@@ -55,7 +56,12 @@ void WallDetection::wallDetection_callback(
   std::cout << "Hier unsere Lösung: " << test.first << "|" << test.second
             << "\n";
 
+  std::cout << "VOR Publish Wall";
+
   publishWall(clustersUsed[test.first], clustersUsed[test.second]);
+  publishObstacles(clustersUsed, test);
+
+  std::cout << "Nach Publish Wall";
 
   // this->m_debug_geometry.drawVoxels(0, (clustersUsed[test.first]*) ,
   // voxelResolution,
@@ -75,8 +81,10 @@ void WallDetection::publishObstacles(
     std::pair<int, int> wallIDs) {
   pcl::PointCloud<pcl::PointXYZI>::Ptr msg(new pcl::PointCloud<pcl::PointXYZI>);
 
+  msg->header.frame_id = frameID;
+
   for (auto itr = mapClusters.begin(); itr != mapClusters.end(); ++itr) {
-    if (itr->first != wallIDs.first || itr->first != wallIDs.second) {
+    if (itr->first != wallIDs.first && itr->first != wallIDs.second) {
       for (size_t i = 0; i < itr->second->size(); i++) {
         msg->push_back((*itr->second)[i]);
       }
@@ -97,14 +105,16 @@ void WallDetection::publishObstacles(
     //   }
     // }
   }
+  pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
+  m_obstacles_publisher.publish(msg);
 }
 
 void WallDetection::publishWall(std::vector<pcl::PointXYZI> *wallLeft,
                                 std::vector<pcl::PointXYZI> *wallRight) {
   pcl::PointCloud<pcl::PointXYZI>::Ptr msg(new pcl::PointCloud<pcl::PointXYZI>);
   msg->header.frame_id = frameID;
-  msg->height = 1;
-  msg->width = wallLeft->size() + wallRight->size();
+  // msg->height = 1;
+  // msg->width = wallLeft->size() + wallRight->size();
   // msg->points.push_back (pcl::PointXYZ(1.0, 2.0, 3.0));
 
   for (size_t i = 0; i < wallLeft->size(); i++) {
@@ -125,7 +135,7 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZI> *wallLeft,
     tmp.z = (*wallRight)[i].z;
     tmp.intensity = 0;
 
-    msg->points.push_back(tmp);
+    msg->push_back(tmp);
 
     // pcl::PointXYZI(wallLeft[i]., voxels[i].y, voxels[i].clusterID));
   }
@@ -148,12 +158,12 @@ std::pair<int, int> WallDetection::voxelMaximaIDs(
       if ((itrVector->y > maxLeft) && (itrVector->x <= Schwellwert) &&
           (itrVector->x >= -Schwellwert)) {
         maxLeft = itrVector->x;
-        maxLeftID = itrVector->z;
+        maxLeftID = itrVector->intensity;
       }
       if ((itrVector->y < maxRight) && (itrVector->x <= Schwellwert) &&
           (itrVector->x >= -Schwellwert)) {
         maxRight = itrVector->x;
-        maxRightID = itrVector->z;
+        maxRightID = itrVector->intensity;
       }
     }
   }
