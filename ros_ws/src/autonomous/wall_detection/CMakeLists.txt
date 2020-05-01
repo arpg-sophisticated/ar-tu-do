@@ -44,6 +44,6 @@ include_directories(
 )
 
 # wall following node 
-add_executable(wall_detection src/wall_detection.cpp src/rviz_geometry_publisher.cpp)
+add_executable(wall_detection src/wall_detection.cpp)
 target_link_libraries(wall_detection ${catkin_LIBRARIES})
 add_dependencies(wall_detection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
