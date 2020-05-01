@@ -9,9 +9,9 @@ import rospy
 from rospkg import RosPack
 
 # General parameters
-ACTIONS = [(0.15, 1.0), (0.15, 0.0), (0, 0.0),(0, 1.0), (-0.15, 0.0), (-0.15, 1.0)]
+ACTIONS = [(0.15, 1.0), (0.15, 0.0), (0, -1.0), (0, 0.0), (0, 1.0), (-0.15, 0.0), (-0.15, 1.0)]
 ACTION_COUNT = len(ACTIONS)
-NULL_ACTION_INDEX =2
+NULL_ACTION_INDEX =3
 
 START_POINTS = [0,10,20,30,40]
 
