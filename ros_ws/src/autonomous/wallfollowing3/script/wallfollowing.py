@@ -177,10 +177,10 @@ def calc_max_curve_speed(friction, radius):
     return math.sqrt(friction * 9.81 * radius)
 
 
-# def calc_steering_radius(steering_angle):
-#     if steering_angle == 0:
-#         return 10000
-#     return CAR_LENGTH / math.sin(steering_angle * MAX_STEERING_ANGLE)
+def calc_steering_radius(steering_angle):
+    if steering_angle == 0:
+        return 10000
+    return CAR_LENGTH / math.sin(steering_angle * MAX_STEERING_ANGLE)
 
 
 # def calc_max_steering_angle():
@@ -198,29 +198,29 @@ def calc_max_curve_speed(friction, radius):
 #     return map(0, MAX_STEERING_ANGLE, 0, 1, angle_rad)
 
 
-# def calc_angle_moving_average():
-#     if len(last_angle_moving_average[0]) == 0:
-#         return 0
-#     return sum(last_angle_moving_average[0]) / len(last_angle_moving_average[0])
+def calc_angle_moving_average():
+    if len(last_angle_moving_average[0]) == 0:
+        return 0
+    return float(sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
 
 
-# def add_angle_moving_average(angle):
-#     global last_angle_moving_average
-#     if len(last_angle_moving_average[0]) >= last_angle_moving_average[1]:
-#         last_angle_moving_average[0] = last_angle_moving_average[0][1:]
-#     last_angle_moving_average[0].append(angle)
+def add_angle_moving_average(angle):
+    global last_angle_moving_average
+    if len(last_angle_moving_average[0]) >= last_angle_moving_average[1]:
+        last_angle_moving_average[0] = last_angle_moving_average[0][1:]
+    last_angle_moving_average[0].append(angle)
 
 """
 Returns a predicted point and distance to this point which is a possible future position if the car would drive straight.
 This position is important to calculate the error for the pid-controller.
 """
 def calc_predicted_car_position():
-    prediction_distance = min(0.1 + last_speed * 0.35, 2)
-    # steering_radius = calc_steering_radius(calc_angle_moving_average())
-    # circle_section_angle = prediction_distance / steering_radius
+    prediction_distance = min(0.1 + last_speed * 0.35, 1.0)
+    steering_radius = calc_steering_radius(calc_angle_moving_average())
+    circle_section_angle = prediction_distance / steering_radius
     # print steering_radius, circle_section_angle, Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
-    # return Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
-    return Point(0, prediction_distance), prediction_distance
+    return Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
+    # return Point(0, prediction_distance), prediction_distance
 
 
 # def calc_circle_intersections(circle_a, circle_b):
@@ -405,6 +405,10 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
 
 #     return np.stack((x_points, y_points), axis=1)
 
+def show_steering_angle():
+    show_line_in_rviz(35, [Point(0, 0), Point(math.sin(calc_angle_moving_average()), math.cos(calc_angle_moving_average()))],
+                      color=ColorRGBA(1, 0, 0, 0.3))
+
 """
 Determines speed and steering angle for the car based on a wall following algorithm.
 left_circle: circle of the left wall
@@ -418,6 +422,7 @@ delta_time: passed time since the last call of follow_walls
 """
 def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall, curve_type, remaining_distance, delta_time):
     global last_speed
+    show_steering_angle()
     predicted_car_position, prediction_distance = calc_predicted_car_position()
     target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance)
 
@@ -451,7 +456,7 @@ def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall,
     #     steering_angle = max(-max_steering_angle, steering_angle)
     # else:
     #     steering_angle = min(steering_angle, max_steering_angle)
-    # add_angle_moving_average(steering_angle)
+    add_angle_moving_average(steering_angle)
 
     # if a curve is unexpected steep, the speed may be reduced
     emergency_slowdown = min(1, distance_to_target**2 / prediction_distance**2)
