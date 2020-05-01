@@ -44,6 +44,6 @@ include_directories(
 )
 
 # wall following node 
-add_executable(voxel_classifier src/voxel_classifier.cpp src/dbscan.cpp src/rviz_geometry_publisher.cpp)
+add_executable(voxel_classifier src/voxel_classifier.cpp src/dbscan.cpp)
 target_link_libraries(voxel_classifier ${catkin_LIBRARIES})
 add_dependencies(voxel_classifier ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
