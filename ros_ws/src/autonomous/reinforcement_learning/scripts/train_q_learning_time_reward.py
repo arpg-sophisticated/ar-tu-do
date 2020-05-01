@@ -54,6 +54,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
         self.sector_times = [None] * len(START_POINTS)
 
+        self.crash_segment_index = None
+
         self.reset_car_to_segment(0)
 
         rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, drive_param, self.wallfollowing_drive_param_callback)
@@ -86,7 +88,10 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.assign_rewards_and_to_memory()
             self.replay()
             self.episode_memory.clear()
-            self.reset_car_to_segment(random.randint(0,4))
+            if(self.crash_segment_index is None):
+                self.reset_car_to_segment(random.randint(0,4))
+            else:
+                self.reset_car_to_segment(self.crash_segment_index)
             #self.reset_car_to_segment(1)
             return
         
@@ -94,8 +99,9 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.on_complete_step(self.state, self.action, new_state)
         if self.reached_target_segment():
             self.reached_target_time = rospy.get_time()
-            playsound('/home/marvin/Downloads/woosh_trimmed.mp3')  
-            print("-- REACHED TARGET --")    
+            playsound('/home/marvin/Downloads/power-up.mp3')  
+            print("-- REACHED TARGET --")
+            self.crash_segment_index = None    
             self.perform_action(NULL_ACTION_INDEX,False)
             self.sleep_after_reached_target=100
             self.reached_target = True
@@ -181,11 +187,15 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
     def reset_car_to_segment(self,segment_index):
         print("--RESET--")
         self.sleep_after_reset = 100
-        self.drive_forward = random.random() > 0.5 #TODO: bisher nicht benutzt
+        self.drive_forward = True
+        #self.drive_forward = random.random() > 0.5 #TODO: bisher nicht benutzt
         start_segment =  START_POINTS[segment_index]
         self.current_segment_index =segment_index
-        self.target_segment = (start_segment+10)%(track.size)
-        self.car_position=reset_car.reset_to_segment(start_segment)
+        if(self.drive_forward):
+            self.target_segment = (start_segment+10)%(track.size)
+        else:
+            self.target_segment = (start_segment-10+track.size)%(track.size)
+        self.car_position=reset_car.reset_to_segment(start_segment,forward =self.drive_forward)
         print("---- start_segment = "+str(start_segment)+ ",target_segment = "+str(self.target_segment)+" ----")
         self.is_terminal_step = False
         self.state = None
@@ -231,7 +241,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             math.exp(-1. * self.total_step_count / EPS_DECAY)
 
     def select_action(self, state):
-        use_epsilon_greedy = self.episode_count % 4 > 0
+        use_epsilon_greedy = self.episode_count % 2 > 0
         if use_epsilon_greedy and random.random() < self.get_epsilon_greedy_threshold():
             return random.randrange(ACTION_COUNT)
 
@@ -256,7 +266,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         else:
             message.angle = angle
             message.velocity = velocity
-        print(str(angle)+", "+ str(velocity))
+        #print(str(angle)+", "+ str(velocity))
         self.drive_parameters_publisher.publish(message)
 
     def get_reward(self):
@@ -271,7 +281,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("----------------------------DIFFERENCE "+ str(time_difference)+ " -----------------------" )
 
             reward =  (((1+time_difference-0.15)**3)-1)/10.0
-            if(reward<=-1):
+            if(reward<=0):
                 reward=0
             print("reward "+str(reward))
             return reward
@@ -292,10 +302,13 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     def on_crash(self,_):
         if(not self.is_terminal_step):
-            print("--CRASH--")
-            self.perform_action(NULL_ACTION_INDEX,False)
-            self.is_terminal_step = True
-            self.sleep_after_crash =100
+            if(not self.reached_target_segment()):
+                print("--CRASH--")
+                self.perform_action(NULL_ACTION_INDEX,False)
+                self.is_terminal_step = True
+                self.sleep_after_crash =100
+                self.crash_segment_index=self.current_segment_index
+                playsound('/home/marvin/Downloads/bowser-falls.mp3') 
 
 
 rospy.init_node('q_learning_training', anonymous=True)
