@@ -1,12 +1,14 @@
 #pragma once
 
 #include "dbscan.h"
+#include <dynamic_reconfigure/server.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>
+#include <voxel_classifier/voxel_classifierConfig.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -22,6 +24,10 @@ class VoxelClassifier
     ros::Publisher m_marker_publisher;
     ros::Publisher m_cluster_publisher;
     std::string m_frame;
+
+    dynamic_reconfigure::Server<voxel_classifier::voxel_classifierConfig> m_dyn_cfg_server;
+    double m_epsilon;
+    int m_minimum_points;
 
     public:
     VoxelClassifier();

@@ -1,7 +1,9 @@
 #include "voxel_classifier.h"
+#include <dynamic_reconfigure/server.h>
+#include <voxel_classifier/voxel_classifierConfig.h>
 
-#define MINIMUM_POINTS 4
-#define EPSILON (0.47 * 0.47)
+#define DEFAULT_MINIMUM_POINTS (4)
+#define DEFAULT_EPSILON (0.47)
 
 VoxelClassifier::VoxelClassifier()
     : m_private_node_handle("~")
@@ -19,6 +21,13 @@ VoxelClassifier::VoxelClassifier()
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicVoxels, 1, &VoxelClassifier::voxel_callback, this);
 
     this->m_cluster_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicClusters, 1);
+
+    m_epsilon = DEFAULT_EPSILON;
+    m_minimum_points = DEFAULT_MINIMUM_POINTS;
+    m_dyn_cfg_server.setCallback([&](voxel_classifier::voxel_classifierConfig& cfg, uint32_t) {
+        m_epsilon = cfg.cluster_epsilon;
+        m_minimum_points = cfg.cluster_minimum_points;
+    });
 }
 
 void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& voxelPointcloud)
@@ -40,7 +49,7 @@ void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& v
         dbScanPoints.push_back(tmp);
     }
 
-    DBSCAN ds(MINIMUM_POINTS, EPSILON, &dbScanPoints);
+    DBSCAN ds(m_minimum_points, m_epsilon * m_epsilon, &dbScanPoints);
     ds.run();
 
     cluster_publish(&dbScanPoints);

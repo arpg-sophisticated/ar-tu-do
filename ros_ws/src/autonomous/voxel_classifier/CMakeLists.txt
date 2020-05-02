@@ -23,6 +23,10 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp
 ## Dynamic Reconfigure ##
 #########################
 
+generate_dynamic_reconfigure_options(
+  cfg/voxel_classifier.cfg
+)
+
 
 ###################################
 ## catkin specific configuration ##
