@@ -1,12 +1,14 @@
 #pragma once
 
 #include <boost/foreach.hpp>
+#include <dynamic_reconfigure/server.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>
 #include <unordered_map>
+#include <wall_detection/wall_detectionConfig.h>
 
 constexpr const char* TOPIC_VOXEL_ = "/scan/cluster";
 constexpr const char* TOPIC_WALLS_ = "/obstacles/walls";
@@ -25,6 +27,10 @@ class WallDetection
     ros::Publisher m_obstacles_publisher;
     const std::string m_frame;
     std::vector<PointCloud> listOfClusters;
+
+    dynamic_reconfigure::Server<wall_detection::wall_detectionConfig> m_dyn_cfg_server;
+    float m_wall_radius;
+
     std::pair<int, int> determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZI>*>, float radius);
     void publishWall(std::vector<pcl::PointXYZI>* wallLeft, std::vector<pcl::PointXYZI>* wallRight);
     void publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZI>*> mapClusters,

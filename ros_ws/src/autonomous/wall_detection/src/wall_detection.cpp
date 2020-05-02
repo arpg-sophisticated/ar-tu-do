@@ -1,4 +1,6 @@
 #include "wall_detection.h"
+#include <dynamic_reconfigure/server.h>
+#include <wall_detection/wall_detectionConfig.h>
 
 WallDetection::WallDetection()
     : m_private_node_handle("~")
@@ -23,6 +25,11 @@ WallDetection::WallDetection()
     this->m_wall_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicWalls, 1);
 
     this->m_obstacles_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicObstacles, 1);
+
+    m_wall_radius = 3;
+
+    m_dyn_cfg_server.setCallback(
+        [&](wall_detection::wall_detectionConfig& cfg, uint32_t) { m_wall_radius = cfg.wall_search_radius; });
 }
 
 void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& inputVoxels)
@@ -47,7 +54,7 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZI>
     }
 
     // determine maximum left and right clusters in a radius
-    auto test = determineWallIDs(clustersUsed, 3.0); // these ids are the walls
+    auto test = determineWallIDs(clustersUsed, m_wall_radius); // these ids are the walls
 
     // publish only the clusters with ids equal to the walls, but only if the id is > 0
     if (test.first >= 0 && test.second >= 0)
@@ -125,12 +132,12 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
     {
         for (auto itrVector = itr->second->begin(); itrVector != itr->second->end(); ++itrVector)
         {
-            if ((itrVector->y > maxLeft) && (itrVector->x <= radius) && (itrVector->x >= -radius))
+            if ((itrVector->y > maxLeft) && (fabsf(itrVector->x) <= radius))
             {
                 maxLeft = itrVector->x;
                 maxLeftID = itrVector->intensity;
             }
-            if ((itrVector->y < maxRight) && (itrVector->x <= radius) && (itrVector->x >= -radius))
+            if ((itrVector->y < maxRight) && fabsf((itrVector->x) <= radius))
             {
                 maxRight = itrVector->x;
                 maxRightID = itrVector->intensity;
