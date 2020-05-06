@@ -13,12 +13,16 @@ ACTIONS = [(0.15, 1.0), (0.15, 0.0), (0, -1.0), (0, 0.0), (0, 1.0), (-0.15, 0.0)
 ACTION_COUNT = len(ACTIONS)
 NULL_ACTION_INDEX =3
 
-START_POINTS = [0,10,20,30,40]
+# Custom segments(startindex,endindex,rounds,timedifference-multiplikator)
+CUSTOM_SEGMENTS = [(0,10,0,1),(10,20,0,1),(20,30,0,1),(30,40,0,1),(40,0,1,1),(0,10,1,0.2),(0,10,3,0.08)]
+
 
 # Only use some of the LIDAR measurements
 # When changing this value, also update laser_sample_count in q_learning.launch
 LASER_SAMPLE_COUNT = 8
 
+#safety velocity reduction for driving node
+SAFETY_REDUCTION = 1
 
 MODEL_FILENAME = os.path.join(RosPack().get_path(
     "reinforcement_learning"), "q_learning_time_reward.to")

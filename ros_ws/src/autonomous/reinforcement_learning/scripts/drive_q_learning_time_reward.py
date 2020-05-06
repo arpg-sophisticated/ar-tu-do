@@ -3,7 +3,7 @@
 from reinforcement_learning_node import ReinforcementLearningNode, device
 import os
 import rospy
-from parameters_q_learning_time_reward import NeuralQEstimator, ACTIONS, LASER_SAMPLE_COUNT
+from parameters_q_learning_time_reward import *
 import torch
 from topics import TOPIC_DRIVE_PARAMETERS_WF
 from drive_msgs.msg import drive_param
@@ -58,7 +58,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
         # add WFdrivemessages
         if(addWFMessage):
             message.angle = angle +self.lastWFmessage.angle
-            message.velocity = velocity+ self.lastWFmessage.velocity
+            message.velocity = (velocity*SAFETY_REDUCTION) +self.lastWFmessage.velocity
         else:
             message.angle = angle
             message.velocity = velocity

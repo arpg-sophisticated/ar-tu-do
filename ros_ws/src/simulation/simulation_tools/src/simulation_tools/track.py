@@ -106,6 +106,10 @@ class Track():
         return TrackPosition(segment, distance_to_center,  # nopep8
             0, Point(x, y), self)  # nopep8
 
+    def get_length(self):
+        return len(PATH)-1
+
+
 
 world_name = rospy.get_param("world_name")
 
