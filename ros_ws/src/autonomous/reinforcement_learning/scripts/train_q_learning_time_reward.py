@@ -9,6 +9,7 @@ from collections import deque
 from parameters_q_learning_time_reward import *
 import rospy
 from drive_msgs.msg import drive_param
+from drive_msgs.msg import gazebo_state_telemetry
 
 from playsound import playsound
 import torch
@@ -17,6 +18,7 @@ import simulation_tools.reset_car as reset_car
 from simulation_tools.track import track
 BATCH_INDICES = torch.arange(0, BATCH_SIZE, device=device, dtype=torch.long)
 
+TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 
 class QLearningTimeRewardTrainingNode(TrainingNode):
     ''' ROS node to train the Q-Learning model with a reward based on time spent to finish an episode
@@ -38,6 +40,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.episode_starttime= rospy.get_time()
 
         self.lastWFmessage = None
+        self.current_speed = 0
+
         self.target_point = None
 
         self.sleep_after_crash =0
@@ -64,9 +68,14 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.reset_car_to_segment(0)
 
         rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, drive_param, self.wallfollowing_drive_param_callback)
+        rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, self.speed_callback)
 
         if CONTINUE:
             self.policy.load()
+
+    def speed_callback(self,speed_message):
+        self.current_speed = speed_message.wheel_speed
+        print("Speed: "+ str(self.current_speed))
 
     def wallfollowing_drive_param_callback(self,message):
         if(self.lastLasermessage is None):
@@ -145,7 +154,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("Sector Time Summary:")
             print("Startpoint: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][0]))
             print("Endpoint: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][1]))
-            print("Rounds: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][2]))
+            print("Rounds: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][3]))
 
             print("Starttime: "+str(self.episode_starttime))
             print("Endtime: "+str(rospy.get_time()))
@@ -193,8 +202,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         #print("------ "+str(track.get_closest_segment(self.car_position))+" ------")
         if(self.target_point is not None):
             self.target_point
-
-            rounds_to_complete = CUSTOM_SEGMENTS[self.current_custom_segment_index][2]
+            rounds_to_complete = CUSTOM_SEGMENTS[self.current_custom_segment_index][3]
             return self.current_closest_point ==self.target_point and self.rounds_in_segment_completed == rounds_to_complete
         return False
 
@@ -209,7 +217,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
     def reset_car_to_segment(self,segment_index):
         print("--RESET--")
         self.sleep_after_reset = 100
-        self.drive_forward = True
+        self.drive_forward = CUSTOM_SEGMENTS[segment_index][2]
         #self.drive_forward = random.random() > 0.5 #TODO: bisher nicht benutzt
 
         self.current_custom_segment_index =segment_index
@@ -221,7 +229,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.target_point= CUSTOM_SEGMENTS[segment_index][0]
 
         self.car_position=reset_car.reset_to_segment(start_point,forward =self.drive_forward)
-        print("---- start_point = "+str(start_point)+ ",target_point = "+str(self.target_point)+" rounds: "+ str(CUSTOM_SEGMENTS[segment_index][2])+" ----")
+        print("---- start_point = "+str(start_point)+ ",target_point = "+str(self.target_point)+" rounds: "+ str(CUSTOM_SEGMENTS[segment_index][3])+" ----")
         self.is_terminal_step = False
         self.state = None
         if self.episode_length != 0:
@@ -268,14 +276,15 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     def select_action(self, state):
         use_epsilon_greedy = self.episode_count % 2 > 0
-        if use_epsilon_greedy and random.random() < self.get_epsilon_greedy_threshold():
+        use_epsilon_greedy_with_segment = use_epsilon_greedy and random.random() <= CUSTOM_SEGMENTS[self.current_custom_segment_index][5]
+        if use_epsilon_greedy_with_segment and random.random() < self.get_epsilon_greedy_threshold():
             return random.randrange(ACTION_COUNT)
 
         with torch.no_grad():
             output = self.policy(state)
-            if self.episode_length < 10:
-                self.net_output_debug_string = ", ".join(
-                    ["{0:.1f}".format(v).rjust(5) for v in output.tolist()])
+            #if self.episode_length < 10:
+            #    self.net_output_debug_string = ", ".join(
+            #        ["{0:.1f}".format(v).rjust(5) for v in output.tolist()])
             return output.max(0)[1].item()
 
     # override implemented function of ReinforcementLearningNode
@@ -306,10 +315,11 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             time_difference = wallfollowing_episode_time - episode_time
             print("----------------------------DIFFERENCE "+ str(time_difference)+ " -----------------------" )
 
-            difference_multiplikator = CUSTOM_SEGMENTS[self.current_custom_segment_index][3]
+            difference_multiplikator = CUSTOM_SEGMENTS[self.current_custom_segment_index][4]
             reward =  (((1+(time_difference* difference_multiplikator)-0.05)**3)-1)/10.0
             if(reward<=0):
                 reward=0
+            reward = reward +0.5
             print("reward "+str(reward))
             return reward
         else:

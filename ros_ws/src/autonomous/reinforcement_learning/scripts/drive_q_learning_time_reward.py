@@ -6,7 +6,9 @@ import rospy
 from parameters_q_learning_time_reward import *
 import torch
 from topics import TOPIC_DRIVE_PARAMETERS_WF
+TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 from drive_msgs.msg import drive_param
+from drive_msgs.msg import gazebo_state_telemetry
 
 
 class QLearningDrivingNode(ReinforcementLearningNode):
@@ -29,6 +31,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
         ReinforcementLearningNode.__init__(self, ACTIONS, LASER_SAMPLE_COUNT)
 
         rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, drive_param, self.wallfollowing_drive_param_callback)
+        rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, self.speed_callback)
 
     def on_receive_laser_scan(self, message):
         self.lastLasermessage = message
@@ -46,6 +49,10 @@ class QLearningDrivingNode(ReinforcementLearningNode):
         with torch.no_grad():
             action = self.policy(state).max(0)[1].item()
         self.perform_action(action,True)
+
+    def speed_callback(self,speed_message):
+        self.current_speed = speed_message.wheel_speed
+        print("Speed: "+ str(self.current_speed))
 
     # override implemented function of ReinforcementLearningNode
     def perform_action(self, action_index, addWFMessage):
