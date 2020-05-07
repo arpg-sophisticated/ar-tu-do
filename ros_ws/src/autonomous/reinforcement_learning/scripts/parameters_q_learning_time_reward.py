@@ -62,7 +62,7 @@ EPS_DECAY = 100000
 class NeuralQEstimator(nn.Module):
     def __init__(self):
         super(NeuralQEstimator, self).__init__()
-        self.fc1 = nn.Linear(LASER_SAMPLE_COUNT, 64)
+        self.fc1 = nn.Linear(LASER_SAMPLE_COUNT+1, 64)
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, ACTION_COUNT)
 

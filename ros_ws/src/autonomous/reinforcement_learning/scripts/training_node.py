@@ -93,8 +93,7 @@ class TrainingNode(ReinforcementLearningNode):
         self.episode_length_history.append(self.episode_length)
         self.cumulative_reward_history.append(self.cumulative_reward)
         self.episode_result_publisher.publish(
-            reward=self.cumulative_reward/self.episode_length, length=float(
-                self.episode_length/3000.0))
+            reward=self.cumulative_reward/self.episode_length, length=self.episode_length/3000.0)
 
         rospy.loginfo(self.get_episode_summary())
         self.episode_start_time_real = time.time()
