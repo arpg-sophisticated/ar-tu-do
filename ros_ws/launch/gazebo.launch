@@ -78,7 +78,7 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
-    <!-- <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/> -->
+    <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
     <include file="$(find wallfollowing3)/launch/autonomous_driving.launch"/>
 
     <group if="$(arg emergency_stop)">
@@ -99,6 +99,5 @@
     </node>
     <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />
 
-        
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen"/>
 </launch>
