@@ -75,7 +75,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     def speed_callback(self,speed_message):
         self.current_speed = speed_message.wheel_speed
-        print("Speed: "+ str(self.current_speed))
+        #print("Speed: "+ str(self.current_speed))
 
     def wallfollowing_drive_param_callback(self,message):
         if(self.lastLasermessage is None):
@@ -304,20 +304,6 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         #print(str(angle)+", "+ str(velocity))
         self.drive_parameters_publisher.publish(message)
 
-
-    def convert_laser_and_speed_message_to_tensor(self, message,speed, use_device=True):
-        if self.scan_indices is None:
-            self.scan_indices = [int(i * (len(message.ranges) - 1) / (self.laser_sample_count - 1)) for i in range(self.laser_sample_count)]  # nopep8
-
-        values = [message.ranges[i] for i in self.scan_indices]
-        values = [v if not math.isinf(v) else 100 for v in values]
-        values.append(speed)
-
-        return torch.tensor(
-            values,
-            device=device if use_device else None,
-            dtype=torch.float)
-
     def get_reward(self):        
         if(self.reached_target):
             wallfollowing_episode_time = self.sector_times[self.current_custom_segment_index]
@@ -332,7 +318,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             reward =  (((1+(time_difference* difference_multiplikator)-0.05)**3)-1)/10.0
             if(reward<=0):
                 reward=0
-            reward = reward +0.1
+            reward = reward +0.01
             print("reward "+str(reward))
             return reward
         else:

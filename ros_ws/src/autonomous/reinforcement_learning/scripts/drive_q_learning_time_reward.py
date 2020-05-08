@@ -18,6 +18,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
 
     def __init__(self):
         self.policy = NeuralQEstimator().to(device)
+        self.current_speed = 0
 
         try:
             self.policy.load()
@@ -43,8 +44,10 @@ class QLearningDrivingNode(ReinforcementLearningNode):
         self.lastWFmessage = message
         if(self.lastLasermessage is None):
             return
+        if(self.current_speed ==0):
+            print("speed 0!!!")
 
-        state = self.convert_laser_message_to_tensor(self.lastLasermessage)
+        state = self.convert_laser_and_speed_message_to_tensor(self.lastLasermessage,self.current_speed)
 
         with torch.no_grad():
             action = self.policy(state).max(0)[1].item()
@@ -52,7 +55,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
 
     def speed_callback(self,speed_message):
         self.current_speed = speed_message.wheel_speed
-        print("Speed: "+ str(self.current_speed))
+        #print("Speed: "+ str(self.current_speed))
 
     # override implemented function of ReinforcementLearningNode
     def perform_action(self, action_index, addWFMessage):
