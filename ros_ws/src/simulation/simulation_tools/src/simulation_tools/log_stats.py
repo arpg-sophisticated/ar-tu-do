@@ -58,8 +58,8 @@ def log_message():
         angle = last_drive_message.angle
     time = rospy.get_time()
     print("log stats")
-    with open("test.txt", "a") as myfile:
-        myfile.write(str(time)+", "+str(track_position)+", "+str(car_position)+", "+str(velocity)+", "+str(angle)+", "+str(current_speed))
+    log_stats_file = open("/home/marvin/code/ar-tu-do/ros_ws/log_stats.txt", "a")
+    log_stats_file.write(str(time)+", "+str(track_position)+", "+str(car_position)+", "+str(velocity)+", "+str(angle)+", "+str(current_speed))
 
 rospy.init_node('log_stats', anonymous=True)
 rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
