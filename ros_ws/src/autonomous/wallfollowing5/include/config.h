@@ -1,5 +1,7 @@
 #pragma once
 
+#include "car_config.h"
+
 namespace Config
 {
     // safety margin in m the car brakes before a curve entry
@@ -7,7 +9,11 @@ namespace Config
     // The size of the part of the laser scan that should be used by the algorithm, in degrees.
     static const float USABLE_LASER_RANGE = 220;
 
-    static const bool USE_CIRCLE_TANGENTS = true;
+    static const bool USE_CIRCLE_TANGENTS = false;
+
+    static const float SAFETY_WALL_DISTANCE = 1.5 * car_config::REAR_WHEEL_DISTANCE;
+
+    static const double MAX_PREDICTED_DISTANCE = 2.0;
 } // namespace Config
 
 namespace PID

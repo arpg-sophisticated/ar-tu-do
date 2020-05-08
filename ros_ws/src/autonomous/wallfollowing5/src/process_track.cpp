@@ -104,12 +104,12 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
         {
             storage->upper_wall = cropPointcloud(storage->right_wall,
                                                  [storage](Point& p) { return p.y >= storage->curve_entry.y - 1.5; });
-            storage->right_wall =
-                cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
+            // storage->right_wall =
+            //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
             // if len(right_wall) == 0:
             //     right_wall = upper_wall[0: 1]
             // try:
-            storage->right_circle = CircleFit::hyperFit(storage->right_wall);
+            // storage->right_circle = CircleFit::hyperFit(storage->right_wall);
             // except:
             //     print right_wall, upper_wall
             storage->curve_type = CURVE_TYPE_LEFT;
@@ -123,12 +123,12 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
         {
             storage->upper_wall =
                 cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y >= storage->curve_entry.y - 1.5; });
-            storage->left_wall =
-                cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
+            // storage->left_wall =
+            //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
             // if len(left_wall) == 0:
             //     left_wall = upper_wall[-2: -1]
             // try:
-            storage->left_circle = CircleFit::hyperFit(storage->left_wall);
+            // storage->left_circle = CircleFit::hyperFit(storage->left_wall);
             // except:
             //     print left_wall, upper_wall
             storage->curve_type = CURVE_TYPE_RIGHT;
@@ -166,6 +166,8 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
         m_rviz_geometry.deleteMarker(7);
     }
 
+    std::cout << "l_c: " << storage->left_circle.getCenter().x << ", " << storage->left_circle.getCenter().y
+              << " r_c: " << storage->right_circle.getCenter().x << std::endl;
     m_rviz_geometry.showCircleInRviz(0, storage->left_circle, storage->left_wall, ColorRGBA{ 0.5, 1, 1, 1 });
     m_rviz_geometry.showCircleInRviz(1, storage->right_circle, storage->right_wall, ColorRGBA{ 0, 1, 1, 1 });
 

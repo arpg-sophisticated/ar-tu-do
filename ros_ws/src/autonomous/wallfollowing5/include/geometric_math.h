@@ -6,8 +6,8 @@
 
 struct Point
 {
-    double x;
-    double y;
+    float x;
+    float y;
 };
 
 namespace GeometricFunctions
@@ -15,6 +15,7 @@ namespace GeometricFunctions
     const double PI = std::acos(-1);
 
     double distance(Point& a, Point& b);
+    double distance(Point* a, Point* b);
 
     double toRadians(double degrees);
 }; // namespace GeometricFunctions

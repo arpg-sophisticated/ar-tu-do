@@ -4,23 +4,27 @@ Wallfollowing::Wallfollowing()
 {
     m_laserscan_subscriber =
         m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &Wallfollowing::laserScanCallback, this);
+    m_voxel_subscriber =
+        m_node_handle.subscribe<sensor_msgs::PointCloud2>(TOPIC_VOXEL, 1, &Wallfollowing::voxelCallback, this);
     m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
 }
 
 Point Wallfollowing::determinePredictedCarPosition(ProcessedTrack& processedTrack)
 {
-    double prediction_distance = std::min(0.1 + m_speed_controller.getLastDeterminedSpeed() * 0.35, 2.0);
+    double prediction_distance =
+        std::min(0.1 + m_speed_controller.getLastDeterminedSpeed() * 0.35, Config::MAX_PREDICTED_DISTANCE);
     return Point{ 0, prediction_distance };
 }
 
-Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track, Point& predicted_position,
-                                                Point& car_position)
+Point Wallfollowing::determineTargetCarPositionCircleTangents(ProcessedTrack& processed_track,
+                                                              Point& predicted_position, Point& car_position)
 {
     Point left_point = processed_track.left_circle.getClosestPoint(predicted_position);
     Point right_point = processed_track.right_circle.getClosestPoint(predicted_position);
     Point central_point = Point{ (left_point.x + right_point.x) / 2, (left_point.y + right_point.y) / 2 };
-
     double track_width = std::abs(left_point.x - right_point.x);
+    Point left_car_position = Point{ car_position.x, car_position.y - track_width / 2 };
+    Point right_car_position = Point{ car_position.x, car_position.y + track_width / 2 };
 
     Point target_position = central_point;
 
@@ -49,19 +53,24 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
     if (Config::USE_CIRCLE_TANGENTS)
     {
-        double safety_distance = 1.5 * car_config::REAR_WHEEL_DISTANCE;
         std::vector<Point> left_tangent_points;
         std::vector<Point> right_tangent_points;
+        double left_center_distance =
+            GeometricFunctions::distance(car_position, processed_track.left_circle.getCenter());
+        double right_center_distance =
+            GeometricFunctions::distance(car_position, processed_track.right_circle.getCenter());
         // left curve
         if (processed_track.left_circle.getCenter().x < 0 && processed_track.right_circle.getCenter().x < 0 &&
             (processed_track.left_circle.getRadius() < 1000 || processed_track.right_circle.getRadius() < 1000))
         {
             Circle safety_circle = Circle(processed_track.left_circle.getCenter(),
-                                          processed_track.left_circle.getRadius() + safety_distance);
+                                          processed_track.left_circle.getRadius() + Config::SAFETY_WALL_DISTANCE);
             left_tangent_points = safety_circle.calcTangents(car_position);
             if (left_tangent_points.size() > 0)
             {
                 target_position = left_tangent_points.front();
+                // target_position = Point{target_position.x + track_width / 2 - Config::SAFETY_WALL_DISTANCE,
+                // target_position.y};
             }
         }
         // right curve
@@ -69,11 +78,13 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
             (processed_track.left_circle.getRadius() < 1000 || processed_track.right_circle.getRadius() < 1000))
         {
             Circle safety_circle = Circle(processed_track.right_circle.getCenter(),
-                                          processed_track.right_circle.getRadius() + safety_distance);
+                                          processed_track.right_circle.getRadius() + Config::SAFETY_WALL_DISTANCE);
             right_tangent_points = safety_circle.calcTangents(car_position);
             if (right_tangent_points.size() > 0)
             {
                 target_position = right_tangent_points.front();
+                // target_position = Point{target_position.x - track_width / 2 + Config::SAFETY_WALL_DISTANCE,
+                // target_position.y};
             }
         }
 
@@ -100,13 +111,20 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     return target_position;
 }
 
+// Point Wallfollowing::determineTargetCarPositionCircleTangents(ProcessedTrack& processed_track, Point&
+// predicted_position,
+//                                                 Point& car_position)
+// {
+
+// }
+
 void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_time)
 {
     double speed = m_speed_controller.calcSpeed(processed_track);
 
     Point car_position = { 0, 0 };
     Point predicted_position = determinePredictedCarPosition(processed_track);
-    Point target_position = determineTargetCarPosition(processed_track, predicted_position, car_position);
+    Point target_position = determineTargetCarPositionCircleTangents(processed_track, predicted_position, car_position);
     double angle =
         m_steering_controller.determineSteeringAngle(car_position, predicted_position, target_position, delta_time);
 
@@ -163,23 +181,57 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
-    double scan_time = laserscan->header.stamp.toSec();
+    // double scan_time = laserscan->header.stamp.toSec();
+    // double t_start = ros::Time::now().toSec();
+    // if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+    // {
+    //     double delta_time = scan_time - m_last_scan_time;
+    //     std::cout << delta_time << std::endl;
+    //     std::vector<Point> pointcloud;
+    //     getScanAsCartesian(&pointcloud, laserscan);
+    //     handleLaserPointcloud(pointcloud, delta_time);
+    //     double t_end = ros::Time::now().toSec();
+    //     // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s"
+    //     <<
+    //     // std::endl;
+    // }
+    // m_last_scan_time = scan_time;
+}
+
+// void Wallfollowing::clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster)
+// {
+// }
+
+void Wallfollowing::voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg)
+{
+    double scan_time = ros::Time::now().toSec();
     double t_start = ros::Time::now().toSec();
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
     {
         double delta_time = scan_time - m_last_scan_time;
+
         std::vector<Point> pointcloud;
-        getScanAsCartesian(&pointcloud, laserscan);
+
+        for (size_t i = 0; i < voxel_msg->width; i++)
+        {
+            Point p;
+            uint32_t tmp_score;
+            memcpy(&p.y, &voxel_msg->data[i * voxel_msg->point_step + voxel_msg->fields[0].offset], sizeof(float));
+            memcpy(&p.x, &voxel_msg->data[i * voxel_msg->point_step + voxel_msg->fields[1].offset], sizeof(float));
+            p.x = -p.x;
+            if (!std::isnan(p.x) && !std::isinf(p.x) && !std::isnan(p.y) && !std::isinf(p.y))
+            {
+                pointcloud.push_back(p);
+                // std::cout << "x: " << p.x << " y: " << p.y << std::endl;
+            }
+        }
+
         handleLaserPointcloud(pointcloud, delta_time);
         double t_end = ros::Time::now().toSec();
         // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s" <<
         // std::endl;
     }
     m_last_scan_time = scan_time;
-}
-
-void Wallfollowing::clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster)
-{
 }
 
 int main(int argc, char** argv)

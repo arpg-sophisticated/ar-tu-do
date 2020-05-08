@@ -25,7 +25,7 @@ class Circle
     {
         return m_radius;
     }
-    Point getCenter()
+    Point& getCenter()
     {
         return m_center;
     }

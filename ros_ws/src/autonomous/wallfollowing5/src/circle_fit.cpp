@@ -43,12 +43,13 @@ Circle CircleFit::hyperFit(std::vector<Point>& pointcloud, int iter_max)
 
     mean = calcMean(pointcloud);
 
+    unsigned int mod = 0;
     // compute moments
     Mxx = Myy = Mxy = Mxz = Myz = Mzz = 0;
     for (auto& point : pointcloud)
     {
         Xi = point.x - mean.x;
-        Yi = point.y - mean.y;
+        Yi = (point.y + mod % 9 * 0.001) - mean.y;
         Zi = Xi * Xi + Yi * Yi;
 
         Mxy += Xi * Yi;
@@ -57,6 +58,8 @@ Circle CircleFit::hyperFit(std::vector<Point>& pointcloud, int iter_max)
         Mxz += Xi * Zi;
         Myz += Yi * Zi;
         Mzz += Zi * Zi;
+
+        mod++;
     }
     Mxx /= n;
     Myy /= n;

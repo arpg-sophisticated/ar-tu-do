@@ -226,10 +226,10 @@ def add_angle_moving_average(angle):
 Returns a predicted point and distance to this point which is a possible future position if the car would drive straight.
 This position is important to calculate the error for the pid-controller.
 """
-def calc_predicted_car_position(remaining_distance, offset_distance):
+def calc_predicted_car_position():
     prediction_distance = min(0.1 + last_speed * 0.35, 2.0)
-    if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
-        prediction_distance = remaining_distance
+    # if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
+    #     prediction_distance = remaining_distance
     # steering_radius = calc_steering_radius(calc_angle_moving_average())
     # circle_section_angle = prediction_distance / steering_radius
     # print steering_radius, circle_section_angle, Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
@@ -478,7 +478,7 @@ delta_time: passed time since the last call of follow_walls
 def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall, curve_type, remaining_distance, delta_time):
     global last_speed
     show_steering_angle()
-    predicted_car_position, prediction_distance = calc_predicted_car_position(remaining_distance, CAR_WIDTH)
+    predicted_car_position, prediction_distance = calc_predicted_car_position()
     target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance)
 
     distance_to_target = math.sqrt(target_position.x**2 + target_position.y**2)
