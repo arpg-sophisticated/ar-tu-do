@@ -182,6 +182,10 @@
             values["track_only_height"] = 0;
             values["space_width"] = 0;
             values["space_height"] = 0;
+            
+            values["circ_inner"] = 0;
+            values["circ_outer"] = 0;
+            values["circ_drive"] = 0;
     
             function updateValue(element) {
                 values[element.id] = element.value;
@@ -228,6 +232,12 @@
                 updateCalculated("space_width");
                 values["space_height"] = ((values["track_only_height"] * 1) + 2 * values["outer_distance"]).toFixed(2);
                 updateCalculated("space_height");
+                values["circ_drive"] = (values["straight_length"] * 4 + Math.PI * 2 * values["curve_radius"]).toFixed(2);
+                updateCalculated("circ_drive");
+                values["circ_inner"] = (values["straight_length"] * 4 + Math.PI * 2 * values["curve_radius_inner"]).toFixed(2);
+                updateCalculated("circ_inner");
+                values["circ_outer"] = (values["straight_length"] * 4 + Math.PI * 2 * values["curve_radius_outer"]).toFixed(2);
+                updateCalculated("circ_outer");
                 
                 drawTrack();
             }
@@ -310,9 +320,11 @@
                 measLineRElement.style.left = ((measureBaseY) + ((values["track_only_height"] * values["display"]) / 2 - 1.5) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.5)) + "px";
                 
                 var measLineWrElement = document.getElementById("measure_line_wr");
-                measLineWrElement.style.width = ((values["straight_length"] * 2 * values["display"]) - 1.0) + "px";
-                measLineWrElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"])) + 2.5) + "px";
-                measLineWrElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineWrElement.style.width = ((values["straight_length"] * 2 * values["display"]) + (values["track_only_height"] * values["display"]) - 1.0) + "px";
+                measLineWrElement.style.height = ((values["track_only_height"] * values["display"] / 2) + 5) + "px";
+                measLineWrElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2) + 22 + 2.5) + "px";
+                measLineWrElement.style.lineHeight = ((values["outer_distance"] * values["display"] * 2) + ((values["track_only_height"] * values["display"]) / 2) + 28 + 2.5) + "px";
+                measLineWrElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + 2) + "px";
                 
                 var measLineHrElement = document.getElementById("measure_line_hr");
                 measLineHrElement.style.height = ((values["track_only_height"] * values["display"]) - 1.5) + "px";
@@ -419,10 +431,6 @@
                 <div class="calculated_values">
                     <h3>Calculated</h3>
                     <div class="inputitem">
-                        <input type="number" step="0.01" name="acceleration_eff" id="acceleration_eff" value="0" readonly class="input_text_readonly"><span class="unit">m/s^2</span><br>
-                        <label>Effective acceleration <i>a<sub>eff</sub></i></label>
-                    </div>
-                    <div class="inputitem">
                         <input type="number" step="0.01" name="speed_curve" id="speed_curve" value="0" readonly class="input_text_readonly"><span class="unit">m/s</span><br>
                         <label>Speed in/out curve <i>v<sub>c</sub></i></label>
                     </div>
@@ -442,15 +450,19 @@
                         <input type="number" step="0.01" name="curve_radius_inner" id="curve_radius_inner" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
                         <label>Curve radius (inner) <i>r<sub>i</sub></i></label>
                     </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="acceleration_eff" id="acceleration_eff" value="0" readonly class="input_text_readonly"><span class="unit">m/s^2</span><br>
+                        <label>Effective acceleration <i>a<sub>eff</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="straight_length" id="straight_length" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Acceleration/Break length <i>s<sub>a</sub>, s<sub>b</sub></i></label>
+                    </div>
                 </div>
             </div>
             <div class="windowright">
                 <div class="calculated_values">
                     <h3>&zwnj;</h3>
-                    <div class="inputitem">
-                        <input type="number" step="0.01" name="straight_length" id="straight_length" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
-                        <label>Acceleration/Break length <i>s<sub>a</sub>, s<sub>b</sub></i></label>
-                    </div>
                     <div class="inputitem">
                         <input type="number" step="0.01" name="track_only_width" id="track_only_width" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
                         <label>Width of racetrack <i>w<sub>r</sub></i></label>
@@ -468,7 +480,16 @@
                         <label>Overall height needed <i>h<sub>tot</sub></i></label>
                     </div>
                     <div class="inputitem">
-                        <label><i>We assume CCW driving. Please scale to one fit one page on printing.</i></label>
+                        <input type="number" step="0.01" name="circ_drive" id="circ_drive" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Length drive path <i>c<sub>d</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="circ_outer" id="circ_outer" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Circumfence outer wall <i>c<sub>o</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="circ_inner" id="circ_inner" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Circumfence inner wall <i>c<sub>i</sub></i></label>
                     </div>
                 </div>
             </div>
@@ -485,6 +506,7 @@
                 </div>
                 <div class="measure_height" id="measure_room_h"><i>w<sub>tot</sub> <span id="drawing_htot"></span></i></div>
                 <div class="measure_width" id="measure_room_w"><i>w<sub>tot</sub> <span id="drawing_wtot"></span></i></div>
+                <br><label><i>We assume CCW driving. Please scale to fit one page on printing.</i></label>
             </div>
         </div>
         <script>
