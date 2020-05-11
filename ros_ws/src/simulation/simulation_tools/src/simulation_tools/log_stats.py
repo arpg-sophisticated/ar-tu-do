@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import rospy
+import os
 import sys
+from rospkg import RosPack
 from simulation_tools.track import track
 from simulation_tools.reset_car import Point
 from drive_msgs.msg import drive_param,gazebo_state_telemetry
@@ -29,7 +31,6 @@ def drive_param_callback(message):
 
  
 def speed_callback(speed_message):
-    print("speed")
     global current_speed
     current_speed = speed_message.wheel_speed
     log_message()
@@ -57,8 +58,8 @@ def log_message():
         velocity = last_drive_message.velocity
         angle = last_drive_message.angle
     time = rospy.get_time()
-    print("log stats")
-    log_stats_file = open("/home/marvin/code/ar-tu-do/ros_ws/log_stats.txt", "a")
+    log_stats_file_path= os.path.join(RosPack().get_path("simulation_tools"), "log_stats.txt")
+    log_stats_file = open(log_stats_file_path, "a")
     log_stats_file.write(str(time)+", "+str(track_position)+", "+str(car_position)+", "+str(velocity)+", "+str(angle)+", "+str(current_speed))
 
 rospy.init_node('log_stats', anonymous=True)
