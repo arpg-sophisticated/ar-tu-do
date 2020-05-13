@@ -91,7 +91,7 @@ if world_name not in [
     "racetrack_decorated",
     "racetrack_decorated_2",
     "racetrack_decorated_2_big",
-    "racer_empty"]:
+        "racer_empty"]:
     print "ERROR: Racetrack not supported by track.py"
     sys.exit(1)
 

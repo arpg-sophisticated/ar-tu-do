@@ -88,7 +88,8 @@ def calculate_acceleration():
     if car_velocity is not None and car_velocity_old is not None and time_old is not None:
         delta_time = time_now - time_old
         if delta_time.to_nsec() != 0:
-            car_acceleration = (car_velocity - car_velocity_old) / delta_time.to_sec()
+            car_acceleration = (
+                car_velocity - car_velocity_old) / delta_time.to_sec()
     time_old = time_now
     car_velocity_old = car_velocity
     if car_acceleration is not None and car_acceleration > max_car_acceleration:
@@ -99,9 +100,11 @@ def calculate_acceleration():
 
 def publish_state_telemetry():
     msg = gazebo_state_telemetry()
-    msg.car_acceleration = float(car_acceleration) if car_acceleration is not None else 0.0
+    msg.car_acceleration = float(
+        car_acceleration) if car_acceleration is not None else 0.0
     msg.car_speed = float(car_velocity) if car_velocity is not None else 0.0
-    msg.wheel_speed = float(wheel_velocity) if wheel_velocity is not None else 0.0
+    msg.wheel_speed = float(
+        wheel_velocity) if wheel_velocity is not None else 0.0
     msg.point_x = float(model_states_message.pose[1].position.x)
     msg.point_y = float(model_states_message.pose[1].position.y)
     gazebo_telemetry_publisher.publish(msg)
@@ -110,7 +113,10 @@ def publish_state_telemetry():
 rospy.init_node('gazebo_state_telemetry')
 rospy.Subscriber("/gazebo/model_states", ModelStates, model_state_callback)
 rospy.Subscriber("/gazebo/link_states", LinkStates, link_state_callback)
-gazebo_telemetry_publisher = rospy.Publisher("/gazebo/state_telemetry", gazebo_state_telemetry, queue_size=1)
+gazebo_telemetry_publisher = rospy.Publisher(
+    "/gazebo/state_telemetry",
+    gazebo_state_telemetry,
+    queue_size=1)
 rospy.Timer(rospy.Duration(0.05, 0), calculate_velocity)
 
 rospy.spin()
