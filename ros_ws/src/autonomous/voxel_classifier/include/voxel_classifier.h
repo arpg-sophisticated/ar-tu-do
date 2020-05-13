@@ -1,29 +1,36 @@
 #pragma once
+
 #include "dbscan.h"
-#include "rviz_geometry_publisher.h"
-#include "voxel.h"
+#include <dynamic_reconfigure/server.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <stdlib.h>
+#include <voxel_classifier/voxel_classifierConfig.h>
+
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 constexpr const char* TOPIC_VOXEL_ = "/scan/voxels";
-constexpr const char* TOPIC_VISUALIZATION_Cluster = "/wall_separation_visualization_cluster";
-constexpr const char* LIDAR_FRAME = "laser";
+constexpr const char* TOPIC_CLUSTER_ = "/scan/cluster";
 
 class VoxelClassifier
 {
     private:
     ros::NodeHandle m_node_handle;
+    ros::NodeHandle m_private_node_handle;
     ros::Subscriber m_voxel_subscriber;
-    std::vector<Voxel> voxels;
-    RvizGeometryPublisher m_debug_geometry;
     ros::Publisher m_marker_publisher;
-    const std::string m_frame;
+    ros::Publisher m_cluster_publisher;
+    std::string m_frame;
+
+    dynamic_reconfigure::Server<voxel_classifier::voxel_classifierConfig> m_dyn_cfg_server;
+    double m_epsilon;
+    int m_minimum_points;
 
     public:
     VoxelClassifier();
     void voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar);
-    // std::vector<Point> transformPoints();
-    void printResults(vector<Voxel>& points, int num_points);
-    void clearRects();
+    void cluster_publish(std::vector<Point_>* clusters);
 };

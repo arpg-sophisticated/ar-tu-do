@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!--
+        Launches all necessary nodes that transform various frames
+    -->
+    <arg name="topic_input_clusters" default="/scan/clusters" />
+    <arg name="topic_output_walls" default="/obstacles/walls" />
+    <arg name="topic_output_obstacles" default="/obstacles/obstacles" />
+        <!-- tf_laserscan_to_pointcloud node -->
+    <node
+        respawn="true"
+        pkg="wall_detection"
+        type="wall_detection"
+        name="$(anon wall_detection)"
+        output="screen" >
+    <param name="topic_input_clusters" type="string" value="$(arg topic_input_clusters)" />
+    <param name="topic_output_walls" type="string" value="$(arg topic_output_walls)" />
+    <param name="topic_output_obstacles" type="string" value="$(arg topic_output_obstacles)" />
+</node>
+
+</launch>

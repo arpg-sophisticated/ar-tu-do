@@ -51,6 +51,17 @@
         <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
         <arg name="topic_voxels" value="/scan/voxels" />
     </include>
+
+    <include file="$(find voxel_classifier)/launch/voxel_classifier.launch">
+        <arg name="topic_input_voxels" value="/scan/voxels" />
+        <arg name="topic_output_clusters" value="/scan/clusters" />
+    </include>
+
+    <include file="$(find wall_detection)/launch/wall_detection.launch">
+        <arg name="topic_input_clusters" value="/scan/clusters" />
+        <arg name="topic_output_walls" value="/obstacles/walls" />
+        <arg name="topic_output_obstacles" value="/obstacles/obstacles" />
+    </include>
  
     <include file="$(find car_tf)/launch/car_transformer.launch" />
 

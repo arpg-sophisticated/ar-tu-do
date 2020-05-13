@@ -3,7 +3,7 @@
 int DBSCAN::run()
 {
     int clusterID = 1;
-    vector<Voxel>::iterator iter;
+    vector<Point_>::iterator iter;
     for (iter = m_points->begin(); iter != m_points->end(); ++iter)
     {
         if (iter->clusterID == UNCLASSIFIED)
@@ -18,7 +18,7 @@ int DBSCAN::run()
     return 0;
 }
 
-int DBSCAN::expandCluster(Voxel point, int clusterID)
+int DBSCAN::expandCluster(Point_ point, int clusterID)
 {
     vector<int> clusterSeeds = calculateCluster(point);
 
@@ -70,10 +70,10 @@ int DBSCAN::expandCluster(Voxel point, int clusterID)
     }
 }
 
-vector<int> DBSCAN::calculateCluster(Voxel point)
+vector<int> DBSCAN::calculateCluster(Point_ point)
 {
     int index = 0;
-    vector<Voxel>::iterator iter;
+    vector<Point_>::iterator iter;
     vector<int> clusterIndex;
     for (iter = m_points->begin(); iter != m_points->end(); ++iter)
     {
@@ -86,7 +86,7 @@ vector<int> DBSCAN::calculateCluster(Voxel point)
     return clusterIndex;
 }
 
-inline double DBSCAN::calculateDistance(Voxel pointCore, Voxel pointTarget)
+inline double DBSCAN::calculateDistance(Point_ pointCore, Point_ pointTarget)
 {
     return pow(pointCore.x - pointTarget.x, 2) + pow(pointCore.y - pointTarget.y, 2) +
         pow(pointCore.z - pointTarget.z, 2);
