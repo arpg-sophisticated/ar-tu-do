@@ -254,8 +254,7 @@ def calc_steering_radius(steering_angle):
 def calc_angle_moving_average():
     if len(last_angle_moving_average[0]) == 0:
         return 0
-    return float(
-        sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
+    return float(sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
 
 
 def add_angle_moving_average(angle):
@@ -264,17 +263,14 @@ def add_angle_moving_average(angle):
         last_angle_moving_average[0] = last_angle_moving_average[0][1:]
     last_angle_moving_average[0].append(angle)
 
-
 """
 Returns a predicted point and distance to this point which is a possible future position if the car would drive straight.
 This position is important to calculate the error for the pid-controller.
 """
-
-
-def calc_predicted_car_position():
+def calc_predicted_car_position(remaining_distance, offset_distance):
     prediction_distance = min(0.1 + last_speed * 0.35, 2.0)
-    # if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
-    #     prediction_distance = remaining_distance
+    if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
+        prediction_distance = remaining_distance
     # steering_radius = calc_steering_radius(calc_angle_moving_average())
     # circle_section_angle = prediction_distance / steering_radius
     # print steering_radius, circle_section_angle, Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
@@ -381,6 +377,21 @@ def calc_closest_collision_point(points, demanded_side, safety_distance):
 def calc_shortest_distance_to_vector(p1, p2, p3):
     return np.linalg.norm(np.cross(p2-p1, p1-p3))/np.linalg.norm(p2-p1)
 
+
+def calc_distance(point_a, point_b):
+    return math.sqrt((point_a[0] - point_b[0])**2 + (point_a[1] - point_b[1])**2)
+
+
+def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
+    closest_point = None
+    closest_distance = 1000000
+    for point in points:
+        if point[1] > 0.3:
+            distance = calc_shortest_distance_to_vector(np.array(line_point_a), np.array(line_point_b), np.array(point))
+            if closest_distance > distance:
+                closest_distance = distance
+                closest_point = point
+    return closest_point
 
 def calc_distance(point_a, point_b):
     return math.sqrt((point_a[0] - point_b[0])**2 + (point_a[1] - point_b[1])**2)
@@ -540,15 +551,8 @@ def calc_target_car_position(
 #     return np.stack((x_points, y_points), axis=1)
 
 def show_steering_angle():
-    show_line_in_rviz(
-        35, [
-            Point(
-                0, 0), Point(
-                math.sin(
-                    calc_angle_moving_average()), math.cos(
-                        calc_angle_moving_average()))], color=ColorRGBA(
-                            1, 0, 0, 0.3))
-
+    show_line_in_rviz(35, [Point(0, 0), Point(math.sin(calc_angle_moving_average()), math.cos(calc_angle_moving_average()))],
+                      color=ColorRGBA(1, 0, 0, 0.3))
 
 """
 Determines speed and steering angle for the car based on a wall following algorithm.
@@ -574,16 +578,8 @@ def follow_walls(
         delta_time):
     global last_speed
     show_steering_angle()
-    predicted_car_position, prediction_distance = calc_predicted_car_position()
-    target_position = calc_target_car_position(
-        predicted_car_position,
-        curve_type,
-        left_circle,
-        right_circle,
-        upper_circle,
-        left_wall,
-        right_wall,
-        remaining_distance)
+    predicted_car_position, prediction_distance = calc_predicted_car_position(remaining_distance, CAR_WIDTH)
+    target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance)
 
     distance_to_target = math.sqrt(target_position.x**2 + target_position.y**2)
 
