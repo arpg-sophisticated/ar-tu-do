@@ -20,6 +20,8 @@ constexpr const char* TOPIC_VOXEL_ = "/scan/voxels";
 
 constexpr const char* LIDAR_FRAME = "laser";
 
+typedef unsigned __int128 uint128_t;
+
 class Boxing
 {
     private:
@@ -44,7 +46,20 @@ class Boxing
     float m_sor_mean_k;
     float m_sor_stddev_mul_thresh;
 
+    bool m_colors_enabled;
+    uint32_t m_color_levels;
+    bool m_adjacent_voxels;
+
+    float m_maximum_x = 0;
+    float m_minimum_x = 0;
+    float m_maximum_y = 0;
+    float m_minimum_y = 0;
+    float m_maximum_z = 0;
+    float m_minimum_z = 0;
+
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr m_colored_cloud;
+
+    uint128_t get_voxel_id(float x, float y, float z);
 
     public:
     Boxing();
