@@ -8,6 +8,7 @@ import math
 from collections import deque
 from parameters_q_learning_time_reward import *
 import rospy
+from drive_msgs.msg import wallfollowing_to_reinforcementlearning
 from drive_msgs.msg import drive_param
 from drive_msgs.msg import gazebo_state_telemetry
 
@@ -67,7 +68,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
         self.reset_car_to_segment(0)
 
-        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, drive_param, self.wallfollowing_drive_param_callback)
+        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, wallfollowing_to_reinforcementlearning, self.wallfollowing_drive_param_callback)
         rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, self.speed_callback)
 
         if CONTINUE:
@@ -78,8 +79,6 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         #print("Speed: "+ str(self.current_speed))
 
     def wallfollowing_drive_param_callback(self,message):
-        if(self.lastLasermessage is None):
-            return
         self.lastWFmessage = message
 
         self.set_current_point()
@@ -89,7 +88,10 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
                 self.perform_action(NULL_ACTION_INDEX,False)
                 return
             self.set_sector_times()
-            self.drive_parameters_publisher.publish(message) # do wallfollowing to get sector_times
+            drive_param_message = drive_param()
+            drive_param_message.angle = message.angle
+            drive_param_message.velocity = message.velocity
+            self.drive_parameters_publisher.publish(drive_param_message) # do wallfollowing to get sector_times
             return
 
         if(self.sleeping()):
@@ -98,7 +100,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         if(self.lastWFmessage == None):
             return
 
-        new_state = self.convert_laser_and_speed_message_to_tensor(self.lastLasermessage,self.current_speed)
+        new_state = self.convert_laser_and_speed_message_to_tensor(message.laser_scan,self.current_speed)
 
         if self.is_terminal_step:
             print("-- TERMINAL STEP --")
@@ -189,12 +191,17 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     # override implemented function of traning_node
     def on_receive_laser_scan(self, message):
-        self.lastLasermessage=message
+        return
 
     def set_current_point(self):
-        if((self.current_closest_point == track.get_length()-1) and track.get_closest_segment(self.car_position) == 0):
-            self.rounds_in_segment_completed +=1    
-            print("----------- ROUND COMPLETED ----------------")        
+        if(self.drive_forward):
+            if((self.current_closest_point == track.get_length()-1) and track.get_closest_segment(self.car_position) == 0):
+                self.rounds_in_segment_completed +=1    
+                print("----------- ROUND COMPLETED ----------------")    
+        else:
+            if((self.current_closest_point == 0) and track.get_closest_segment(self.car_position) == track.get_length()-1):
+                self.rounds_in_segment_completed +=1    
+                print("----------- ROUND COMPLETED ----------------")
         self.current_closest_point = track.get_closest_segment(self.car_position)
 
     def reached_target_point(self):
@@ -315,7 +322,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("----------------------------DIFFERENCE "+ str(time_difference)+ " -----------------------" )
 
             difference_multiplikator = CUSTOM_SEGMENTS[self.current_custom_segment_index][4]
-            reward =  (((1+(time_difference* difference_multiplikator)-0.05)**3)-1)/10.0
+            reward =  (((1+(time_difference* difference_multiplikator)-0.05)**3)-1)/3.0
             if(reward<=0):
                 reward=0
             reward = reward +0.01

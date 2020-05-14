@@ -5,6 +5,7 @@ project(drive_msgs)
 find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
+  sensor_msgs
 )
 
 ## Errors and Warnings
@@ -20,12 +21,14 @@ add_message_files(
   FILES
   drive_param.msg
   gazebo_state_telemetry.msg
+  wallfollowing_to_reinforcementlearning.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs
+  sensor_msgs
 )
 
 ###################################
@@ -34,7 +37,7 @@ generate_messages(
 
 ## Declare things to be passed to dependent projects
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs
+  CATKIN_DEPENDS message_runtime std_msgs sensor_msgs
 )
 
 

@@ -3,7 +3,7 @@
 import rospy
 from std_msgs.msg import ColorRGBA
 from sensor_msgs.msg import LaserScan
-from drive_msgs.msg import drive_param
+from drive_msgs.msg import wallfollowing_to_reinforcementlearning
 
 from rviz_geometry import show_circle_in_rviz, show_line_in_rviz
 
@@ -69,9 +69,12 @@ def convertRpmToSpeed(rpm):
 
 
 def drive(angle, velocity):
-    message = drive_param()
+    global laser_scan
+
+    message = wallfollowing_to_reinforcementlearning()
     message.angle = angle
     message.velocity = velocity
+    message.laser_scan = laser_scan
     drive_parameters_publisher.publish(message)
 
 
@@ -197,6 +200,9 @@ last_scan = None
 
 def laser_callback(scan_message):
     global last_scan
+    global laser_scan
+
+    laser_scan = scan_message
 
     scan_time = scan_message.header.stamp.to_sec()
     if last_scan is not None and abs(scan_time - last_scan) > 0.0001 and scan_time > last_scan:  # nopep8
@@ -221,7 +227,7 @@ pid = PIDController(1, 1, 1)
 
 rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
 drive_parameters_publisher = rospy.Publisher(
-    TOPIC_DRIVE_PARAMETERS_WF, drive_param, queue_size=1)
+    TOPIC_DRIVE_PARAMETERS_WF, wallfollowing_to_reinforcementlearning, queue_size=1)
 
 Server(wallfollowing2Config, dynamic_configuration_callback)
 

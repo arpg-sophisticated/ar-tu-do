@@ -9,20 +9,22 @@ import rospy
 from rospkg import RosPack
 
 # General parameters
-ACTIONS = [(0.15, 1.0), (0.15, 0.0), (0, -1.0), (0, 0.0), (0, 1.0), (-0.15, 0.0), (-0.15, 1.0)]
+ACTIONS = [(0.5, 1.0), (0.5, 0.0), (0, -1.0), (0, 0.0), (0, 1.0), (-0.5, 0.0), (-0.5, 1.0)]
 ACTION_COUNT = len(ACTIONS)
 NULL_ACTION_INDEX =3
 
 # Custom segments(startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
 #CUSTOM_SEGMENTS = [(0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(0,10,True,1,0.2,0.5)]
 #CUSTOM_SEGMENTS = [(0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1)]
-CUSTOM_SEGMENTS = [(0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(0,10,True,1,0.2,0.5),(0,10,True,3,0.08,0.33)]
-#                   (0,10,False,0,1),(10,20,False,0,1),(20,30,False,0,1),(30,40,False,0,1),(40,0,False,1,1),(0,10,False,1,0.2),(0,10,False,3,0.08)]
-#CUSTOM_SEGMENTS = [(0,10,True,2,0.1)]
+CUSTOM_SEGMENTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),
+                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1)]
+#CUSTOM_SEGMENTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),(40,0,False,3,0.08,0.33),
+#                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(0,10,True,1,0.2,0.5),(0,10,True,3,0.08,0.33)]
+
 
 # Only use some of the LIDAR measurements
-# When changing this value, also update laser_sample_count in q_learning.launch
-LASER_SAMPLE_COUNT = 8
+# When changing this value, also update laser_sample_count in q_learning_time_reward*.launch
+LASER_SAMPLE_COUNT = 256
 
 #safety velocity reduction for driving node
 SAFETY_REDUCTION = 1
