@@ -1,0 +1,83 @@
+%\section{Auswertung ___PH_DESC___ - ___PH_SIZE___}
+
+\begin{figure}
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+xmin=1]
+
+\addplot[smooth,green,solid] table [y=speed,x=distance]{___PH_FILENAME___.dat};
+\addplot[smooth,blue,solid] table [y=maxspeed,x=distance]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $v_{cur}(d)$}
+\addlegendentry{___PH_TITLE___ $v_{max}(d)$}
+
+\end{axis}
+\end{tikzpicture}
+\caption \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVT___,
+xmin=1]
+
+\addplot[smooth,green,solid] table [y=speed,x=time]{___PH_FILENAME___.dat};
+\addplot[smooth,blue,solid] table [y=maxspeed,x=time]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $v_{cur}(t)$}
+\addlegendentry{___PH_TITLE___ $v_{max}(t)$}
+
+\end{axis}
+\end{tikzpicture}
+\caption \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Zeit $t$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
+xtick distance=___PH_DIVD___,
+xmin=1]
+
+\addplot[smooth,green,solid] table [y=acceleration,x=distance]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $a(d)$}
+
+\end{axis}
+\end{tikzpicture}
+\caption \textbf{___PH_TITLE___:} Beschleunigung $a$ nach Distanz $d$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
+xtick distance=___PH_DIVT___,
+xmin=1]
+
+\addplot[smooth,green,solid] table [y=acceleration,x=time]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $a(t)$}
+
+\end{axis}
+\end{tikzpicture}
+\caption \textbf{___PH_TITLE___:} Beschleunigung $a$ nach Zeit $t$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+%\newpage
