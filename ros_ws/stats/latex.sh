@@ -22,16 +22,15 @@ sim-old_20200514-155328/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Versi
 "
 # Timesets to use for plots seperated by spaces or linebreaks
 # Please ensure, that the data files hold enough datasets
-# Format: COUNT;DIVT;DIVD;SMOO
+# Format: COUNT;DIVT;DIVD
 #     COUNT Number of datasets to use on Plots
 #     DIVT  Steps for plots by time
 #     DIVD  Steps for plots by distance
-#     SMOO  Smoothing: 0 for no, higher values smoothes stronger
 SETS="
-800;80;80;5
-400;40;40;3
-200;20;20;1
-100;10;10;0
+800;8;40
+400;4;20
+200;2;10
+100;1;5
 "
 
 ### functions
@@ -94,11 +93,52 @@ case $1 in
             done      
         done  
         
+        # create variables for main
+        PH_INCLUDES=""
+        PH_DATAITEMS="\\n"
+        PH_SETS="\\n"
 
+        # create list for datasets
+        for DATAFILE in $DATAFILES; do
+            FILENAME="$(echo $DATAFILE | cut -d ";" -f 1)"
+            TITLE="$(echo $DATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+            DESC="$(echo $DATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+            PH_DATAITEMS=$PH_DATAITEMS"\\\item \\\textbf{$TITLE:} $DESC\\n"
+        done
+
+        # create list for setsizes
+        for SET in $SETS; do
+            SIZE="$(echo $SET | cut -d ";" -f 1)"
+            PH_SETS=$PH_SETS"\\\item $SIZE Messwerte\\n"
+        done
         
-#head -$(($4+1)) $2 > new.dat
-        #head -$(($4+1)) $3 > old.dat
+        # create subsections from single
+        rm *.tex > /dev/null 2>&1
+        for DATAFILE in $DATAFILES; do
+            TITLEFILE="$(echo $DATAFILE | cut -d ";" -f 3)"
+            TITLE="$(echo $DATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+            DESC="$(echo $DATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+            for SET in $SETS; do
+                SIZE=$(echo $SET | cut -d ";" -f 1)
+                FILENAME="latex-data-$TITLEFILE-$SIZE"
+                DIVT=$(echo $SET | cut -d ";" -f 2)
+                DIVD=$(echo $SET | cut -d ";" -f 3)
+                cat tex/section.tex \
+                    | sed "s&___PH_DESC___&$DESC&g" \
+                    | sed "s&___PH_SIZE___&$SIZE&g" \
+                    | sed "s&___PH_DIVD___&$DIVD&g" \
+                    | sed "s&___PH_DIVT___&$DIVT&g" \
+                    | sed "s&___PH_FILENAME___&$FILENAME&g" \
+                    | sed "s&___PH_TITLE___&$TITLE&g" \
+                    > section-$TITLEFILE-$SIZE.tex
+                PH_INCLUDES=$PH_INCLUDES"\\\section {$DESC - $SIZE}\\n\\\include{section-$TITLEFILE-$SIZE}\\n"
+            done      
+        done
+        
+        # create main tex and replace variables
+        cat tex/main.tex | sed "s&___PH_DATAITEMS___&$PH_DATAITEMS&" | sed "s&___PH_SETS___&$PH_SETS&" | sed "s&___PH_INCLUDES___&$PH_INCLUDES&" > report.tex
         #pdflatex report.tex > /dev/null 2>&1
+        pdflatex report.tex
     ;;
     *)
         helpMain
