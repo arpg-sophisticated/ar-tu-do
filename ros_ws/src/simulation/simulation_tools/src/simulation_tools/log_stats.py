@@ -15,23 +15,75 @@ TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 
 def __init__(self):
+    global logfile_handler_csv;
+    global logfile_handler_dat;
+    
     global last_drive_message
-    global current_speed
-    global max_speed
     global car_position
     global car_orientation
     global track_position
     global logpath
     global logentry
     
+    global speed_current
+    global speed_last
+    global speed_delta
+    global speed_avg
+    
+    global maxspeed_current
+    global maxspeed_last
+    global maxspeed_delta
+    global maxspeed_avg
+    
+    global time_current
+    global time_last
+    global time_delta
+    
+    global distance_current
+    global distance_last
+    global distance_delta
+    
+    global acceleration_current
+    global acceleration_last
+    global acceleration_delta
+    
+    global angle_current
+    global angle_last
+    global angle_delta
+    
     last_drive_message = None
-    current_speed = 0
-    max_speed = 0
     car_position = None
     car_orientation = 0
     track_position = 0
     logentry = 0
-
+    
+    speed_current = 0
+    speed_last = 0
+    speed_delta = 0
+    speed_avg = 0
+    
+    maxspeed_current = 0
+    maxspeed_last = 0
+    maxspeed_delta = 0
+    maxspeed_avg = 0
+    
+    time_current = 0
+    time_last = 0
+    time_delta = 0
+    
+    distance_current = 0
+    distance_last = 0
+    distance_delta = 0
+    
+    acceleration_current = 0
+    acceleration_last = 0
+    acceleration_delta = 0
+    
+    angle_current = 0
+    angle_last = 0
+    angle_delta = 0
+    
+    
 def getStatsPath():
     fullpath = RosPack().get_path("simulation_tools").split("/")
     fullpath.reverse()
@@ -50,11 +102,19 @@ def drive_param_callback(message):
 
  
 def speed_callback(speed_message):
-    global current_speed
-    global max_speed
-    current_speed = speed_message.wheel_speed
-    # TODO: get real maximum speed from node meanwhile assume we're 10% slower than possible
-    max_speed = current_speed * 1.1
+    global speed_current
+    global speed_last
+    global speed_delta
+    global speed_avg
+    
+    speed_last = speed_current
+    speed_current = speed_message.wheel_speed
+    speed_delta = speed_current - speed_last
+    if logentry > 0:
+        speed_avg = ( speed_avg * ( logentry - 1 ) + speed_current ) / logentry
+    else:
+        speed_avg += speed_current
+            
     log_message()
 
 def on_model_state_callback(message):
@@ -70,39 +130,77 @@ def on_model_state_callback(message):
     track_position = track.localize(car_position)
 
 def log_message():
-    velocity = 0
-    angle = 0
     global last_drive_message
     global track_position
     global car_position
-    global current_speed
-    global max_speed
     global logpath
     global logentry
     
-    # logfile handlers overall
-    global logfile_handler_csv_speed;
-    global logfile_handler_dat_speed;
+    global speed_current
+    global speed_last
+    global speed_delta
+    global speed_avg
+    
+    global maxspeed_current
+    global maxspeed_last
+    global maxspeed_delta
+    global maxspeed_avg
+    
+    global time_current
+    global time_last
+    global time_delta
+    
+    global distance_current
+    global distance_last
+    global distance_delta
+    
+    global acceleration_current
+    global acceleration_last
+    global acceleration_delta
+    
+    global angle_current
+    global angle_last
+    global angle_delta
+    
+    global logfile_handler_csv;
+    global logfile_handler_dat;
     
     if(last_drive_message is not None):
-        velocity = last_drive_message.velocity
-        angle = last_drive_message.angle
-    time = rospy.get_time()
+        maxspeed_last = maxspeed_current
+        maxspeed_current = last_drive_message.velocity
+        maxspeed_delta = maxspeed_current - maxspeed_last
+        if logentry > 0:
+            maxspeed_avg = ( maxspeed_avg * ( logentry - 1 ) + maxspeed_current ) / logentry
+        else:
+            maxspeed_avg += maxspeed_current
+        
+        angle_last = angle_current
+        angle_current = last_drive_message.angle
+        angle_delta = angle_current - angle_last
+        
+        
+    time_last = time_current
+    time_current = rospy.get_time()
+    time_delta = time_current - time_last
     
-    # now handle logging - start logging in round o
+    distance_delta = time_delta * speed_current
+    distance_last = distance_current
+    distance_current += distance_delta
     
-       
-#    Path("/my/directory").mkdir(parents=True, exist_ok=True)
+    acceleration_last = acceleration_current
+    acceleration_current = 0
+    if time_delta > 0:
+        acceleration_current = speed_delta / time_delta
+    acceleration_delta = acceleration_current - acceleration_last
     
-    # current overall file implementation
-    #log_stats_file_path= os.path.join(RosPack().get_path("simulation_tools"), "log_stats.txt")
-#    log_stats_file = open(log_stats_file_path, "a")
-#    logfile_handler_csv_speed.write(str(time)+", "+str(track_position)+", "+str(car_position)+", "+str(velocity)+", "+str(angle)+", "+str(current_speed) + "\n")
     if logentry == 0:
         logbase = getStatsPath()
         dateTimeObj = datetime.now()    
         timestampStr = dateTimeObj.strftime("%Y%m%d-%H%M%S")
-        logpath = logbase + "/" + timestampStr
+        loginstance = ""
+        if len(sys.argv) > 1:
+            loginstance = sys.argv[1] + "_"
+        logpath = logbase + "/" + loginstance + timestampStr
         
         # create logpath for session if nonexistant
         try:
@@ -115,34 +213,107 @@ def log_message():
             pass
         
         # create handlers
-        logfile_handler_csv_speed = open(logpath + "/speed_over_time.csv", "a")
-        logfile_handler_dat_speed = open(logpath + "/speed_over_time.dat", "a")
-        logfile_handler_csv_speed_angle = open(logpath + "/speed_angle_over_time.csv", "a")
-        logfile_handler_dat_speed_angle = open(logpath + "/speed_angle_over_time.dat", "a")
-        logfile_handler_csv_speed.write("Datapoint;Time;Speed;Maxspeed\n")
-        logfile_handler_dat_speed.write("X t v vmax\n")
-        logfile_handler_csv_speed_angle.write("Datapoint;Time;Speed;Maxspeed;Angle\n")
-        logfile_handler_dat_speed_angle.write("X t v vmax angle\n")
+        logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
+        logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
+        logstring_header = "Datapoint;\
+            Time;\
+            TimeDelta;\
+            Speed;\
+            SpeedDelta;\
+            SpeedAverage;\
+            Maxspeed;\
+            MaxspeedDelta;\
+            MaxspeedAverage;\
+            Angle;\
+            AngleDelta;\
+            Acceleration;\
+            AccelerationDelta;\
+            Distance;\
+            DistanceDelta\
+            \n"
+        logfile_handler_csv.write(logstring_header)
+        logfile_handler_dat.write(logstring_header.replace("Datapoint","x").lower())
 
 
-    logfile_handler_csv_speed = open(logpath + "/speed_over_time.csv", "a")
-    logfile_handler_dat_speed = open(logpath + "/speed_over_time.dat", "a")
-    logfile_handler_csv_speed_angle = open(logpath + "/speed_angle_over_time.csv", "a")
-    logfile_handler_dat_speed_angle = open(logpath + "/speed_angle_over_time.dat", "a")
+    logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
+    logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
         
-    logstring_speed = str(logentry) + ";" + str('%.2f' % time)+ ";" + str('%.2f' % current_speed) + ";" + str('%.2f' % max_speed) + "\n"
-    logfile_handler_csv_speed.write(logstring_speed)
-    logfile_handler_dat_speed.write(logstring_speed.replace(";"," "))
-    
-    logstring_speed_angle = str(logentry) + ";" + str('%.2f' % time)+ ";" + str('%.2f' % current_speed) + ";" + str('%.2f' % max_speed) + ";" + str('%.2f' % angle) + "\n"
-    logfile_handler_csv_speed_angle.write(logstring_speed_angle)
-    logfile_handler_dat_speed_angle.write(logstring_speed_angle.replace(";"," "))
+    logstring = str(logentry) + \
+        ";" + str('%.2f' % time_current) + \
+        ";" + str('%.2f' % time_delta) + \
+        ";" + str('%.2f' % speed_current) + \
+        ";" + str('%.2f' % speed_delta) + \
+        ";" + str('%.2f' % speed_avg) + \
+        ";" + str('%.2f' % maxspeed_current) + \
+        ";" + str('%.2f' % maxspeed_delta) + \
+        ";" + str('%.2f' % maxspeed_avg) + \
+        ";" + str('%.2f' % angle_current) + \
+        ";" + str('%.2f' % angle_delta) + \
+        ";" + str('%.2f' % acceleration_current) + \
+        ";" + str('%.2f' % acceleration_delta) + \
+        ";" + str('%.2f' % distance_current) + \
+        ";" + str('%.2f' % distance_delta) + \
+        "\n"
+    logfile_handler_csv.write(logstring)
+    logfile_handler_dat.write(logstring.replace(";"," "))
     
     logentry += 1
 
 
 global logentry
 logentry = 0
+    
+global speed_current
+global speed_last
+global speed_delta
+global speed_avg
+
+global maxspeed_current
+global maxspeed_last
+global maxspeed_delta
+global maxspeed_avg
+
+global time_current
+global time_last
+global time_delta
+
+global distance_current
+global distance_last
+global distance_delta
+
+global acceleration_current
+global acceleration_last
+global acceleration_delta
+
+global angle_current
+global angle_last
+global angle_delta
+
+speed_current = 0
+speed_last = 0
+speed_delta = 0
+speed_avg = 0
+
+maxspeed_current = 0
+maxspeed_last = 0
+maxspeed_delta = 0
+maxspeed_avg = 0
+
+time_current = 0
+time_last = 0
+time_delta = 0
+
+distance_current = 0
+distance_last = 0
+distance_delta = 0
+
+acceleration_current = 0
+acceleration_last = 0
+acceleration_delta = 0
+
+angle_current = 0
+angle_last = 0
+angle_delta = 0
 
 rospy.init_node('log_stats', anonymous=True)
 rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)

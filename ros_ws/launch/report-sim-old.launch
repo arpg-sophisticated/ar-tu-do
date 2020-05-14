@@ -82,7 +82,7 @@
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
     <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
-    <include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>
+    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
     <group if="$(arg emergency_stop)">
         <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
@@ -102,5 +102,5 @@
     </node>
     <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />
 
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="sim-old"/>
 </launch>
