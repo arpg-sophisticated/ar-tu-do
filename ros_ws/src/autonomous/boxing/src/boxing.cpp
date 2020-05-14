@@ -90,14 +90,13 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
     }
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud = m_sor_enabled ? cloud_sor_ptr : inputCloud;
-
     // now quantize this cloud for our system. this could probably also be implemented as a proper filter
 
     float largest_intensity = 0;
 
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr quantized_cloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
-    quantized_cloud->clear();
     quantized_cloud->header.frame_id = output_cloud->header.frame_id;
+
     for (size_t i = 0; i < output_cloud->points.size(); i++)
     {
         pcl::PointXYZ& point = output_cloud->at(i);
@@ -187,7 +186,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
                 }
 
                 if (largest_rgb == 0)
-                    largest_rgb = 255 << 16 | 255 << 8 | 255;
+                    largest_rgb = 0 << 16 | 255 << 8 | 0;
 
                 colors_in_voxel.clear();
 
