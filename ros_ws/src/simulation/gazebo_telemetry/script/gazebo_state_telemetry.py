@@ -8,8 +8,8 @@ from track import track, Point
 
 import time
 
-wheel_velocity = None
-car_velocity = None
+wheel_velocity = 0
+car_velocity = 0
 max_car_velocity = 0
 
 car_acceleration = None
@@ -57,6 +57,9 @@ def calculate_wheel_velocity():
     twists = [link_states_message.twist[i].angular for i in indices]
 
     angle_velocities = [(t.x**2 + t.y**2)**0.5 for t in twists]
+    if(len(angle_velocities) == 0):
+        wheel_velocity = 0 
+        return
     angular_velocity = sum(angle_velocities) / len(angle_velocities)
     wheel_velocity = angular_velocity * WHEEL_RADIUS
 
