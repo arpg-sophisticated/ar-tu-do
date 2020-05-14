@@ -1,0 +1,516 @@
+<html>
+    <head>
+        <title>ARPG Track Calculator</title>
+        <style>
+            body {
+                font-family: "Roboto";
+            }
+            
+            input[type=text] {
+                width: 190px;
+            }
+            
+            input[type=number] {
+                width: 190px;
+            }
+            
+            label {
+                font-size: 80%;
+            }
+            
+            h3 {
+                margin-bottom: 4px;
+                margin-top: 0px;
+            }
+            
+            #windowleft {
+                float:left;
+                width: 275px;
+            }
+            
+            .windowright {
+                float:left;
+                width: 275px;
+            }
+            
+            #input_values {
+                margin-bottom: 32px;
+            }
+            
+            .inputitem {
+                margin-bottom: 8px;
+            }
+            
+            .unit {
+                margin-left: 4px;
+                font-size: 80%;
+            }
+            
+            .input_text_readonly {
+                border: none;
+                padding: 1px !important;
+            }
+            
+            .measure_width {
+                border-color: red !important;                
+                border-left: 1px dashed;
+                border-right: 1px dashed;
+                border-bottom: 1px solid;
+                text-align: center;
+                font-size: 80%;
+                color: red;
+            }
+            
+            .measure_height {
+                border-color: red !important;                
+                border-top: 1px dashed;
+                border-left: 1px solid;
+                border-bottom: 1px dashed;
+                text-align: center;
+                font-size: 80%;
+                color: red;
+                writing-mode: vertical-rl;
+                -webkit-transform: rotate(180deg) !important
+            }
+            
+            .measure_dot {
+                height: 0px;
+                width: 0px;
+                position: absolute;
+                border: 1.5px solid red;
+                border-radius: 3px;
+            }  
+            
+            .speed_dot {
+                height: 0px;
+                width: 0px;
+                position: absolute;
+                border: 1.5px solid blue;
+                border-radius: 3px;
+            }    
+            
+            .measure_line {
+                border-color: red !important;                
+                border-left: 1px dashed;
+                border-right: 1px dashed;
+                border-bottom: 1px solid;
+                text-align: center;
+                color: red;
+                height: 18px;
+                line-height: 18px;
+                font-size: 80%;
+                position: absolute;
+            }
+            
+            .measure_line_v {
+                border-color: red !important;                
+                border-top: 1px dashed;
+                border-bottom: 1px dashed;
+                border-left: 1px solid;
+                text-align: center;
+                color: red;
+                width: 18px;
+                line-height: 18px;
+                font-size: 80%;
+                position: absolute;
+                writing-mode: vertical-rl;
+                -webkit-transform: rotate(180deg) !important
+            }
+            
+            .speed_line {
+                border-color: blue !important;    
+                border-left: 2px dashed;
+                text-align: center;
+                color: blue;
+                width: 18px;
+                line-height: 18px;
+                font-size: 80%;
+                position: absolute;
+                width: fit-content;
+            }
+            
+            #track {
+                clear: both;
+            }
+            
+            #room {
+                border: 4px black solid;
+                float: left;
+            }
+            
+            #measure_room_h {
+                float: left;
+            }
+            
+            #measure_room_w {
+                clear: both;
+            }
+            
+            #track_outer {
+                border: 2px black solid;
+                z-index: 1000;
+            }
+            
+            #track_inner {
+                border: 2px black solid;
+                z-index: 1000;
+            }
+            
+            #track_drive {
+                border: 2px green dashed;
+                z-index: 1000;
+            }
+        </style>
+        <script>
+            var values = [];
+            values["acceleration"] = 9.81;
+            values["friction"] = 0.85;
+            values["track_width"] = 1.5;
+            values["outer_distance"] = 1.0;
+            values["aspect"] = 0.3;
+            values["vmax"] = 15;
+            values["display"] = 40;
+            
+            values["acceleration_eff"] = 0;
+            values["speed_curve"] = 0;
+            values["speed_straight"] = 0;
+            values["curve_radius"] = 0;
+            values["curve_radius_outer"] = 0;
+            values["curve_radius_inner"] = 0;
+            values["straight_length"] = 0;
+            values["track_only_width"] = 0;
+            values["track_only_height"] = 0;
+            values["space_width"] = 0;
+            values["space_height"] = 0;
+            
+            values["circ_inner"] = 0;
+            values["circ_outer"] = 0;
+            values["circ_drive"] = 0;
+    
+            function updateValue(element) {
+                values[element.id] = element.value;
+                runCalculation();
+                drawTrack();
+            }
+    
+            function updateInput(id) {
+                document.getElementById(id).value = values[id];
+            }
+    
+            function updateDrawingMeasure(value, id) {
+                document.getElementById(id).textContent = "(" + value + ")";
+            }
+            
+            function runCalculation() {
+                updateInput("acceleration");
+                updateInput("friction");
+                updateInput("track_width");
+                updateInput("outer_distance");
+                updateInput("aspect");
+                updateInput("vmax");
+                updateInput("display");
+                
+                values["acceleration_eff"] = (values["acceleration"] * values["friction"]).toFixed(2);
+                updateCalculated("acceleration_eff");
+                values["speed_curve"] = (values["vmax"] * values["aspect"]).toFixed(2);
+                updateCalculated("speed_curve");
+                values["speed_straight"] = (values["vmax"] * ( 1 - values["aspect"])).toFixed(2);
+                updateCalculated("speed_straight");
+                values["curve_radius"] = (values["speed_curve"] * values["speed_curve"] / values["acceleration_eff"]).toFixed(2);
+                updateCalculated("curve_radius");
+                values["curve_radius_outer"] = ((values["curve_radius"] * 1) + (values["track_width"] / 2)).toFixed(2);
+                updateCalculated("curve_radius_outer");
+                values["curve_radius_inner"] = ((values["curve_radius"] * 1) - (values["track_width"] / 2)).toFixed(2);
+                updateCalculated("curve_radius_inner");
+                values["straight_length"] = (((values["vmax"] * values["vmax"]) - (values["speed_curve"] * values["speed_curve"])) / (2 * values["acceleration_eff"])).toFixed(2);
+                updateCalculated("straight_length");
+                values["track_only_width"] = (2 * values["straight_length"] + 2 * values["curve_radius_outer"]).toFixed(2);
+                updateCalculated("track_only_width");
+                values["track_only_height"] = (2 * values["curve_radius_outer"]).toFixed(2);
+                updateCalculated("track_only_height");
+                values["space_width"] = ((values["track_only_width"] * 1) + 2 * values["outer_distance"]).toFixed(2);
+                updateCalculated("space_width");
+                values["space_height"] = ((values["track_only_height"] * 1) + 2 * values["outer_distance"]).toFixed(2);
+                updateCalculated("space_height");
+                values["circ_drive"] = (values["straight_length"] * 4 + Math.PI * 2 * values["curve_radius"]).toFixed(2);
+                updateCalculated("circ_drive");
+                values["circ_inner"] = (values["straight_length"] * 4 + Math.PI * 2 * values["curve_radius_inner"]).toFixed(2);
+                updateCalculated("circ_inner");
+                values["circ_outer"] = (values["straight_length"] * 4 + Math.PI * 2 * values["curve_radius_outer"]).toFixed(2);
+                updateCalculated("circ_outer");
+                
+                drawTrack();
+            }
+    
+            function updateCalculated(id) {
+                document.getElementById(id).value = values[id];
+            }
+            
+            function drawTrack() {
+                var roomElement = document.getElementById("room");
+                roomElement.style.width = (values["space_width"] * values["display"]) + "px";
+                roomElement.style.height = (values["space_height"] * values["display"]) + "px";
+                
+                var trackOuterElement = document.getElementById("track_outer");
+                trackOuterElement.style.width = (values["track_only_width"] * values["display"]) + "px";
+                trackOuterElement.style.height = (values["track_only_height"] * values["display"]) + "px";
+                trackOuterElement.style.margin = ((values["outer_distance"] * values["display"]) - 3.5)+ "px";
+                trackOuterElement.style.borderRadius = ((values["track_only_height"] * values["display"]) / 2 )+ "px";
+                
+                var trackDriveElement = document.getElementById("track_drive");
+                trackDriveElement.style.width = ((values["track_only_width"] - values["track_width"] / 1) * values["display"]) + "px";
+                trackDriveElement.style.height = ((values["track_only_height"] - values["track_width"] / 1) * values["display"]) + "px";
+                trackDriveElement.style.margin = ((values["track_width"] * values["display"] / 2) - 1.5)+ "px";
+                trackDriveElement.style.borderRadius = (((values["track_only_height"] - values["track_width"] / 2) * values["display"]) / 2)+ "px";
+                
+                var trackInnerElement = document.getElementById("track_inner");
+                trackInnerElement.style.width = ((values["track_only_width"] - values["track_width"] * 2) * values["display"]) + "px";
+                trackInnerElement.style.height = ((values["track_only_height"] - values["track_width"] * 2) * values["display"]) + "px";
+                trackInnerElement.style.margin = ((values["track_width"] * values["display"] / 2) - 1.5)+ "px";
+                trackInnerElement.style.borderRadius = (((values["track_only_height"] - values["track_width"]) * values["display"]) / 2)+ "px";
+                
+                var measRoomWidthElement = document.getElementById("measure_room_w");
+                measRoomWidthElement.style.width = (values["space_width"] * values["display"] + 6) + "px";
+                measRoomWidthElement.style.height = "30px";
+                measRoomWidthElement.style.lineHeight = "36px";
+                
+                var measRoomHeightElement = document.getElementById("measure_room_h");
+                measRoomHeightElement.style.height = (values["space_height"] * values["display"] + 6) + "px";
+                measRoomHeightElement.style.width = "30px";
+                measRoomHeightElement.style.lineHeight = "36px";
+                
+                var measureBaseX = document.getElementById("room").getBoundingClientRect().top;
+                var measureBaseY = document.getElementById("room").getBoundingClientRect().left;
+                
+                var measDotRElement = document.getElementById("measure_dot_r");
+                measDotRElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measDotRElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                
+                var measDotSaElement = document.getElementById("measure_dot_sa");
+                measDotSaElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measDotSaElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) + (values["straight_length"] * values["display"])) + "px";
+                
+                var measDotSbElement = document.getElementById("measure_dot_sb");
+                measDotSbElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measDotSbElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) + (values["straight_length"] * values["display"]) * 2) + "px";
+                
+                var measLineRaElement = document.getElementById("measure_line_ro");
+                measLineRaElement.style.width = ((values["track_only_height"] * values["display"]) / 2 - 1.5) + "px";
+                measLineRaElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineRaElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.5)) + "px";
+                
+                var measLineSbElement = document.getElementById("measure_line_sb");
+                measLineSbElement.style.width = ((values["straight_length"] * values["display"]) - 1.5) + "px";
+                measLineSbElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineSbElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.0) + ((values["track_only_height"] * values["display"]) / 2)) + "px";
+                
+                var measLineSaElement = document.getElementById("measure_line_sa");
+                measLineSaElement.style.width = ((values["straight_length"] * values["display"]) - 1.0) + "px";
+                measLineSaElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineSaElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 0.5) + ((values["track_only_height"] * values["display"]) / 2) + ((values["straight_length"] * values["display"]))) + "px";
+                
+                var measLineRiElement = document.getElementById("measure_line_ri");
+                measLineRiElement.style.width = ((values["track_only_height"] * values["display"]) / 2 - ((values["track_width"] * values["display"])) + 1 ) + "px";
+                measLineRiElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineRiElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 0.5) + ((values["track_only_height"] * values["display"]) / 2) + ((values["straight_length"] * 2 * values["display"]))) + "px";
+                
+                var measLineRElement = document.getElementById("measure_line_r");
+                measLineRElement.style.height = ((values["track_only_height"] * values["display"]) / 2 - 1.5 - (values["track_width"] * values["display"]) / 2) + "px";
+                measLineRElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - (values["track_only_height"] * values["display"] / 2) + (values["track_width"] * values["display"]) / 2 + 1.5) + "px";
+                measLineRElement.style.left = ((measureBaseY) + ((values["track_only_height"] * values["display"]) / 2 - 1.5) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.5)) + "px";
+                
+                var measLineWrElement = document.getElementById("measure_line_wr");
+                measLineWrElement.style.width = ((values["straight_length"] * 2 * values["display"]) + (values["track_only_height"] * values["display"]) - 1.0) + "px";
+                measLineWrElement.style.height = ((values["track_only_height"] * values["display"] / 2) + 5) + "px";
+                measLineWrElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2) + 22 + 2.5) + "px";
+                measLineWrElement.style.lineHeight = ((values["outer_distance"] * values["display"] * 2) + ((values["track_only_height"] * values["display"]) / 2) + 28 + 2.5) + "px";
+                measLineWrElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + 2) + "px";
+                
+                var measLineHrElement = document.getElementById("measure_line_hr");
+                measLineHrElement.style.height = ((values["track_only_height"] * values["display"]) - 1.5) + "px";
+                measLineHrElement.style.width = ((values["curve_radius_outer"] * values["display"]) + 26) + "px";
+                measLineHrElement.style.lineHeight = ((values["curve_radius_outer"] * values["display"] * 2) + 28) + "px";
+                measLineHrElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + 2.5) + "px";
+                measLineHrElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) + ((values["straight_length"] * values["display"])) * 2) + "px";
+                
+                var measLineWElement = document.getElementById("measure_line_w");
+                measLineWElement.style.width = ((values["track_width"] * values["display"]) - 1.5) + "px";
+                measLineWElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineWElement.style.left = ((measureBaseY) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 2.0) + ((values["track_only_height"] * values["display"]) / 2) + ((values["straight_length"] * 2 * values["display"])) + (values["track_only_height"] * values["display"]) / 2 - ((values["track_width"] * values["display"]))) + "px";
+                
+                var measLineDElement = document.getElementById("measure_line_d");
+                measLineDElement.style.width = ((values["outer_distance"] * values["display"]) - 2.5) + "px";
+                measLineDElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 )) + "px";
+                measLineDElement.style.left = ((measureBaseY) + 3) + "px";
+                
+                var speedLineVk1Element = document.getElementById("speed_line_vc1");
+                speedLineVk1Element.style.height = ((values["track_only_height"] * values["display"]) / 2 - 1.5 - (values["track_width"] * values["display"]) / 2) + "px";
+                speedLineVk1Element.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 1 ) - (values["track_only_height"] * values["display"] / 2) + (values["track_width"] * values["display"]) / 2 + 1.5) + "px";
+                speedLineVk1Element.style.left = ((measureBaseY) + ((values["track_only_height"] * values["display"]) / 2 - 1.5) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.5)) + "px";
+                
+                var speedLineVMaxElement = document.getElementById("speed_line_vmax");
+                speedLineVMaxElement.style.height = ((values["track_only_height"] * values["display"]) / 2 - 1.5 - (values["track_width"] * values["display"]) / 2) + "px";
+                speedLineVMaxElement.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 1 ) - (values["track_only_height"] * values["display"] / 2) + (values["track_width"] * values["display"]) / 2 + 1.5) + "px";
+                speedLineVMaxElement.style.left = ((measureBaseY) + ((values["track_only_height"] * values["display"]) / 2 - 1.5) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.5) + ((values["straight_length"] * values["display"]))) + "px";
+                
+                var speedLineVk2Element = document.getElementById("speed_line_vc2");
+                speedLineVk2Element.style.height = ((values["track_only_height"] * values["display"]) / 2 - 1.5 - (values["track_width"] * values["display"]) / 2) + "px";
+                speedLineVk2Element.style.top = ((measureBaseX) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 1 ) - (values["track_only_height"] * values["display"] / 2) + (values["track_width"] * values["display"]) / 2 + 1.5) + "px";
+                speedLineVk2Element.style.left = ((measureBaseY) + ((values["track_only_height"] * values["display"]) / 2 - 1.5) + (values["outer_distance"] * values["display"]) + ((values["track_only_height"] * values["display"]) / 2 ) - ((values["track_only_height"] * values["display"]) / 2 - 1.5) + ((values["straight_length"] * values["display"]) * 2)) + "px";
+                
+                updateDrawingMeasure(values["space_width"] + "m", "drawing_wtot");
+                updateDrawingMeasure(values["space_height"] + "m", "drawing_htot");
+                updateDrawingMeasure(values["track_only_width"] + "m", "drawing_wr");
+                updateDrawingMeasure(values["track_only_height"] + "m", "drawing_hr");
+                updateDrawingMeasure(values["straight_length"] + "m", "drawing_sa");
+                updateDrawingMeasure(values["straight_length"] + "m", "drawing_sb");
+                updateDrawingMeasure(values["curve_radius"] + "m", "drawing_r");
+                updateDrawingMeasure(values["curve_radius_outer"] + "m", "drawing_ro");
+                updateDrawingMeasure(values["curve_radius_inner"] + "m", "drawing_ri");
+                updateDrawingMeasure(values["track_width"] + "m", "drawing_w");
+                updateDrawingMeasure(values["outer_distance"] + "m", "drawing_d");
+                updateDrawingMeasure(values["speed_curve"] + "m/s", "drawing_vc1");
+                updateDrawingMeasure(values["speed_curve"] + "m/s", "drawing_vc2");
+                updateDrawingMeasure(values["vmax"] + "m/s", "drawing_vmax");
+            }
+        </script>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div class="speed_line" id="speed_line_vc1"><i>v<sub>c</sub> <span id="drawing_vc1"></span></i></div>
+            <div class="speed_line" id="speed_line_vc2"><i>v<sub>c</sub> <span id="drawing_vc2"></span></i></div>
+            <div class="speed_line" id="speed_line_vmax"><i>v<sub>max</sub> <span id="drawing_vmax"></span></i></div>            
+            <div class="measure_dot" id="measure_dot_r"></div>
+            <div class="measure_dot" id="measure_dot_sa"></div>
+            <div class="measure_dot" id="measure_dot_sb"></div>
+            <div class="measure_line" id="measure_line_ro"><i>r<sub>o</sub> <span id="drawing_ro"></span></i></div>
+            <div class="measure_line" id="measure_line_sa"><i>s<sub>a</sub> <span id="drawing_sa"></span></i></div>
+            <div class="measure_line" id="measure_line_sb"><i>s<sub>b</sub> <span id="drawing_sb"></span></i></div>
+            <div class="measure_line" id="measure_line_ri"><i>r<sub>i</sub> <span id="drawing_ri"></span></i></div>
+            <div class="measure_line_v" id="measure_line_r"><i>r <span id="drawing_r"></span></i></div>
+            <div class="measure_line" id="measure_line_wr"><i>w<sub>r</sub> <span id="drawing_wr"></span></i></div>
+            <div class="measure_line_v" id="measure_line_hr"><i>h<sub>r</sub> <span id="drawing_hr"></span></i></div>
+            <div class="measure_line" id="measure_line_w"><i>w <span id="drawing_w"></span></i></div>
+            <div class="measure_line" id="measure_line_d"><i>d <span id="drawing_d"></span></i></div>
+            <h1>ARPG Track Calculator</h1>
+        <div id="data">
+            <div id="windowleft">
+                <div id="input_values">
+                    <h3>Input</h3>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" min="0" name="acceleration" id="acceleration" value="0" onChange="updateValue(this)"><span class="unit">m/s^2</span><br>
+                        <label>Acceleration <i>g</i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" min="0" name="friction" id="friction" value="0" onChange="updateValue(this)"><br>
+                        <label>Coefficient of friction <i>&mu;</i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.1" min="0" name="track_width" id="track_width" value="0" onChange="updateValue(this)"><span class="unit">m</span><br>
+                        <label>Track width <i>w</i> on straight</label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.1" min="0" name="outer_distance" id="outer_distance" value="0" onChange="updateValue(this)"><span class="unit">m</span><br>
+                        <label>Outer distance <i>d</i> of track</label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" min="0.2" max="1.0" name="aspect" id="aspect" value="0" onChange="updateValue(this)"><br>
+                        <label>Speed ratio curves - 0.2 ... 1.0 (circle) </label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" min="0" name="vmax" id="vmax" value="0" onChange="updateValue(this)"><span class="unit">m/s</span><br>
+                        <label>Target maximum speed <i>v<sub>max</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="1" min="10" name="display" id="display" value="0" onChange="updateValue(this)"><span class="unit">px/m</span><br>
+                        <label>Pixel per m</label>
+                    </div>
+                </div>
+            </div>
+            <div class="windowright">
+                <div class="calculated_values">
+                    <h3>Calculated</h3>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="speed_curve" id="speed_curve" value="0" readonly class="input_text_readonly"><span class="unit">m/s</span><br>
+                        <label>Speed in/out curve <i>v<sub>c</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="speed_straight" id="speed_straight" value="0" readonly class="input_text_readonly"><span class="unit">m/s</span><br>
+                        <label>Speed gain on straight <i>v<sub>gain</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="curve_radius" id="curve_radius" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Curve radius <i>r</i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="curve_radius_outer" id="curve_radius_outer" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Curve radius (outer) <i>r<sub>o</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="curve_radius_inner" id="curve_radius_inner" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Curve radius (inner) <i>r<sub>i</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="acceleration_eff" id="acceleration_eff" value="0" readonly class="input_text_readonly"><span class="unit">m/s^2</span><br>
+                        <label>Effective acceleration <i>a<sub>eff</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="straight_length" id="straight_length" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Acceleration/Break length <i>s<sub>a</sub>, s<sub>b</sub></i></label>
+                    </div>
+                </div>
+            </div>
+            <div class="windowright">
+                <div class="calculated_values">
+                    <h3>&zwnj;</h3>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="track_only_width" id="track_only_width" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Width of racetrack <i>w<sub>r</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="track_only_height" id="track_only_height" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Height of racetrack <i>h<sub>r</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="space_width" id="space_width" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Overall width needed <i>w<sub>tot</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="space_height" id="space_height" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Overall height needed <i>h<sub>tot</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="circ_drive" id="circ_drive" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Length drive path <i>c<sub>d</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="circ_outer" id="circ_outer" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Circumfence outer wall <i>c<sub>o</sub></i></label>
+                    </div>
+                    <div class="inputitem">
+                        <input type="number" step="0.01" name="circ_inner" id="circ_inner" value="0" readonly class="input_text_readonly"><span class="unit">m</span><br>
+                        <label>Circumfence inner wall <i>c<sub>i</sub></i></label>
+                    </div>
+                </div>
+            </div>
+           </div>
+           <div id="track">
+                <h3>Resulting Track</h3>
+                <div id="room">
+                    <div id="track_outer">
+                        <div id="track_drive">
+                            <div id="track_inner">
+                            </div>
+                        </div>
+                    </div>                 
+                </div>
+                <div class="measure_height" id="measure_room_h"><i>w<sub>tot</sub> <span id="drawing_htot"></span></i></div>
+                <div class="measure_width" id="measure_room_w"><i>w<sub>tot</sub> <span id="drawing_wtot"></span></i></div>
+                <br><label><i>We assume CCW driving. Please scale to fit one page on printing.</i></label>
+            </div>
+        </div>
+        <script>
+            runCalculation();
+        </script>
+    </body>
+</html>

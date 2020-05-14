@@ -100,7 +100,11 @@ def drive(angle, velocity):
 
 def get_scans_in_angular_range(laser_scan, angle_start, angle_end):
     ranges = np.array(laser_scan.ranges)
-    filterd_ranges = ranges[int((laser_scan.angle_max + angle_start) / laser_scan.angle_increment): int((laser_scan.angle_max + angle_end) / laser_scan.angle_increment)]
+    filterd_ranges = ranges[int((laser_scan.angle_max +
+                                 angle_start) /
+                                laser_scan.angle_increment): int((laser_scan.angle_max +
+                                                                  angle_end) /
+                                                                 laser_scan.angle_increment)]
     inf_mask = np.isinf(filterd_ranges)
     if inf_mask.any():
         filterd_ranges = filterd_ranges[~inf_mask]
@@ -153,10 +157,19 @@ def find_left_right_border(points):
 
     split_index = np.argmax(distances)
 
-    show_line_in_rviz(15, [Point(points[split_index][0], points[split_index][1]), Point(points[split_index + 1][0], points[split_index + 1][1])],
-                      color=ColorRGBA(0, 1, 0, 0.7), line_width=0.005)
+    show_line_in_rviz(15,
+                      [Point(points[split_index][0],
+                             points[split_index][1]),
+                          Point(points[split_index + 1][0],
+                                points[split_index + 1][1])],
+                      color=ColorRGBA(0,
+                                      1,
+                                      0,
+                                      0.7),
+                      line_width=0.005)
 
     return np.argmax(distances) + 1
+
 
 """
 Calculates the maximal possible speed which can be targeted before the car hits the breaking point.
@@ -166,8 +179,25 @@ target_speed: target speed which should be reached at curve entry
 acceleration: typical acceleration of the car
 decceleration: typical decceleration of the car
 """
-def calc_max_speed(distance, current_speed, target_speed, acceleration, decceleration):
-    return math.sqrt((2 * distance * acceleration * decceleration + current_speed**2 * decceleration + target_speed**2 * acceleration) / (acceleration + decceleration))
+
+
+def calc_max_speed(
+        distance,
+        current_speed,
+        target_speed,
+        acceleration,
+        decceleration):
+    return math.sqrt((2 *
+                      distance *
+                      acceleration *
+                      decceleration +
+                      current_speed**2 *
+                      decceleration +
+                      target_speed**2 *
+                      acceleration) /
+                     (acceleration +
+                      decceleration))
+
 
 """
 Calculates the distance until the car has to break before a curve entry.
@@ -177,14 +207,25 @@ target_speed: target speed which should be reached at curve entry
 acceleration: typical acceleration of the car
 decceleration: typical decceleration of the car
 """
-def calc_braking_distance(distance, current_speed, target_speed, acceleration, decceleration):
-    return (2 * distance * acceleration + current_speed**2 - target_speed**2) / (2 * acceleration + 2 * decceleration)
+
+
+def calc_braking_distance(
+        distance,
+        current_speed,
+        target_speed,
+        acceleration,
+        decceleration):
+    return (2 * distance * acceleration + current_speed**2 -
+            target_speed**2) / (2 * acceleration + 2 * decceleration)
+
 
 """
 Calculates the maximal speed which can be targeted in a curve.
 friction: friction of the car on the ground
 radius: radius of the curve
 """
+
+
 def calc_max_curve_speed(friction, radius):
     return math.sqrt(friction * 9.81 * radius)
 
@@ -213,7 +254,8 @@ def calc_steering_radius(steering_angle):
 def calc_angle_moving_average():
     if len(last_angle_moving_average[0]) == 0:
         return 0
-    return float(sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
+    return float(
+        sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
 
 
 def add_angle_moving_average(angle):
@@ -222,10 +264,13 @@ def add_angle_moving_average(angle):
         last_angle_moving_average[0] = last_angle_moving_average[0][1:]
     last_angle_moving_average[0].append(angle)
 
+
 """
 Returns a predicted point and distance to this point which is a possible future position if the car would drive straight.
 This position is important to calculate the error for the pid-controller.
 """
+
+
 def calc_predicted_car_position():
     prediction_distance = min(0.1 + last_speed * 0.35, 2.0)
     # if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
@@ -276,11 +321,14 @@ def calc_circle_tangent(circle_a, outside_point):
 
 """
 Calculates the determinant of point_c and a line between point_a and point_b.
-If the return value is greater than 0 point_c is on the right side, when it is 
-zero it is on the line and if it is smaller than zero it is on the left side. 
+If the return value is greater than 0 point_c is on the right side, when it is
+zero it is on the line and if it is smaller than zero it is on the left side.
 """
+
+
 def which_side_of_line(point_a, point_b, point_c):
-    return (point_c[0] - point_a[0]) * (point_b[1] - point_a[1]) - (point_c[1] - point_a[1]) * (point_b[0] - point_a[0])
+    return (point_c[0] - point_a[0]) * (point_b[1] - point_a[1]) - \
+        (point_c[1] - point_a[1]) * (point_b[0] - point_a[0])
 
 
 """
@@ -288,19 +336,27 @@ Returns true if all points are on one side of the line between point_a and point
 The parameter demanded_side indicates on which side all points should be.
 demanded_side: 1 -> right side, -1 -> left side
 """
+
+
 def all_points_on_one_side(points, point_a, point_b, demanded_side):
     for point in points:
         if point is not point_b:
-            if which_side_of_line(point_a, point_b, point) < 0 and demanded_side > 0:
+            if which_side_of_line(
+                    point_a,
+                    point_b,
+                    point) < 0 and demanded_side > 0:
                 return False
             elif which_side_of_line(point_a, point_b, point) > 0 and demanded_side < 0:
                 return False
     return True
 
+
 """
 Returns the point for which all other points are on the demanded_side from a line between the car [0, 0] and this point.
 demanded_side: 1 -> right side, -1 -> left side
 """
+
+
 def calc_polygon_tangent_point(points, demanded_side):
     for point in points:
         if all_points_on_one_side(points, [0, 0], point, demanded_side):
@@ -342,7 +398,8 @@ def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
     return closest_point
 
 # def calc_shortest_distance_to_points(point_a, point_b, points):
-#     return min([calc_shortest_distance_to_vector(np.array(point_a), np.array(point_b), np.array(point)) for point in points])
+# return min([calc_shortest_distance_to_vector(np.array(point_a),
+# np.array(point_b), np.array(point)) for point in points])
 
 """
 Calculates the point which is the end of a vector which is orthogonal to a line between point_a and point_b.
@@ -370,10 +427,22 @@ left_wall: points of the left wall
 right_wall: points of the right wall
 remaining_distance: remaining distance to the curve entry point
 """
-def calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance):
+
+
+def calc_target_car_position(
+        predicted_car_position,
+        curve_type,
+        left_circle,
+        right_circle,
+        upper_circle,
+        left_wall,
+        right_wall,
+        remaining_distance):
     left_point = left_circle.get_closest_point(predicted_car_position)
     right_point = right_circle.get_closest_point(predicted_car_position)
-    central_point = Point((left_point.x + right_point.x) / 2, (left_point.y + right_point.y) / 2)
+    central_point = Point(
+        (left_point.x + right_point.x) / 2,
+        (left_point.y + right_point.y) / 2)
     track_width = abs(left_point.x - right_point.x)
 
     target_position = central_point
@@ -381,14 +450,16 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
     if curve_type == CURVE_TYPE_LEFT:
         target_position = Point(central_point.x + 0.0, central_point.y)
         if predicted_car_position.y > remaining_distance and remaining_distance is not None and upper_circle is not None:
-            upper_point = upper_circle.get_closest_point(predicted_car_position)
+            upper_point = upper_circle.get_closest_point(
+                predicted_car_position)
             target_position = Point(
                 (upper_point.x - track_width / 2),
                 (left_point.y + right_point.y) / 2)
     elif curve_type == CURVE_TYPE_RIGHT:
         target_position = Point(central_point.x - 0.0, central_point.y)
         if predicted_car_position.y > remaining_distance and remaining_distance is not None and upper_circle is not None:
-            upper_point = upper_circle.get_closest_point(predicted_car_position)
+            upper_point = upper_circle.get_closest_point(
+                predicted_car_position)
             target_position = Point(
                 (upper_point.x + track_width / 2),
                 (left_point.y + right_point.y) / 2)
@@ -418,13 +489,21 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
             target_position = Point(right_tangent_point[0], right_tangent_point[1])
 
     if left_tangent_point is not None:
-        show_line_in_rviz(20, [Point(0, 0), Point(left_tangent_point[0], left_tangent_point[1])],
-                        color=ColorRGBA(1, 1, 1, 1.0))
+        show_line_in_rviz(
+            20, [
+                Point(
+                    0, 0), Point(
+                    left_tangent_point[0], left_tangent_point[1])], color=ColorRGBA(
+                1, 1, 1, 1.0))
     else:
         delete_marker(20)
     if right_tangent_point is not None:
-        show_line_in_rviz(21, [Point(0, 0), Point(right_tangent_point[0], right_tangent_point[1])],
-                        color=ColorRGBA(0.5, 0.5, 0.5, 1.0))
+        show_line_in_rviz(
+            21, [
+                Point(
+                    0, 0), Point(
+                    right_tangent_point[0], right_tangent_point[1])], color=ColorRGBA(
+                0.5, 0.5, 0.5, 1.0))
     else:
         delete_marker(21)
     if start_position is not None:
@@ -461,8 +540,15 @@ def calc_target_car_position(predicted_car_position, curve_type, left_circle, ri
 #     return np.stack((x_points, y_points), axis=1)
 
 def show_steering_angle():
-    show_line_in_rviz(35, [Point(0, 0), Point(math.sin(calc_angle_moving_average()), math.cos(calc_angle_moving_average()))],
-                      color=ColorRGBA(1, 0, 0, 0.3))
+    show_line_in_rviz(
+        35, [
+            Point(
+                0, 0), Point(
+                math.sin(
+                    calc_angle_moving_average()), math.cos(
+                        calc_angle_moving_average()))], color=ColorRGBA(
+                            1, 0, 0, 0.3))
+
 
 """
 Determines speed and steering angle for the car based on a wall following algorithm.
@@ -475,11 +561,29 @@ curve_type: type of the curve which is behind the curve entry (left, right)
 remaining_distance: remaining distance to the curve entry point
 delta_time: passed time since the last call of follow_walls
 """
-def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall, curve_type, remaining_distance, delta_time):
+
+
+def follow_walls(
+        left_circle,
+        right_circle,
+        upper_circle,
+        left_wall,
+        right_wall,
+        curve_type,
+        remaining_distance,
+        delta_time):
     global last_speed
     show_steering_angle()
     predicted_car_position, prediction_distance = calc_predicted_car_position()
-    target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance)
+    target_position = calc_target_car_position(
+        predicted_car_position,
+        curve_type,
+        left_circle,
+        right_circle,
+        upper_circle,
+        left_wall,
+        right_wall,
+        remaining_distance)
 
     distance_to_target = math.sqrt(target_position.x**2 + target_position.y**2)
 
@@ -499,9 +603,21 @@ def follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall,
             safety_margin = 0.05 * remaining_distance
         target_speed = calc_max_curve_speed(FRICTION, upper_circle.radius)
         last_speed = target_speed
-        braking_distance = calc_braking_distance(remaining_distance, current_speed, target_speed, CAR_ACCELERATION, CAR_DECCELERATION) + safety_margin
+        braking_distance = calc_braking_distance(
+            remaining_distance,
+            current_speed,
+            target_speed,
+            CAR_ACCELERATION,
+            CAR_DECCELERATION) + safety_margin
         if remaining_distance > braking_distance:
-            speed = min(calc_max_speed(remaining_distance, current_speed, target_speed, CAR_ACCELERATION, CAR_DECCELERATION), speed)
+            speed = min(
+                calc_max_speed(
+                    remaining_distance,
+                    current_speed,
+                    target_speed,
+                    CAR_ACCELERATION,
+                    CAR_DECCELERATION),
+                speed)
         else:
             speed = target_speed
 
@@ -572,7 +688,8 @@ def handle_scan(laser_scan, delta_time):
     curve_type = None
     upper_wall = None
     if min_range_in_front < 30:
-        # With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the track.
+        # With radius_proportions can be checked whether the car is approaching
+        # a curve or is on a straight part of the track.
         radius_proportions_left = left_circle.radius / right_circle.radius
         radius_proportions_right = right_circle.radius / left_circle.radius
         if radius_proportions_left > 1.2 and right_circle.center.x < 0:
@@ -605,14 +722,29 @@ def handle_scan(laser_scan, delta_time):
     if curve_entry_point is not None and upper_wall is not None and len(upper_wall) > 0:
         remaining_distance = curve_entry_point[1]
         upper_circle = Circle.fit(upper_wall)
-        show_line_in_rviz(
-            6, [Point(-2, remaining_distance), Point(2, remaining_distance)], color=ColorRGBA(0.2, 0.5, 0.8, 1))
+        show_line_in_rviz(6,
+                          [Point(-2,
+                                 remaining_distance),
+                           Point(2,
+                                 remaining_distance)],
+                          color=ColorRGBA(0.2,
+                                          0.5,
+                                          0.8,
+                                          1))
         show_circle_in_rviz(upper_circle, upper_wall, 7, ColorRGBA(0, 1, 1, 1))
     else:
         delete_marker(6)
         delete_marker(7)
 
-    follow_walls(left_circle, right_circle, upper_circle, left_wall, right_wall, curve_type, remaining_distance, delta_time)
+    follow_walls(
+        left_circle,
+        right_circle,
+        upper_circle,
+        left_wall,
+        right_wall,
+        curve_type,
+        remaining_distance,
+        delta_time)
 
     show_circle_in_rviz(left_circle, left_wall, 0, ColorRGBA(0.5, 1, 1, 1))
     show_circle_in_rviz(right_circle, right_wall, 1, ColorRGBA(0, 1, 1, 1))
@@ -642,9 +774,12 @@ def speed_callback(speed_message):
     current_speed = speed_message.wheel_speed
     # print current_speed - speed_message.car_speed
 
+
 """
 Callback function for the /commands/controlled_drive_param to get an approximated speed of the car from the acceleration_controller.
 """
+
+
 def controlled_drive_param_callback(drive_param):
     global current_speed
     current_speed = drive_param.velocity
@@ -664,8 +799,16 @@ parameters = None
 pid = PIDController(1, 1, 1)
 
 rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback, queue_size=1)
-rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, speed_callback, queue_size=1)
-rospy.Subscriber(TOPIC_CONTROLLED_DRIVE_PARAM, drive_param, controlled_drive_param_callback, queue_size=1)
+rospy.Subscriber(
+    TOPIC_GAZEBO_STATE_TELEMETRY,
+    gazebo_state_telemetry,
+    speed_callback,
+    queue_size=1)
+rospy.Subscriber(
+    TOPIC_CONTROLLED_DRIVE_PARAM,
+    drive_param,
+    controlled_drive_param_callback,
+    queue_size=1)
 drive_parameters_publisher = rospy.Publisher(
     TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 

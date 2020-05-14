@@ -42,14 +42,10 @@
     </include>
     <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
 
-    <node name="boxing" pkg="boxing" type="boxing">
-	<param name="voxel_size" type="double" value="0.2" />
-    <param name="topic_laser_scan" type="string" value="/scan/lidar/cartesian" />
-    <param name="topic_voxels" type="string" value="/scan/voxels" />
-    <param name="sor_enabled" type="bool" value="false" />
-    <param name="sor_mean_k" type="int" value="2" />
-    <param name="sor_stddev_mul_thresh" type="double" value="3.0" />
-    </node>
+    <include file="$(find boxing)/launch/boxing.launch">
+      <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
+      <arg name="topic_voxels" value="/scan/voxels" />
+    </include>
 
     <include file="$(find car_tf)/launch/car_transformer.launch" />
 

@@ -3,7 +3,6 @@
 #ifndef DBSCAN_H
 #define DBSCAN_H
 
-#include "voxel.h"
 #include <cmath>
 #include <vector>
 
@@ -16,16 +15,16 @@
 
 using namespace std;
 
-/*typedef struct Point_
+typedef struct Point_
 {
-    float x, y, z;  // X, Y, Z position
-    int clusterID;  // clustered ID
-}Point;*/
+    float x, y, z; // X, Y, Z position
+    int clusterID; // clustered ID
+} Point;
 
 class DBSCAN
 {
     public:
-    DBSCAN(unsigned int minPts, float eps, vector<Voxel>* points)
+    DBSCAN(unsigned int minPts, float eps, vector<Point_>* points)
     {
         m_minPoints = minPts;
         m_epsilon = eps;
@@ -37,9 +36,9 @@ class DBSCAN
     }
 
     int run();
-    vector<int> calculateCluster(Voxel point);
-    int expandCluster(Voxel point, int clusterID);
-    inline double calculateDistance(Voxel pointCore, Voxel pointTarget);
+    vector<int> calculateCluster(Point_ point);
+    int expandCluster(Point_ point, int clusterID);
+    inline double calculateDistance(Point_ pointCore, Point_ pointTarget);
 
     int getTotalPointSize()
     {
@@ -53,8 +52,9 @@ class DBSCAN
     {
         return m_epsilon;
     }
-    // private:
-    vector<Voxel>* m_points;
+
+    private:
+    vector<Point_>* m_points;
     unsigned int m_pointSize;
     unsigned int m_minPoints;
     float m_epsilon;
