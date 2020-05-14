@@ -60,7 +60,7 @@ def log_message():
     time = rospy.get_time()
     log_stats_file_path= os.path.join(RosPack().get_path("simulation_tools"), "log_stats.txt")
     log_stats_file = open(log_stats_file_path, "a")
-    log_stats_file.write(str(time)+", "+str(track_position)+", "+str(car_position)+", "+str(velocity)+", "+str(angle)+", "+str(current_speed))
+    log_stats_file.write(str(time)+", "+str(track_position)+", "+str(car_position)+", "+str(velocity)+", "+str(angle)+", "+str(current_speed) + "\n")
 
 rospy.init_node('log_stats', anonymous=True)
 rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
