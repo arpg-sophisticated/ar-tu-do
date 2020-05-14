@@ -133,6 +133,19 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
     std::vector<Point> rviz_target_points = { predicted_position, target_position };
     m_rviz_geometry.showLineInRviz(4, rviz_target_points, ColorRGBA{ 1, 0.4, 0, 1 });
 
+    double predicted_distance = GeometricFunctions::distance(car_position, predicted_position);
+    double target_distance = GeometricFunctions::distance(car_position, target_position);
+
+    // if a curve is unexpected steep, the speed may be reduced
+    double emergency_slowdown =
+        std::min(1.0, (target_distance * target_distance) / (predicted_distance * predicted_distance));
+    if (emergency_slowdown > 0.8)
+    {
+        emergency_slowdown = 1.0;
+    }
+    speed *= emergency_slowdown;
+    speed = std::max(1.0, speed);
+
     publishDriveParameters(angle, speed);
 }
 
@@ -181,21 +194,20 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
-    // double scan_time = laserscan->header.stamp.toSec();
-    // double t_start = ros::Time::now().toSec();
-    // if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
-    // {
-    //     double delta_time = scan_time - m_last_scan_time;
-    //     std::cout << delta_time << std::endl;
-    //     std::vector<Point> pointcloud;
-    //     getScanAsCartesian(&pointcloud, laserscan);
-    //     handleLaserPointcloud(pointcloud, delta_time);
-    //     double t_end = ros::Time::now().toSec();
-    //     // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s"
-    //     <<
-    //     // std::endl;
-    // }
-    // m_last_scan_time = scan_time;
+    double scan_time = laserscan->header.stamp.toSec();
+    double t_start = ros::Time::now().toSec();
+    if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+    {
+        double delta_time = scan_time - m_last_scan_time;
+        // std::cout << delta_time << std::endl;
+        std::vector<Point> pointcloud;
+        getScanAsCartesian(&pointcloud, laserscan);
+        handleLaserPointcloud(pointcloud, delta_time);
+        double t_end = ros::Time::now().toSec();
+        // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s" <<
+        // std::endl;
+    }
+    m_last_scan_time = scan_time;
 }
 
 // void Wallfollowing::clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster)
@@ -204,34 +216,35 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
 
 void Wallfollowing::voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg)
 {
-    double scan_time = ros::Time::now().toSec();
-    double t_start = ros::Time::now().toSec();
-    if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
-    {
-        double delta_time = scan_time - m_last_scan_time;
+    // double scan_time = ros::Time::now().toSec();
+    // double t_start = ros::Time::now().toSec();
+    // if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+    // {
+    //     double delta_time = scan_time - m_last_scan_time;
 
-        std::vector<Point> pointcloud;
+    //     std::vector<Point> pointcloud;
 
-        for (size_t i = 0; i < voxel_msg->width; i++)
-        {
-            Point p;
-            uint32_t tmp_score;
-            memcpy(&p.y, &voxel_msg->data[i * voxel_msg->point_step + voxel_msg->fields[0].offset], sizeof(float));
-            memcpy(&p.x, &voxel_msg->data[i * voxel_msg->point_step + voxel_msg->fields[1].offset], sizeof(float));
-            p.x = -p.x;
-            if (!std::isnan(p.x) && !std::isinf(p.x) && !std::isnan(p.y) && !std::isinf(p.y))
-            {
-                pointcloud.push_back(p);
-                // std::cout << "x: " << p.x << " y: " << p.y << std::endl;
-            }
-        }
+    //     for (size_t i = 0; i < voxel_msg->width; i++)
+    //     {
+    //         Point p;
+    //         uint32_t tmp_score;
+    //         memcpy(&p.y, &voxel_msg->data[i * voxel_msg->point_step + voxel_msg->fields[0].offset], sizeof(float));
+    //         memcpy(&p.x, &voxel_msg->data[i * voxel_msg->point_step + voxel_msg->fields[1].offset], sizeof(float));
+    //         p.x = -p.x;
+    //         if (!std::isnan(p.x) && !std::isinf(p.x) && !std::isnan(p.y) && !std::isinf(p.y))
+    //         {
+    //             pointcloud.push_back(p);
+    //             // std::cout << "x: " << p.x << " y: " << p.y << std::endl;
+    //         }
+    //     }
 
-        handleLaserPointcloud(pointcloud, delta_time);
-        double t_end = ros::Time::now().toSec();
-        // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s" <<
-        // std::endl;
-    }
-    m_last_scan_time = scan_time;
+    //     handleLaserPointcloud(pointcloud, delta_time);
+    //     double t_end = ros::Time::now().toSec();
+    //     // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s"
+    //     <<
+    //     // std::endl;
+    // }
+    // m_last_scan_time = scan_time;
 }
 
 int main(int argc, char** argv)

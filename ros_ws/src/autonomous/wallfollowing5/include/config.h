@@ -13,7 +13,7 @@ namespace Config
 
     static const float SAFETY_WALL_DISTANCE = 1.5 * car_config::REAR_WHEEL_DISTANCE;
 
-    static const double MAX_PREDICTED_DISTANCE = 2.0;
+    static const double MAX_PREDICTED_DISTANCE = 2.2;
 } // namespace Config
 
 namespace PID

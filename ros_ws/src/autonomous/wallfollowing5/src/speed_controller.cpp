@@ -49,7 +49,7 @@ double SpeedController::calcSpeed(ProcessedTrack& processed_track)
         {
             safety_margin = 0.05 * remaining_distance;
         }
-        double target_speed = calcMaxCurveSpeed(processed_track.upper_circle.getRadius());
+        double target_speed = calcMaxCurveSpeed(processed_track.upper_circle.getRadius()) * 0.9;
         double braking_distance = calcBrakingDistance(remaining_distance, target_speed) + safety_margin;
         if (remaining_distance > braking_distance)
         {
@@ -60,6 +60,7 @@ double SpeedController::calcSpeed(ProcessedTrack& processed_track)
             speed = target_speed;
         }
     }
+    // speed *= std::min(1.0, radius / 3.0);
     m_last_determined_speed = speed;
     return speed;
 }

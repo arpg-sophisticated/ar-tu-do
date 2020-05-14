@@ -166,8 +166,8 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
         m_rviz_geometry.deleteMarker(7);
     }
 
-    std::cout << "l_c: " << storage->left_circle.getCenter().x << ", " << storage->left_circle.getCenter().y
-              << " r_c: " << storage->right_circle.getCenter().x << std::endl;
+    // std::cout << "l_c: " << storage->left_circle.getCenter().x << ", " << storage->left_circle.getCenter().y
+    //           << " r_c: " << storage->right_circle.getCenter().x << std::endl;
     m_rviz_geometry.showCircleInRviz(0, storage->left_circle, storage->left_wall, ColorRGBA{ 0.5, 1, 1, 1 });
     m_rviz_geometry.showCircleInRviz(1, storage->right_circle, storage->right_wall, ColorRGBA{ 0, 1, 1, 1 });
 
