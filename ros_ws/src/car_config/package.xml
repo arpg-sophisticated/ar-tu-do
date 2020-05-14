@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package format="2">
+  <name>car_config</name>
+  <version>0.0.0</version>
+  <description>The car_config package describes for example physical properties of the car.</description>
+
+
+  <!-- Maintainer -->
+  <maintainer email="f110@ls12.cs.uni-dortmund.de">PG F1/10</maintainer>
+
+  <!-- License -->
+  <license>MIT</license>
+  <license>GPLv3</license>
+
+  <!-- Dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+</package>
