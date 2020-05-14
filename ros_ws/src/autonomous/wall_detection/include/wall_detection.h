@@ -14,7 +14,7 @@ constexpr const char* TOPIC_VOXEL_ = "/scan/cluster";
 constexpr const char* TOPIC_WALLS_ = "/obstacles/walls";
 constexpr const char* TOPIC_OBSTACLES_ = "/obstacles/obstacles";
 
-typedef pcl::PointCloud<pcl::PointXYZI> PointCloud;
+typedef pcl::PointCloud<pcl::PointXYZRGBL> PointCloud;
 
 class WallDetection
 {
@@ -31,13 +31,13 @@ class WallDetection
     dynamic_reconfigure::Server<wall_detection::wall_detectionConfig> m_dyn_cfg_server;
     float m_wall_radius;
 
-    std::pair<int, int> determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZI>*>, float radius);
-    void publishWall(std::vector<pcl::PointXYZI>* wallLeft, std::vector<pcl::PointXYZI>* wallRight);
-    void publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZI>*> mapClusters,
+    std::pair<int, int> determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*>, float radius);
+    void publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::vector<pcl::PointXYZRGBL>* wallRight);
+    void publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapClusters,
                           std::pair<int, int> wallIDs);
     std::string frameID;
 
     public:
     WallDetection();
-    void wallDetection_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& inputVoxels);
+    void wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& inputVoxels);
 };

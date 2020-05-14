@@ -1,9 +1,11 @@
 <launch>
     <arg name="topic_input_cloud" />
+    <arg name="topic_input_colored_cloud" />
     <arg name="topic_voxels" />
 
     <node name="boxing" pkg="boxing" type="boxing" respawn="true" output="screen">
         <param name="topic_input_cloud" type="string" value="$(arg topic_input_cloud)" />
+        <param name="topic_input_colored_cloud" type="string" value="$(arg topic_input_colored_cloud)" />
         <param name="topic_voxels" type="string" value="$(arg topic_voxels)" />
     </node>
 </launch>

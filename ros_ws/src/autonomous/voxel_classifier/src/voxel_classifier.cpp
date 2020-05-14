@@ -20,7 +20,7 @@ VoxelClassifier::VoxelClassifier()
     this->m_voxel_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicVoxels, 1, &VoxelClassifier::voxel_callback, this);
 
-    this->m_cluster_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicClusters, 1);
+    this->m_cluster_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZRGBL>>(topicClusters, 1);
 
     m_epsilon = DEFAULT_EPSILON;
     m_minimum_points = DEFAULT_MINIMUM_POINTS;
@@ -33,7 +33,7 @@ VoxelClassifier::VoxelClassifier()
 void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& voxelPointcloud)
 {
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
     pcl::fromROSMsg(*voxelPointcloud, *inputCloud);
 
     m_frame = voxelPointcloud->header.frame_id;
@@ -57,16 +57,16 @@ void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& v
 
 void VoxelClassifier::cluster_publish(std::vector<Point_>* clusters)
 {
-    pcl::PointCloud<pcl::PointXYZI>::Ptr msg(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
     msg->header.frame_id = m_frame;
 
     for (size_t i = 0; i < clusters->size(); i++)
     {
-        pcl::PointXYZI tmp;
+        pcl::PointXYZRGBL tmp;
         tmp.x = (*clusters)[i].x;
         tmp.y = (*clusters)[i].y;
         tmp.z = (*clusters)[i].z;
-        tmp.intensity = (*clusters)[i].clusterID;
+        tmp.label = (*clusters)[i].clusterID; // todo: we lose color information here!
         msg->push_back(tmp);
     }
 
