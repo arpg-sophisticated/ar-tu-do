@@ -20,7 +20,7 @@ jobs:
         sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
         ./toad.sh init system ci
         ./toad.sh init ros ci
-        sudo apt-get install ros-melodic-pcl-ros
+        sudo apt-get install ros-melodic-pcl-ros rviz
     - name: Check formatting
       run: ./scripts/travis/check-format.sh 
     - name: Run Tests
