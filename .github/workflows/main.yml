@@ -9,22 +9,18 @@ jobs:
       ROS_DISTRO: melodic
     steps:
     - uses: actions/checkout@v1
-    - name: add ros repository
-      run: |
-        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-        sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-        sudo apt-get update
     - name: Install dependencies
       run: |
         sudo apt-get remove -y clang-6.0 libclang-common-6.0-dev libclang1-6.0 libllvm6.0
         sudo apt-get autoremove
-        sudo apt-get install clang-format ros-melodic-pcl-ros
+        sudo apt-get install clang-format
         cd ros_ws/
         cp toad.example toad.settings
         sed -i -e "s/melodic/${ROS_DISTRO}/g" toad.settings
         sed -i -e 's/CONFIGURED="0"/CONFIGURED="1"/g' toad.settings
         ./toad.sh init system ci
         ./toad.sh init ros ci
+        sudo apt-get install ros-melodic-pcl-ros
     - name: Check formatting
       run: ./scripts/travis/check-format.sh 
     - name: Run Tests
