@@ -215,24 +215,9 @@ def log_message():
         # create handlers
         logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
         logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
-        logstring_header = "Datapoint;\
-            Time;\
-            TimeDelta;\
-            Speed;\
-            SpeedDelta;\
-            SpeedAverage;\
-            Maxspeed;\
-            MaxspeedDelta;\
-            MaxspeedAverage;\
-            Angle;\
-            AngleDelta;\
-            Acceleration;\
-            AccelerationDelta;\
-            Distance;\
-            DistanceDelta\
-            \n"
+        logstring_header = "Datapoint;Time;TimeDelta;Speed;SpeedDelta;SpeedAverage;Maxspeed;MaxspeedDelta;MaxspeedAverage;Angle;AngleDelta;Acceleration;AccelerationDelta;Distance;DistanceDelta\n"
         logfile_handler_csv.write(logstring_header)
-        logfile_handler_dat.write(logstring_header.replace("Datapoint","x").lower())
+        logfile_handler_dat.write(logstring_header.replace(";"," ").replace("Datapoint","x").lower())
 
 
     logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
