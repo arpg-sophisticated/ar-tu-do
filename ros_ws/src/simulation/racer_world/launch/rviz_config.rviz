@@ -12,7 +12,6 @@ Panels:
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
-        - /VideoCapture1
       Splitter Ratio: 0.5305555462837219
     Tree Height: 146
   - Class: rviz/Selection
@@ -212,6 +211,7 @@ Visualization Manager:
         Imu: true
         LaserScan (Camera): true
         LaserScan (Lidar): true
+        OverlayText: true
         RobotModel: true
         Value: false
         VideoCapture: true
@@ -237,6 +237,7 @@ Visualization Manager:
         Imu: true
         LaserScan (Camera): true
         LaserScan (Lidar): true
+        OverlayText: true
         RobotModel: true
         Value: false
         VideoCapture: true
@@ -262,6 +263,7 @@ Visualization Manager:
         Imu: true
         LaserScan (Camera): true
         LaserScan (Lidar): true
+        OverlayText: true
         RobotModel: true
         Value: false
         VideoCapture: true
@@ -386,6 +388,25 @@ Visualization Manager:
       start capture: false
       use 3D viewer size: false
       width: 672
+    - Align Bottom: false
+      Background Alpha: 0
+      Background Color: 0; 0; 0
+      Class: jsk_rviz_plugin/OverlayText
+      Enabled: true
+      Foreground Alpha: 1
+      Foreground Color: 239; 41; 41
+      Name: OverlayText
+      Overtake Color Properties: true
+      Overtake Position Properties: true
+      Topic: /hud
+      Value: true
+      font: DejaVu Sans Mono
+      height: 200
+      left: 10
+      line width: 3
+      text size: 10
+      top: 10
+      width: 400
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -429,10 +450,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6902029514312744
+      Pitch: 0.8052033185958862
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.5284149646759033
+      Yaw: 3.3134140968322754
     Saved: ~
 Window Geometry:
   Camera (Depth):

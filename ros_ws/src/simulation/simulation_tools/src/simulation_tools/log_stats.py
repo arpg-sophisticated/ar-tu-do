@@ -9,6 +9,8 @@ from simulation_tools.track import track
 from simulation_tools.reset_car import Point
 from drive_msgs.msg import drive_param,gazebo_state_telemetry
 from gazebo_msgs.msg import ModelStates
+from jsk_rviz_plugins.msg import OverlayText
+from jsk_rviz_plugins.overlay_text_interface import OverlayTextInterface
 
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
@@ -51,6 +53,8 @@ def __init__(self):
     global angle_last
     global angle_delta
     
+    global text_interface
+    
     last_drive_message = None
     car_position = None
     car_orientation = 0
@@ -81,8 +85,7 @@ def __init__(self):
     
     angle_current = 0
     angle_last = 0
-    angle_delta = 0
-    
+    angle_delta = 0  
     
 def getStatsPath():
     fullpath = RosPack().get_path("simulation_tools").split("/")
@@ -193,8 +196,8 @@ def log_message():
         acceleration_current = speed_delta / time_delta
     acceleration_delta = acceleration_current - acceleration_last
     
+    logbase = getStatsPath()
     if logentry == 0:
-        logbase = getStatsPath()
         dateTimeObj = datetime.now()    
         timestampStr = dateTimeObj.strftime("%Y%m%d-%H%M%S")
         loginstance = ""
@@ -242,6 +245,16 @@ def log_message():
     logfile_handler_csv.write(logstring)
     logfile_handler_dat.write(logstring.replace(";"," "))
     
+    hudstring = \
+        "Time: " + str('%.2f' % time_current) + " s\n" + \
+        "Vcur: " + str('%.2f' % speed_current) + " m/s\n" + \
+        "Vavg: " + str('%.2f' % speed_avg) + " m/s\n" + \
+        "Vmax: " + str('%.2f' % maxspeed_current) + " m/s\n" + \
+        "Angl: " + str('%.2f' % angle_current) + "\n" + \
+        "Acce: " + str('%.2f' % acceleration_current) + " m/s^2\n" + \
+        "Dist: " + str('%.2f' % distance_current) + " m\n"
+    text_interface.publish(str(hudstring))
+
     logentry += 1
 
 
@@ -300,10 +313,13 @@ angle_current = 0
 angle_last = 0
 angle_delta = 0
 
-rospy.init_node('log_stats', anonymous=True)
+rospy.init_node('log_stats', anonymous=False)
 rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
 rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
+
+global text_interface
+text_interface = OverlayTextInterface("hud")
 
 while not rospy.is_shutdown():
     rospy.spin()
