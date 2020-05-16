@@ -17,8 +17,8 @@ CONFIGURED="0"
 #     TITLE Title to use in legend (use _ as spaces)
 #     DESCR Description used in Captions and TOCs (use _ as spaces)
 DATAFILES="
-sim-current_20200514-155846/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
-sim-old_20200514-155328/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
+sim-current-20200515/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
+sim-old-20200515/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
 "
 # Timesets to use for plots seperated by spaces or linebreaks
 # Please ensure, that the data files hold enough datasets
@@ -27,10 +27,9 @@ sim-old_20200514-155328/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Versi
 #     DIVT  Steps for plots by time
 #     DIVD  Steps for plots by distance
 SETS="
-800;8;40
-400;4;20
+2000;20;100
+500;5;25
 200;2;10
-100;1;5
 "
 
 ### functions
@@ -131,9 +130,63 @@ case $1 in
                     | sed "s&___PH_FILENAME___&$FILENAME&g" \
                     | sed "s&___PH_TITLE___&$TITLE&g" \
                     > section-$TITLEFILE-$SIZE.tex
-                PH_INCLUDES=$PH_INCLUDES"\\\section {$DESC - $SIZE}\\n\\\include{section-$TITLEFILE-$SIZE}\\n"
+                PH_INCLUDES=$PH_INCLUDES"\\\include{section-$TITLEFILE-$SIZE}\\n"
             done      
         done
+
+        # create comparisons
+        for SET in $SETS; do
+            PH_PLOT1=""
+            PH_LEGEND1=""
+            PH_PLOT2=""
+            PH_LEGEND2=""
+            PH_PLOT3=""
+            PH_LEGEND3=""
+            PH_PLOT4=""
+            PH_LEGEND4=""
+
+            SIZE=$(echo $SET | cut -d ";" -f 1)
+            DIVT=$(echo $SET | cut -d ";" -f 2)
+            DIVD=$(echo $SET | cut -d ";" -f 3)
+            for DATAFILE in $DATAFILES; do
+                COLOR="$(echo $DATAFILE | cut -d ";" -f 2)"
+                TITLEFILE="$(echo $DATAFILE | cut -d ";" -f 3)"
+                TITLE="$(echo $DATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+                DESC="$(echo $DATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+                FILENAME="latex-data-$TITLEFILE-$SIZE"
+
+                PH_PLOT1=$PH_PLOT1"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=distance]{$FILENAME.dat};\\n"
+                PH_LEGEND1=$PH_LEGEND1"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
+
+                PH_PLOT2=$PH_PLOT2"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=time]{$FILENAME.dat};\\n"
+                PH_LEGEND2=$PH_LEGEND2"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
+
+                PH_PLOT3=$PH_PLOT3"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
+                PH_LEGEND3=$PH_LEGEND3"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
+
+                PH_PLOT4=$PH_PLOT4"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
+                PH_LEGEND4=$PH_LEGEND4"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
+            done  
+
+            cat tex/compare.tex \
+                | sed "s&___PH_DESC___&$DESC&g" \
+                | sed "s&___PH_SIZE___&$SIZE&g" \
+                | sed "s&___PH_DIVD___&$DIVD&g" \
+                | sed "s&___PH_DIVT___&$DIVT&g" \
+                | sed "s&___PH_FILENAME___&$FILENAME&g" \
+                | sed "s&___PH_TITLE___&$TITLE&g" \
+                | sed "s&___PH_PLOT1___&$PH_PLOT1&g" \
+                | sed "s&___PH_LEGEND1___&$PH_LEGEND1&g" \
+                | sed "s&___PH_PLOT2___&$PH_PLOT2&g" \
+                | sed "s&___PH_LEGEND2___&$PH_LEGEND21&g" \
+                | sed "s&___PH_PLOT3___&$PH_PLOT3&g" \
+                | sed "s&___PH_LEGEND3___&$PH_LEGEND3&g" \
+                | sed "s&___PH_PLOT4___&$PH_PLOT4&g" \
+                | sed "s&___PH_LEGEND4___&$PH_LEGEND4&g" \
+                > compare-$SIZE.tex
+            PH_INCLUDES=$PH_INCLUDES"\\\include{compare-$SIZE}\\n" 
+        done
+
         
         # create main tex and replace variables
         cat tex/main.tex | sed "s&___PH_DATAITEMS___&$PH_DATAITEMS&" | sed "s&___PH_SETS___&$PH_SETS&" | sed "s&___PH_INCLUDES___&$PH_INCLUDES&" > report.tex

@@ -12,6 +12,7 @@ Panels:
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
+        - /VideoCapture1
       Splitter Ratio: 0.5305555462837219
     Tree Height: 146
   - Class: rviz/Selection

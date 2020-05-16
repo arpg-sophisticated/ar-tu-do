@@ -80,10 +80,10 @@
 
     <!-- rviz start - please enable only one -->
     <!-- default rviz config -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>-->
     
     <!-- rviz config with enabled video recording -->
-    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config_record.rviz"/>--> 
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config_record.rviz"/> 
     <!-- rviz end - please enable only one -->
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
@@ -119,9 +119,9 @@
     <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="gazebo"/>
     
     <!-- record camera video, comment to disable -->
-<!--    <node pkg="image_view" type="video_recorder" name="video_record_cam">
+    <node pkg="image_view" type="video_recorder" name="video_record_cam">
         <remap from="image" to="/racer/camera1/image_raw"/>
         <param name="fps" value="15" />
         <param name="filename" value="output-cam.avi" />
-    </node>        -->
+    </node>        
 </launch>
