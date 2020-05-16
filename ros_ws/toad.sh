@@ -140,11 +140,14 @@ case $1 in
                 fi
                 source $PATHROS
                 source $PATHSETUP
-                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Starting simulation with following arguments: $ARGUMENTS"
                 fi
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ./videos/$RECORDTIME
+                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
+		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpSystem
@@ -243,11 +246,14 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
-                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ./videos/$RECORDTIME
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
+		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             remote)
                 source $PATHROS
@@ -269,11 +275,14 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
-                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
                 fi
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ./videos/$RECORDTIME
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
+		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             record)
                 case $3 in
@@ -296,7 +305,10 @@ case $1 in
 		export ROS_IP="$CARIP"
 		export ROS_HOSTNAME="$CARIP"
 		export ROS_MASTER_URI="http://$CARIP:11311"
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ./videos/$RECORDTIME
                 rviz -d src/car_control/launch/car.rviz
+		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpCar
