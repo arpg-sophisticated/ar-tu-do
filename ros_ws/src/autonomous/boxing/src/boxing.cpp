@@ -5,6 +5,7 @@
 #include <limits>
 #include <map>
 #include <math.h>
+#include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/crop_box.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/statistical_outlier_removal.h>
@@ -90,13 +91,21 @@ void Boxing::colored_input_callback(const sensor_msgs::PointCloud2::ConstPtr& co
         Eigen::Vector4f(m_maximum_x + m_voxel_size, m_maximum_y + m_voxel_size, m_maximum_z + m_voxel_size, 1.0f));
     crop.filter(*colorsCropped);
 
-    this->m_colored_cloud = colorsCropped;
+    // now downsample using a voxel grid
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr colorsDownsampled(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::ApproximateVoxelGrid<pcl::PointXYZRGB> downsample;
+    downsample.setInputCloud(colorsCropped);
+    downsample.setLeafSize(m_voxel_size / 50.0f, m_voxel_size / 50.0f, m_voxel_size / 50.0f);
+    downsample.filter(*colorsDownsampled);
+
+    this->m_colored_cloud = colorsDownsampled;
 }
 
 uint128_t Boxing::get_voxel_id(float x, float y, float z)
 {
     uint128_t voxel_id = 0;
-    union {
+    union
+    {
         float floaty;
         uint32_t inty;
     } float_uint;
