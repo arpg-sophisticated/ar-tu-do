@@ -147,7 +147,8 @@ case $1 in
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ./videos/$RECORDTIME
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
-		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpSystem
@@ -253,7 +254,8 @@ case $1 in
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ./videos/$RECORDTIME
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
-		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             remote)
                 source $PATHROS
@@ -282,7 +284,8 @@ case $1 in
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ./videos/$RECORDTIME
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
-		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             record)
                 case $3 in
@@ -308,7 +311,8 @@ case $1 in
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ./videos/$RECORDTIME
                 rviz -d src/car_control/launch/car.rviz
-		cp -a ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpCar

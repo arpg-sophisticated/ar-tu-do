@@ -78,12 +78,25 @@
         <arg name="topic_output_obstacles" value="/obstacles/obstacles" />
     </include>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
+    <!-- rviz start - please enable only one -->
+    <!-- default rviz config -->
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>-->
+    
+    <!-- rviz config with enabled video recording -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config_record.rviz"/> 
+    <!-- rviz end - please enable only one -->
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
-    <!-- <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/> -->
+    <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
+    
+    <!-- wallfollowing start - please enable only one -->
+    <!-- current implementation -->
     <include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>
-
+    
+    <!-- former implementation of previous group -->
+    <!-- <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/> -->
+    <!-- wallfollowing end -->
+    
     <group if="$(arg emergency_stop)">
         <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
     </group>
@@ -102,5 +115,13 @@
     </node>
     <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />
 
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen"/>
+    <!-- needed for logging telemetry data and provide node for rviz -->
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="gazebo"/>
+    
+    <!-- record camera video, comment to disable -->
+    <node pkg="image_view" type="video_recorder" name="video_record_cam">
+        <remap from="image" to="/racer/camera1/image_raw"/>
+        <param name="fps" value="15" />
+        <param name="filename" value="output-cam.avi" />
+    </node>        
 </launch>
