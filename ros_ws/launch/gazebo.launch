@@ -94,7 +94,7 @@
     <include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>
     
     <!-- former implementation of previous group -->
-    <!-- <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/> -->
+    <!--<include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>-->
     <!-- wallfollowing end -->
     
     <group if="$(arg emergency_stop)">
@@ -116,12 +116,12 @@
     <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />
 
     <!-- needed for logging telemetry data and provide node for rviz -->
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="gazebo"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="gazebo 100 10"/>
     
     <!-- record camera video, comment to disable -->
-    <node pkg="image_view" type="video_recorder" name="video_record_cam">
+<!--    <node pkg="image_view" type="video_recorder" name="video_record_cam">
         <remap from="image" to="/racer/camera1/image_raw"/>
-        <param name="fps" value="15" />
+        <param name="fps" value="30" />
         <param name="filename" value="output-cam.avi" />
-    </node>        
+    </node>        -->
 </launch>

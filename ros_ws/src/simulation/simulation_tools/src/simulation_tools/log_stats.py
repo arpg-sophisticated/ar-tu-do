@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+# first argument: log prefix
+# second argument: length for min/max arrays
+# third argument: smoothing value of acceleration
 
 import rospy
 import os
 import sys
+import numpy as np
 from datetime import datetime
 from rospkg import RosPack
 from simulation_tools.track import track
@@ -27,30 +31,66 @@ def __init__(self):
     global logpath
     global logentry
     
+    # current speed
     global speed_current
+    # last speed value
     global speed_last
+    # realitve change of speed
     global speed_delta
+    # overall average speed
     global speed_avg
+    # overall average speed smooth
+    global speed_smooth
+    # total top speed
+    global speed_max
+    # top speed last TIME (arg) intervals
+    global speed_maxtime
     
+    # current maximum speed given from algorithm
     global maxspeed_current
+    # last maximum speed given from algorithm
     global maxspeed_last
+    # relative change of maximum speed given from algorithm
     global maxspeed_delta
+    # average maximum speed given from algorithm
     global maxspeed_avg
     
+    # current time stamp
     global time_current
+    # last time stamp
     global time_last
+    # relative change in timestamp
     global time_delta
     
+    # driven distance
     global distance_current
+    # driven distance last interval
     global distance_last
+    # relative driven distance since last interval
     global distance_delta
     
+    # current acceleration
     global acceleration_current
+    # acceleration last intervals
     global acceleration_last
+    # smoothed acceleration
+    global acceleration_smooth
+    # minimal acceleration overall
+    global acceleration_min
+    # maximum acceleration overall
+    global acceleration_max
+    # minimal acceleration last TIME (arg) intervals
+    global acceleration_mintime
+    # maximum acceleration last TIME (arg) intervals
+    global acceleration_maxtime
+    # change of acceleration since last interval
     global acceleration_delta
     
+    # current angle of wheels
     global angle_current
+    # last intervals angle of wheels
     global angle_last
+    # relative change in wheels angle
     global angle_delta
     
     global text_interface
@@ -65,6 +105,9 @@ def __init__(self):
     speed_last = 0
     speed_delta = 0
     speed_avg = 0
+    speed_max = 0
+    speed_maxtime = []
+    speed_smooth = []
     
     maxspeed_current = 0
     maxspeed_last = 0
@@ -81,7 +124,12 @@ def __init__(self):
     
     acceleration_current = 0
     acceleration_last = 0
+    acceleration_min = 0
+    acceleration_max = 0
+    acceleration_mintime = []
+    acceleration_maxtime = []
     acceleration_delta = 0
+    acceleration_smooth = []
     
     angle_current = 0
     angle_last = 0
@@ -109,6 +157,9 @@ def speed_callback(speed_message):
     global speed_last
     global speed_delta
     global speed_avg
+    global speed_max
+    global speed_maxtime
+    global speed_smooth
     
     speed_last = speed_current
     speed_current = speed_message.wheel_speed
@@ -117,6 +168,25 @@ def speed_callback(speed_message):
         speed_avg = ( speed_avg * ( logentry - 1 ) + speed_current ) / logentry
     else:
         speed_avg += speed_current
+    
+    if speed_current > speed_max:
+        speed_max = speed_current
+    
+    time = 100
+    if len(sys.argv) > 2: 
+        time = int(sys.argv[2])
+    
+    smooth = 5
+    if len(sys.argv) > 3: 
+        smooth = int(sys.argv[3])
+    
+    speed_maxtime.append(speed_current)
+    if len(speed_maxtime) > time:
+        speed_maxtime.pop(0)
+    
+    speed_smooth.append(speed_current)
+    if len(speed_smooth) > smooth:
+        speed_smooth.pop(0)
             
     log_message()
 
@@ -143,6 +213,9 @@ def log_message():
     global speed_last
     global speed_delta
     global speed_avg
+    global speed_max
+    global speed_maxtime
+    global speed_smooth
     
     global maxspeed_current
     global maxspeed_last
@@ -159,6 +232,11 @@ def log_message():
     
     global acceleration_current
     global acceleration_last
+    global acceleration_min
+    global acceleration_max
+    global acceleration_mintime
+    global acceleration_maxtime
+    global acceleration_smooth
     global acceleration_delta
     
     global angle_current
@@ -195,6 +273,36 @@ def log_message():
     if time_delta > 0:
         acceleration_current = speed_delta / time_delta
     acceleration_delta = acceleration_current - acceleration_last
+    
+    if acceleration_current > acceleration_max:
+        acceleration_max = acceleration_current
+    
+    if acceleration_current < acceleration_min:
+        acceleration_min = acceleration_current
+            
+    time = 100
+    if len(sys.argv) > 2: 
+        time = int(sys.argv[2])
+            
+    smooth = 5
+    if len(sys.argv) > 3: 
+        smooth = int(sys.argv[3])
+    
+    acceleration_maxtime.append(acceleration_current)
+    if len(acceleration_maxtime) > time:
+        acceleration_maxtime.pop(0)
+    
+    acceleration_mintime.append(acceleration_current)
+    if len(acceleration_mintime) > time:
+        acceleration_mintime.pop(0)
+    
+    acceleration_mintime.append(acceleration_current)
+    if len(acceleration_mintime) > time:
+        acceleration_mintime.pop(0)
+    
+    acceleration_smooth.append(acceleration_current)
+    if len(acceleration_smooth) > smooth:
+        acceleration_smooth.pop(0)
     
     logbase = getStatsPath()
     if logentry == 0:
@@ -248,11 +356,21 @@ def log_message():
     hudstring = \
         "Time: " + str('%.2f' % time_current) + " s\n" + \
         "Vcur: " + str('%.2f' % speed_current) + " m/s\n" + \
+        "Vsmo: " + str('%.2f' % np.mean(speed_smooth)) + " m/s\n" + \
         "Vavg: " + str('%.2f' % speed_avg) + " m/s\n" + \
+        "Vtop: " + str('%.2f' % speed_max) + " m/s\n" + \
+        "Vto+: " + str('%.2f' % max(speed_maxtime)) + " m/s\n" + \
         "Vmax: " + str('%.2f' % maxspeed_current) + " m/s\n" + \
         "Angl: " + str('%.2f' % angle_current) + "\n" + \
-        "Acce: " + str('%.2f' % acceleration_current) + " m/s^2\n" + \
-        "Dist: " + str('%.2f' % distance_current) + " m\n"
+        "Acur: " + str('%.2f' % acceleration_current) + " m/s^2\n" + \
+        "Asmo: " + str('%.2f' % np.mean(acceleration_smooth)) + " m/s^2\n" + \
+        "Amin: " + str('%.2f' % acceleration_min) + " m/s^2\n" + \
+        "Amax: " + str('%.2f' % acceleration_max) + " m/s^2\n" + \
+        "Ato+: " + str('%.2f' % max(acceleration_maxtime)) + " m/s^2\n" + \
+        "Ato-: " + str('%.2f' % min(acceleration_mintime)) + " m/s^2\n" + \
+        "Dist: " + str('%.2f' % distance_current) + " m\n" + \
+        "AvgT: " + str(time) + " (Vto+ Ato+ Ato-)\n" + \
+        "AvgS: " + str(smooth) + " (Vsmo Asmo)\n"
     text_interface.publish(str(hudstring))
 
     logentry += 1
@@ -265,6 +383,9 @@ global speed_current
 global speed_last
 global speed_delta
 global speed_avg
+global speed_max
+global speed_maxtime
+global speed_smooth
 
 global maxspeed_current
 global maxspeed_last
@@ -282,6 +403,11 @@ global distance_delta
 global acceleration_current
 global acceleration_last
 global acceleration_delta
+global acceleration_min
+global acceleration_max
+global acceleration_mintime
+global acceleration_maxtime
+global acceleration_smooth
 
 global angle_current
 global angle_last
@@ -291,6 +417,9 @@ speed_current = 0
 speed_last = 0
 speed_delta = 0
 speed_avg = 0
+speed_max = 0
+speed_maxtime = []
+speed_smooth = []
 
 maxspeed_current = 0
 maxspeed_last = 0
@@ -307,7 +436,12 @@ distance_delta = 0
 
 acceleration_current = 0
 acceleration_last = 0
+acceleration_min = 0
+acceleration_max = 0
+acceleration_mintime = []
+acceleration_maxtime = []
 acceleration_delta = 0
+acceleration_smooth = []
 
 angle_current = 0
 angle_last = 0
