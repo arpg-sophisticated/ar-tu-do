@@ -46,28 +46,19 @@ case $1 in
             exit 1
         fi
 
-        # respeed videos
-        ffmpeg -i $2/cam.avi -filter:v "setpts=2.0*PTS" -c:v libx264 $2/cam.mp4
-        ffmpeg -i $2/rviz.avi -filter:v "setpts=1.0*PTS" -c:v libx264 $2/rviz.mp4
+	# calculate factor
+	CAMLENGTH=$(ffmpeg -i $2/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2]}')
+	RVIZLENGTH=$(ffmpeg -i $2/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2] }')
+	NEWLENGTH=$(python -c "print($RVIZLENGTH*1.0/$CAMLENGTH*1.0)" | cut -b -6)
 
-        # get length
-        CAMLENGTH=$(ffmpeg -i $2/cam.mp4 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | sed 's@\..*@@g' | awk '{ split($1, A, ":"); split(A[3], B, "."); print 3600*A[1] + 60*A[2] + B[1] }')
-        RVIZLENGTH=$(ffmpeg -i $2/rviz.mp4 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | sed 's@\..*@@g' | awk '{ split($1, A, ":"); split(A[3], B, "."); print 3600*A[1] + 60*A[2] + B[1] }')
-
-        # set new length to shorter video
-        NEWLENGTH=$RVIZLENGTH
-        if [[ $CAMLENGTH -le $RVIZLENGTH ]]; then
-            NEWLENGTH=$CAMLENGTH
-        fi
-
-        # cut this length from end of videos
-        ffmpeg -sseof -$RVIZLENGTH -i $2/cam.mp4 -c:v libx264 $2/cam-end.mp4
-        ffmpeg -sseof -$RVIZLENGTH -i $2/rviz.mp4 -c:v libx264 $2/rviz-end.mp4
+	# convert videos
+	ffmpeg -i $2/cam.avi -filter:v "setpts=$NEWLENGTH*PTS" -c:v libx264 $2/cam.mp4
+	ffmpeg -i $2/rviz.avi -c:v libx264 $2/rviz.mp4
 
         # stitch videos
         ffmpeg \
-          -i $2/cam-end.mp4 \
-          -i $2/rviz-end.mp4 \
+          -i $2/cam.mp4 \
+          -i $2/rviz.mp4 \
           -filter_complex '[0:v]pad=iw*2:ih[int];[int][1:v]overlay=W/2:0[vid]' \
           -map [vid] \
           -c:v libx264 \
