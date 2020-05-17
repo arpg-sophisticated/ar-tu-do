@@ -17,8 +17,8 @@ CONFIGURED="0"
 #     TITLE Title to use in legend (use _ as spaces)
 #     DESCR Description used in Captions and TOCs (use _ as spaces)
 DATAFILES="
-gazebo_20200516-202331/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
-gazebo_20200516-203412/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
+gazebo_20200517-wf2/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
+gazebo_20200517-wf5/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
 "
 #sim-current-20200515/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
 #sim-old-20200515/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
@@ -29,8 +29,9 @@ gazebo_20200516-203412/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_E
 #     COUNT Number of datasets to use on Plots
 #     DIVT  Steps for plots by time
 #     DIVD  Steps for plots by distance
+#2000;20;100;20
+#1000;10;50;10
 SETS="
-2000;20;100;20
 500;5;25;5
 200;2;10;2
 "
@@ -127,12 +128,15 @@ case $1 in
                 DIVT=$(echo $SET | cut -d ";" -f 2)
                 DIVD=$(echo $SET | cut -d ";" -f 3)
                 SMOOTH=$(echo $SET | cut -d ";" -f 4)
+		AVERAGE=$(head -2 $FILENAME.dat | tail -1 | cut -d " " -f 3)
+
                 cat tex/section.tex \
                     | sed "s&___PH_DESC___&$DESC&g" \
                     | sed "s&___PH_SIZE___&$SIZE&g" \
                     | sed "s&___PH_DIVD___&$DIVD&g" \
                     | sed "s&___PH_DIVT___&$DIVT&g" \
                     | sed "s&___PH_SMOOTH___&$SMOOTH&g" \
+                    | sed "s&___PH_AVERAGE___&$AVERAGE&g" \
                     | sed "s&___PH_FILENAME___&$FILENAME&g" \
                     | sed "s&___PH_TITLE___&$TITLE&g" \
                     > section-$TITLEFILE-$SIZE.tex
@@ -169,6 +173,7 @@ case $1 in
                 TITLE="$(echo $DATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
                 DESC="$(echo $DATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
                 FILENAME="latex-data-$TITLEFILE-$SIZE"
+		AVERAGE=$(head -2 $FILENAME.dat | tail -1 | cut -d " " -f 3)
 
                 PH_PLOT1=$PH_PLOT1"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=distance]{$FILENAME.dat};\\n"
                 PH_LEGEND1=$PH_LEGEND1"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
@@ -197,6 +202,7 @@ case $1 in
 
             cat tex/compare.tex \
                 | sed "s&___PH_DESC___&$DESC&g" \
+                | sed "s&___PH_AVERAGE___&$AVERAGE&g" \
                 | sed "s&___PH_SIZE___&$SIZE&g" \
                 | sed "s&___PH_DIVD___&$DIVD&g" \
                 | sed "s&___PH_DIVT___&$DIVT&g" \

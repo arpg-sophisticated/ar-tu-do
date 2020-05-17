@@ -417,6 +417,7 @@ def log_message():
         "Ato+: " + str('%.2f' % max(acceleration_maxtime)) + " m/s^2\n" + \
         "Ato-: " + str('%.2f' % min(acceleration_mintime)) + " m/s^2\n" + \
         "Dist: " + str('%.2f' % distance_current) + " m\n" + \
+        "Iter: " + str(logentry) + "\n" + \
         "AvgT: " + str(time) + " (Vto+ Vav+ Ato+ Ato-)\n" + \
         "AvgS: " + str(smooth) + " (Vsmo Asmo)\n"
     text_interface.publish(str(hudstring))
