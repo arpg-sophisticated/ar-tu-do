@@ -386,7 +386,7 @@ Visualization Manager:
       filename: output.avi
       fps: 30
       height: 720
-      start capture: true
+      start capture: false
       use 3D viewer size: false
       width: 1280
     - Align Bottom: false
@@ -436,7 +436,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.913904190063477
+      Distance: 6.164000988006592
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -451,10 +451,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8052033185958862
+      Pitch: 0.6502034664154053
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.3134140968322754
+      Yaw: 3.0534136295318604
     Saved: ~
 Window Geometry:
   Camera (Depth):

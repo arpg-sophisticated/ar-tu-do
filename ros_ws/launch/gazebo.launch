@@ -78,23 +78,15 @@
         <arg name="topic_output_obstacles" value="/obstacles/obstacles" />
     </include>
 
-    <!-- rviz start - please enable only one -->
-    <!-- default rviz config -->
-    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>-->
-    
-    <!-- rviz config with enabled video recording -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config_record.rviz"/> 
-    <!-- rviz end - please enable only one -->
-
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
     <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
     
     <!-- wallfollowing start - please enable only one -->
     <!-- current implementation -->
-    <include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>
+    <!--<include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>-->
     
     <!-- former implementation of previous group -->
-    <!--<include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>-->
+    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
     <!-- wallfollowing end -->
     
     <group if="$(arg emergency_stop)">
@@ -124,4 +116,12 @@
         <param name="fps" value="30" />
         <param name="filename" value="output-cam.avi" />
     </node>        -->
+    
+    <!-- rviz start - please enable only one -->
+    <!-- default rviz config -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
+    
+    <!-- rviz config with enabled video recording -->
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config_record.rviz"/>--> 
+    <!-- rviz end - please enable only one -->
 </launch>

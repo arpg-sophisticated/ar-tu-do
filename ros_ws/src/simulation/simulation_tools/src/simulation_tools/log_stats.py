@@ -20,120 +20,123 @@ TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 
-def __init__(self):
-    global logfile_handler_csv;
-    global logfile_handler_dat;
-    
-    global last_drive_message
-    global car_position
-    global car_orientation
-    global track_position
-    global logpath
-    global logentry
-    
-    # current speed
-    global speed_current
-    # last speed value
-    global speed_last
-    # realitve change of speed
-    global speed_delta
-    # overall average speed
-    global speed_avg
-    # overall average speed smooth
-    global speed_smooth
-    # total top speed
-    global speed_max
-    # top speed last TIME (arg) intervals
-    global speed_maxtime
-    
-    # current maximum speed given from algorithm
-    global maxspeed_current
-    # last maximum speed given from algorithm
-    global maxspeed_last
-    # relative change of maximum speed given from algorithm
-    global maxspeed_delta
-    # average maximum speed given from algorithm
-    global maxspeed_avg
-    
-    # current time stamp
-    global time_current
-    # last time stamp
-    global time_last
-    # relative change in timestamp
-    global time_delta
-    
-    # driven distance
-    global distance_current
-    # driven distance last interval
-    global distance_last
-    # relative driven distance since last interval
-    global distance_delta
-    
-    # current acceleration
-    global acceleration_current
-    # acceleration last intervals
-    global acceleration_last
-    # smoothed acceleration
-    global acceleration_smooth
-    # minimal acceleration overall
-    global acceleration_min
-    # maximum acceleration overall
-    global acceleration_max
-    # minimal acceleration last TIME (arg) intervals
-    global acceleration_mintime
-    # maximum acceleration last TIME (arg) intervals
-    global acceleration_maxtime
-    # change of acceleration since last interval
-    global acceleration_delta
-    
-    # current angle of wheels
-    global angle_current
-    # last intervals angle of wheels
-    global angle_last
-    # relative change in wheels angle
-    global angle_delta
-    
-    global text_interface
-    
-    last_drive_message = None
-    car_position = None
-    car_orientation = 0
-    track_position = 0
-    logentry = 0
-    
-    speed_current = 0
-    speed_last = 0
-    speed_delta = 0
-    speed_avg = 0
-    speed_max = 0
-    speed_maxtime = []
-    speed_smooth = []
-    
-    maxspeed_current = 0
-    maxspeed_last = 0
-    maxspeed_delta = 0
-    maxspeed_avg = 0
-    
-    time_current = 0
-    time_last = 0
-    time_delta = 0
-    
-    distance_current = 0
-    distance_last = 0
-    distance_delta = 0
-    
-    acceleration_current = 0
-    acceleration_last = 0
-    acceleration_min = 0
-    acceleration_max = 0
-    acceleration_mintime = []
-    acceleration_maxtime = []
-    acceleration_delta = 0
-    acceleration_smooth = []
-    
-    angle_current = 0
-    angle_last = 0
-    angle_delta = 0  
+# file handler
+global logfile_handler_csv;
+global logfile_handler_dat;
+
+# misc car messages
+global last_drive_message
+last_drive_message = None
+global car_position
+car_position = None
+global car_orientation
+car_orientation = 0
+global track_position
+track_position = 0
+
+# logging path
+global logpath
+logpath = ""
+
+# log entry number
+global logentry
+logentry = 0
+
+# interface for HUD topic
+global text_interface
+
+# current speed
+global speed_current
+speed_current = 0
+# last speed value
+global speed_last
+speed_last = 0
+# realitve change of speed
+global speed_delta
+speed_delta = 0
+# overall average speed
+global speed_avg
+speed_avg = 0
+# average speed last TIME (arg) intervals
+global speed_avgtime
+speed_avgtime = []
+# overall average speed smooth
+global speed_smooth
+speed_smooth = []
+# total top speed
+global speed_max
+speed_max = 0
+# top speed last TIME (arg) intervals
+global speed_maxtime
+speed_maxtime = []
+
+# current maximum speed given from algorithm
+global maxspeed_current
+maxspeed_current = 0
+# last maximum speed given from algorithm
+global maxspeed_last
+maxspeed_last = 0
+# relative change of maximum speed given from algorithm
+global maxspeed_delta
+maxspeed_delta = 0
+# average maximum speed given from algorithm
+global maxspeed_avg
+maxspeed_avg = 0
+
+# current time stamp
+global time_current
+time_current = 0
+# last time stamp
+global time_last
+time_last = 0
+# relative change in timestamp
+global time_delta
+time_delta = 0
+
+# driven distance
+global distance_current
+distance_current = 0
+# driven distance last interval
+global distance_last
+distance_last = 0
+# relative driven distance since last interval
+global distance_delta
+distance_delta = 0
+
+# current acceleration
+global acceleration_current
+acceleration_current = 0
+# acceleration last intervals
+global acceleration_last
+acceleration_last = 0
+# smoothed acceleration
+global acceleration_smooth
+acceleration_smooth = []
+# minimal acceleration overall
+global acceleration_min
+acceleration_min = 0
+# maximum acceleration overall
+global acceleration_max
+acceleration_max = 0
+# minimal acceleration last TIME (arg) intervals
+global acceleration_mintime
+acceleration_mintime = []
+# maximum acceleration last TIME (arg) intervals
+global acceleration_maxtime
+acceleration_maxtime = []
+# change of acceleration since last interval
+global acceleration_delta
+acceleration_delta = 0
+
+# current angle of wheels
+global angle_current
+angle_current = 0
+# last intervals angle of wheels
+global angle_last
+angle_last = 0
+# relative change in wheels angle
+global angle_delta
+angle_delta = 0  
     
 def getStatsPath():
     fullpath = RosPack().get_path("simulation_tools").split("/")
@@ -147,6 +150,7 @@ def getStatsPath():
             relativepath = "/" + part + relativepath
     return relativepath.replace("//","/")
 
+
 def drive_param_callback(message):
     global last_drive_message 
     last_drive_message = message
@@ -157,6 +161,7 @@ def speed_callback(speed_message):
     global speed_last
     global speed_delta
     global speed_avg
+    global speed_avgtime
     global speed_max
     global speed_maxtime
     global speed_smooth
@@ -183,6 +188,10 @@ def speed_callback(speed_message):
     speed_maxtime.append(speed_current)
     if len(speed_maxtime) > time:
         speed_maxtime.pop(0)
+    
+    speed_avgtime.append(speed_current)
+    if len(speed_avgtime) > time:
+        speed_avgtime.pop(0)
     
     speed_smooth.append(speed_current)
     if len(speed_smooth) > smooth:
@@ -213,6 +222,7 @@ def log_message():
     global speed_last
     global speed_delta
     global speed_avg
+    global speed_avgtime
     global speed_max
     global speed_maxtime
     global speed_smooth
@@ -326,7 +336,33 @@ def log_message():
         # create handlers
         logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
         logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
-        logstring_header = "Datapoint;Time;TimeDelta;Speed;SpeedDelta;SpeedAverage;Maxspeed;MaxspeedDelta;MaxspeedAverage;Angle;AngleDelta;Acceleration;AccelerationDelta;Distance;DistanceDelta\n"
+        logstring_header = \
+            "Datapoint;" + \
+            "AverageTime;" + \
+            "AverageSmooth;" + \
+            "Time;" + \
+            "TimeDelta;" + \
+            "Speed;" + \
+            "SpeedDelta;" + \
+            "SpeedAverage;" + \
+            "SpeedAverageTime;" + \
+            "SpeedMax;" + \
+            "SpeedMaxTime;" + \
+            "Maxspeed;" + \
+            "MaxspeedDelta;" + \
+            "MaxspeedAverage;" + \
+            "Angle;" + \
+            "AngleDelta;" + \
+            "Acceleration;" + \
+            "AccelerationSmooth;" + \
+            "AccelerationDelta;" + \
+            "AccelerationMin;" + \
+            "AccelerationMax;" + \
+            "AccelerationMinTime;" + \
+            "AccelerationMaxTime;" + \
+            "Distance;" + \
+            "DistanceDelta" + \
+            "\n"
         logfile_handler_csv.write(logstring_header)
         logfile_handler_dat.write(logstring_header.replace(";"," ").replace("Datapoint","x").lower())
 
@@ -334,19 +370,30 @@ def log_message():
     logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
     logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
         
-    logstring = str(logentry) + \
+    logstring = \
+        str(logentry) + \
+        ";" + str(time) + \
+        ";" + str(smooth) + \
         ";" + str('%.2f' % time_current) + \
         ";" + str('%.2f' % time_delta) + \
         ";" + str('%.2f' % speed_current) + \
         ";" + str('%.2f' % speed_delta) + \
         ";" + str('%.2f' % speed_avg) + \
+        ";" + str('%.2f' % np.mean(speed_avgtime)) + \
+        ";" + str('%.2f' % speed_max) + \
+        ";" + str('%.2f' % max(speed_maxtime)) + \
         ";" + str('%.2f' % maxspeed_current) + \
         ";" + str('%.2f' % maxspeed_delta) + \
         ";" + str('%.2f' % maxspeed_avg) + \
         ";" + str('%.2f' % angle_current) + \
         ";" + str('%.2f' % angle_delta) + \
         ";" + str('%.2f' % acceleration_current) + \
+        ";" + str('%.2f' % np.mean(acceleration_smooth)) + \
         ";" + str('%.2f' % acceleration_delta) + \
+        ";" + str('%.2f' % acceleration_min) + \
+        ";" + str('%.2f' % acceleration_max) + \
+        ";" + str('%.2f' % max(acceleration_maxtime)) + \
+        ";" + str('%.2f' % min(acceleration_mintime)) + \
         ";" + str('%.2f' % distance_current) + \
         ";" + str('%.2f' % distance_delta) + \
         "\n"
@@ -358,6 +405,7 @@ def log_message():
         "Vcur: " + str('%.2f' % speed_current) + " m/s\n" + \
         "Vsmo: " + str('%.2f' % np.mean(speed_smooth)) + " m/s\n" + \
         "Vavg: " + str('%.2f' % speed_avg) + " m/s\n" + \
+        "Vav+: " + str('%.2f' % np.mean(speed_avgtime)) + " m/s\n" + \
         "Vtop: " + str('%.2f' % speed_max) + " m/s\n" + \
         "Vto+: " + str('%.2f' % max(speed_maxtime)) + " m/s\n" + \
         "Vmax: " + str('%.2f' % maxspeed_current) + " m/s\n" + \
@@ -369,83 +417,12 @@ def log_message():
         "Ato+: " + str('%.2f' % max(acceleration_maxtime)) + " m/s^2\n" + \
         "Ato-: " + str('%.2f' % min(acceleration_mintime)) + " m/s^2\n" + \
         "Dist: " + str('%.2f' % distance_current) + " m\n" + \
-        "AvgT: " + str(time) + " (Vto+ Ato+ Ato-)\n" + \
+        "AvgT: " + str(time) + " (Vto+ Vav+ Ato+ Ato-)\n" + \
         "AvgS: " + str(smooth) + " (Vsmo Asmo)\n"
     text_interface.publish(str(hudstring))
 
     logentry += 1
 
-
-global logentry
-logentry = 0
-    
-global speed_current
-global speed_last
-global speed_delta
-global speed_avg
-global speed_max
-global speed_maxtime
-global speed_smooth
-
-global maxspeed_current
-global maxspeed_last
-global maxspeed_delta
-global maxspeed_avg
-
-global time_current
-global time_last
-global time_delta
-
-global distance_current
-global distance_last
-global distance_delta
-
-global acceleration_current
-global acceleration_last
-global acceleration_delta
-global acceleration_min
-global acceleration_max
-global acceleration_mintime
-global acceleration_maxtime
-global acceleration_smooth
-
-global angle_current
-global angle_last
-global angle_delta
-
-speed_current = 0
-speed_last = 0
-speed_delta = 0
-speed_avg = 0
-speed_max = 0
-speed_maxtime = []
-speed_smooth = []
-
-maxspeed_current = 0
-maxspeed_last = 0
-maxspeed_delta = 0
-maxspeed_avg = 0
-
-time_current = 0
-time_last = 0
-time_delta = 0
-
-distance_current = 0
-distance_last = 0
-distance_delta = 0
-
-acceleration_current = 0
-acceleration_last = 0
-acceleration_min = 0
-acceleration_max = 0
-acceleration_mintime = []
-acceleration_maxtime = []
-acceleration_delta = 0
-acceleration_smooth = []
-
-angle_current = 0
-angle_last = 0
-angle_delta = 0
 
 rospy.init_node('log_stats', anonymous=False)
 rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
