@@ -20,6 +20,10 @@
     </include>
     
     <!-- zed camera launch file -->
+    <!-- pick resolution of camera - please enable only one -->
+    <!-- Include racer with 720p camera -->
+    <!--<include file="./launch/zed_720.launch"/>-->
+    <!-- Include racer with VGA camera -->
     <include file="./launch/zed.launch"/>
 
     <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
@@ -83,5 +87,11 @@
     </node>
 
     <!-- needed for logging telemetry data and provide node for rviz -->
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing"/>
+    <!-- arguments -->
+    <!-- 1: log prefix (string), default: none -->
+    <!-- 2: length for min/max arrays (int), default: 100 -->
+    <!-- 3: smoothing value of acceleration (int), default: 5 -->
+    <!-- 4: whether its simulation or not (string: yes|no), default: no -->
+    <!-- 5: whether write statistics or not (string: yes|no), default: no -->
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no yes"/>
 </launch>

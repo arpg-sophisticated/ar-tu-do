@@ -1,7 +1,10 @@
 #!/usr/bin/env python
-# first argument: log prefix
-# second argument: length for min/max arrays
-# third argument: smoothing value of acceleration
+# arguments:
+# 1: log prefix (string), default: none
+# 2: length for min/max arrays (int), default: 100
+# 3: smoothing value of acceleration (int), default: 5
+# 4: whether its simulation or not (string: yes|no), default: no
+# 5: whether write statistics or not (string: yes|no), default: no
 
 import rospy
 import os
@@ -27,12 +30,13 @@ global logfile_handler_dat;
 # misc car messages
 global last_drive_message
 last_drive_message = None
-global car_position
-car_position = None
-global car_orientation
-car_orientation = 0
-global track_position
-track_position = 0
+# disabled as we don't need it here
+#global car_position
+#car_position = None
+#global car_orientation
+#car_orientation = 0
+#global track_position
+#track_position = 0
 
 # logging path
 global logpath
@@ -152,8 +156,20 @@ def getStatsPath():
 
 
 def drive_param_callback(message):
-    global last_drive_message 
-    last_drive_message = message
+    global last_drive_message
+    
+    # is it simulation?
+    simulation = False
+    if len(sys.argv) > 4: 
+        if str(sys.argv[4]) == "yes":
+            simulation = True
+        
+    # set current drive based on if it is simulation
+    if simulation:
+        last_drive_message = message
+    else:
+        # TODO insert real drive information
+        last_drive_message = message
 
  
 def speed_callback(speed_message):
@@ -167,7 +183,20 @@ def speed_callback(speed_message):
     global speed_smooth
     
     speed_last = speed_current
-    speed_current = speed_message.wheel_speed
+    
+    # is it simulation?
+    simulation = False
+    if len(sys.argv) > 4: 
+        if str(sys.argv[4]) == "yes":
+            simulation = True
+        
+    # set current speed based on if it is simulation
+    if simulation:
+        speed_current = speed_message.wheel_speed
+    else:
+        # TODO insert real speed information
+        speed_current = speed_message.wheel_speed
+        
     speed_delta = speed_current - speed_last
     if logentry > 0:
         speed_avg = ( speed_avg * ( logentry - 1 ) + speed_current ) / logentry
@@ -199,22 +228,24 @@ def speed_callback(speed_message):
             
     log_message()
 
-def on_model_state_callback(message):
-    if len(message.pose) < 2:
-        return
-    global car_position
-    global car_orientation
-    global track_position
-    car_position = Point(
-        message.pose[1].position.x,
-        message.pose[1].position.y)
-    car_orientation = message.pose[1].orientation
-    track_position = track.localize(car_position)
+# disabled as we don't need this information
+#def on_model_state_callback(message):
+#    if len(message.pose) < 2:
+#        return
+#    global car_position
+#    global car_orientation
+#    global track_position
+#    car_position = Point(
+#        message.pose[1].position.x,
+#        message.pose[1].position.y)
+#    car_orientation = message.pose[1].orientation
+#    track_position = track.localize(car_position)
 
 def log_message():
     global last_drive_message
-    global track_position
-    global car_position
+# disabled as we don't need it here
+#    global track_position
+#    global car_position
     global logpath
     global logentry
     
@@ -316,89 +347,102 @@ def log_message():
     
     logbase = getStatsPath()
     if logentry == 0:
-        dateTimeObj = datetime.now()    
-        timestampStr = dateTimeObj.strftime("%Y%m%d-%H%M%S")
-        loginstance = ""
-        if len(sys.argv) > 1:
-            loginstance = sys.argv[1] + "_"
-        logpath = logbase + "/" + loginstance + timestampStr
+        # log writing enabled
+        logwriting = False
+        if len(sys.argv) > 5: 
+            if str(sys.argv[5]) == "yes":
+                logwriting = True
         
-        # create logpath for session if nonexistant
-        try:
-            os.makedirs(logbase)
-        except:
-            pass
-        try:
-            os.makedirs(logpath)
-        except:
-            pass
-        
-        # create handlers
+        if logwriting:
+            dateTimeObj = datetime.now()    
+            timestampStr = dateTimeObj.strftime("%Y%m%d-%H%M%S")
+            loginstance = ""
+            if len(sys.argv) > 1:
+                loginstance = sys.argv[1] + "_"
+            logpath = logbase + "/" + loginstance + timestampStr
+
+            # create logpath for session if nonexistant
+            try:
+                os.makedirs(logbase)
+            except:
+                pass
+            try:
+                os.makedirs(logpath)
+            except:
+                pass
+
+            # create handlers
+            logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
+            logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
+            logstring_header = \
+                "Datapoint;" + \
+                "AverageTime;" + \
+                "AverageSmooth;" + \
+                "Time;" + \
+                "TimeDelta;" + \
+                "Speed;" + \
+                "SpeedDelta;" + \
+                "SpeedAverage;" + \
+                "SpeedAverageTime;" + \
+                "SpeedMax;" + \
+                "SpeedMaxTime;" + \
+                "Maxspeed;" + \
+                "MaxspeedDelta;" + \
+                "MaxspeedAverage;" + \
+                "Angle;" + \
+                "AngleDelta;" + \
+                "Acceleration;" + \
+                "AccelerationSmooth;" + \
+                "AccelerationDelta;" + \
+                "AccelerationMin;" + \
+                "AccelerationMax;" + \
+                "AccelerationMinTime;" + \
+                "AccelerationMaxTime;" + \
+                "Distance;" + \
+                "DistanceDelta" + \
+                "\n"
+            logfile_handler_csv.write(logstring_header)
+            logfile_handler_dat.write(logstring_header.replace(";"," ").replace("Datapoint","x").lower())
+
+    # log writing enabled
+    logwriting = False
+    if len(sys.argv) > 5: 
+        if str(sys.argv[5]) == "yes":
+            logwriting = True
+            
+    if logwriting:
         logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
         logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
-        logstring_header = \
-            "Datapoint;" + \
-            "AverageTime;" + \
-            "AverageSmooth;" + \
-            "Time;" + \
-            "TimeDelta;" + \
-            "Speed;" + \
-            "SpeedDelta;" + \
-            "SpeedAverage;" + \
-            "SpeedAverageTime;" + \
-            "SpeedMax;" + \
-            "SpeedMaxTime;" + \
-            "Maxspeed;" + \
-            "MaxspeedDelta;" + \
-            "MaxspeedAverage;" + \
-            "Angle;" + \
-            "AngleDelta;" + \
-            "Acceleration;" + \
-            "AccelerationSmooth;" + \
-            "AccelerationDelta;" + \
-            "AccelerationMin;" + \
-            "AccelerationMax;" + \
-            "AccelerationMinTime;" + \
-            "AccelerationMaxTime;" + \
-            "Distance;" + \
-            "DistanceDelta" + \
+
+        logstring = \
+            str(logentry) + \
+            ";" + str(time) + \
+            ";" + str(smooth) + \
+            ";" + str('%.2f' % time_current) + \
+            ";" + str('%.2f' % time_delta) + \
+            ";" + str('%.2f' % speed_current) + \
+            ";" + str('%.2f' % speed_delta) + \
+            ";" + str('%.2f' % speed_avg) + \
+            ";" + str('%.2f' % np.mean(speed_avgtime)) + \
+            ";" + str('%.2f' % speed_max) + \
+            ";" + str('%.2f' % max(speed_maxtime)) + \
+            ";" + str('%.2f' % maxspeed_current) + \
+            ";" + str('%.2f' % maxspeed_delta) + \
+            ";" + str('%.2f' % maxspeed_avg) + \
+            ";" + str('%.2f' % angle_current) + \
+            ";" + str('%.2f' % angle_delta) + \
+            ";" + str('%.2f' % acceleration_current) + \
+            ";" + str('%.2f' % np.mean(acceleration_smooth)) + \
+            ";" + str('%.2f' % acceleration_delta) + \
+            ";" + str('%.2f' % acceleration_min) + \
+            ";" + str('%.2f' % acceleration_max) + \
+            ";" + str('%.2f' % max(acceleration_maxtime)) + \
+            ";" + str('%.2f' % min(acceleration_mintime)) + \
+            ";" + str('%.2f' % distance_current) + \
+            ";" + str('%.2f' % distance_delta) + \
             "\n"
-        logfile_handler_csv.write(logstring_header)
-        logfile_handler_dat.write(logstring_header.replace(";"," ").replace("Datapoint","x").lower())
-
-
-    logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
-    logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
-        
-    logstring = \
-        str(logentry) + \
-        ";" + str(time) + \
-        ";" + str(smooth) + \
-        ";" + str('%.2f' % time_current) + \
-        ";" + str('%.2f' % time_delta) + \
-        ";" + str('%.2f' % speed_current) + \
-        ";" + str('%.2f' % speed_delta) + \
-        ";" + str('%.2f' % speed_avg) + \
-        ";" + str('%.2f' % np.mean(speed_avgtime)) + \
-        ";" + str('%.2f' % speed_max) + \
-        ";" + str('%.2f' % max(speed_maxtime)) + \
-        ";" + str('%.2f' % maxspeed_current) + \
-        ";" + str('%.2f' % maxspeed_delta) + \
-        ";" + str('%.2f' % maxspeed_avg) + \
-        ";" + str('%.2f' % angle_current) + \
-        ";" + str('%.2f' % angle_delta) + \
-        ";" + str('%.2f' % acceleration_current) + \
-        ";" + str('%.2f' % np.mean(acceleration_smooth)) + \
-        ";" + str('%.2f' % acceleration_delta) + \
-        ";" + str('%.2f' % acceleration_min) + \
-        ";" + str('%.2f' % acceleration_max) + \
-        ";" + str('%.2f' % max(acceleration_maxtime)) + \
-        ";" + str('%.2f' % min(acceleration_mintime)) + \
-        ";" + str('%.2f' % distance_current) + \
-        ";" + str('%.2f' % distance_delta) + \
-        "\n"
-    logfile_handler_csv.write(logstring)
-    logfile_handler_dat.write(logstring.replace(";"," "))
+        logfile_handler_csv.write(logstring)
+        logfile_handler_dat.write(logstring.replace(";"," "))
     
     hudstring = \
         "Time: " + str('%.2f' % time_current) + " s\n" + \
@@ -426,7 +470,8 @@ def log_message():
 
 
 rospy.init_node('log_stats', anonymous=False)
-rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
+# disabled as we don't need it here
+#rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
 rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
 

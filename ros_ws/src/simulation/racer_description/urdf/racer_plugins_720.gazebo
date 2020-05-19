@@ -29,28 +29,28 @@
       <!--<update_rate>30.0</update_rate>-->
       <camera name="head">
         <!-- 672x376@100Hz - 87deg - 1.51844 -->
-        <horizontal_fov>1.51844</horizontal_fov>
+        <!--<horizontal_fov>1.51844</horizontal_fov>-->
         
         <!-- 854x480@100Hz - 87deg - 1.51844 -->
         <!--<horizontal_fov>1.51844</horizontal_fov>-->
         
         <!-- 1280x720@60Hz - 85deg - 1.48353 -->
-        <!--<horizontal_fov>1.48353</horizontal_fov>-->
+        <horizontal_fov>1.48353</horizontal_fov>
         
         <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
         <!--<horizontal_fov>1.20428</horizontal_fov>-->
         <image>
           <!-- 672x376@100Hz - 87deg - 1.51844 -->
-          <width>672</width>
-          <height>376</height>
+          <!--<width>672</width>-->
+          <!--<height>376</height>-->
           
           <!-- 854x480@100Hz - 87deg - 1.51844 -->
           <!--<width>854</width>-->
           <!--<height>480</height>-->
           
           <!-- 1280x720@60Hz - 85deg - 1.48353 -->
-          <!--<width>1280</width>-->
-          <!--<height>720</height>-->
+          <width>1280</width>
+          <height>720</height>
           
           <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
           <!--<width>1920</width>-->

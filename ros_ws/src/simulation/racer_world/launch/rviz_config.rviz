@@ -12,6 +12,7 @@ Panels:
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
+        - /VideoCapture1
       Splitter Ratio: 0.5305555462837219
     Tree Height: 594
   - Class: rviz/Selection
@@ -384,10 +385,10 @@ Visualization Manager:
       Value: true
       filename: output.avi
       fps: 30
-      height: 720
+      height: 376
       start capture: false
       use 3D viewer size: false
-      width: 1280
+      width: 672
     - Align Bottom: false
       Background Alpha: 0
       Background Color: 0; 0; 0
