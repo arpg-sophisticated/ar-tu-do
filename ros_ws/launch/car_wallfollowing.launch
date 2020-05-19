@@ -93,5 +93,5 @@
     <!-- 3: smoothing value of acceleration (int), default: 5 -->
     <!-- 4: whether its simulation or not (string: yes|no), default: no -->
     <!-- 5: whether write statistics or not (string: yes|no), default: no -->
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no yes"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no no"/>
 </launch>
