@@ -1,14 +1,14 @@
 
 sudo: true
-dist: xenial
+dist: bionic
 
 env:
   global:
     - SRC_PATH=$(pwd)
-    - ROS_DISTRO: kinetic
+    - ROS_DISTRO: melodic
     - GH_REPO_NAME: ar-tu-do
     - DOXYFILE: $TRAVIS_BUILD_DIR/docs/master/Doxyfile
-    - GH_REPO_REF: github.com/Autonomous-Racing-PG/ar-tu-do.git
+    - GH_REPO_REF: github.com/arpg-sophisticated/ar-tu-do.git
 
 jobs:
   include:
@@ -71,4 +71,4 @@ jobs:
       script:
         - cd $TRAVIS_BUILD_DIR
         - chmod 755 ./scripts/travis/doxygen/generate-doxygen-doc.sh
-        - ./scripts/travis/doxygen/generate-doxygen-doc.sh
+        - # ./scripts/travis/doxygen/generate-doxygen-doc.sh
