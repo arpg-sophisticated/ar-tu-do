@@ -142,16 +142,16 @@ angle_last = 0
 global angle_delta
 angle_delta = 0  
     
-def getStatsPath():
+def getDataPath():
     fullpath = RosPack().get_path("simulation_tools").split("/")
     fullpath.reverse()
-    relativepath = "/stats"
+    relativepath = "../data"
     insert = False
     for part in fullpath:
         if part == "ros_ws":
             insert = True
         if insert:
-            relativepath = "/" + part + relativepath
+            relativepath = part + "/" + relativepath
     return relativepath.replace("//","/")
 
 
@@ -345,7 +345,7 @@ def log_message():
     if len(acceleration_smooth) > smooth:
         acceleration_smooth.pop(0)
     
-    logbase = getStatsPath()
+    datapath = getDataPath()
     if logentry == 0:
         # log writing enabled
         logwriting = False
@@ -359,13 +359,9 @@ def log_message():
             loginstance = ""
             if len(sys.argv) > 1:
                 loginstance = sys.argv[1] + "_"
-            logpath = logbase + "/" + loginstance + timestampStr
+            logpath = datapath + "/telemetry/" + loginstance + timestampStr
 
             # create logpath for session if nonexistant
-            try:
-                os.makedirs(logbase)
-            except:
-                pass
             try:
                 os.makedirs(logpath)
             except:
