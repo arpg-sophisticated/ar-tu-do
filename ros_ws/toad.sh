@@ -737,6 +737,37 @@ case $1 in
             ;;
         esac
     ;;
+    telemetry)
+        # exit when no second parameter is given
+        if [[ $# -le 1 ]]; then
+            toadHelpTelemetry
+            echo
+            exit 1
+        fi
+        case $2 in
+            list)
+                # exit when not configured
+                if [[ $REPORTCONFIGURED != "1" ]]; then
+                    echo "Report not configured, exiting"
+                    echo
+                    exit 1
+                fi
+                toadTelemetryList
+            ;;
+            report)
+                # exit when not configured
+                if [[ $REPORTCONFIGURED != "1" ]]; then
+                    echo "Report not configured, exiting"
+                    echo
+                    exit 1
+                fi
+                toadTelemetryReport
+            ;;
+            *)
+                toadHelpTelemetry
+            ;;
+        esac
+    ;;
     *)
         toadHelpMain
         echo

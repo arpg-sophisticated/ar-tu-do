@@ -1,8 +1,0 @@
-*.dat
-*.tex
-*.csv
-*.aux
-*.log
-*.gz
-*.pdf
-./*.out

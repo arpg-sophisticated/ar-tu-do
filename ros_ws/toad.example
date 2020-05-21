@@ -84,3 +84,37 @@ SLACKCARRUN="0"
 
 # settings for video conversion
 VIDEOSDIR="../data/videos"
+
+# settings for latex telemetry report
+REPORTCONFIGURED="0"
+# normally no change needed
+REPORTDIR="../data/reports"
+# normally no change needed
+REPORTDATADIR="../data/telemetry"
+# normally no change needed
+REPORTTEMPLATES="../templates/tex"
+# Provide data files seperated by spaces or linebreaks
+# Format: FILE;COLOR;TITLE;DESCR
+#     FILE  Filename to include
+#     COLOR red,blue,green,yellow,black,purple or anything, that latex supports
+#     TITLE Title to use in legend (use _ as spaces)
+#     DESCR Description used in Captions and TOCs (use _ as spaces)
+REPORTDATAFILES="
+gazebo_20200517-wf2/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
+gazebo_20200517-wf5/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
+"
+#sim-current-20200515/speed_over_time.dat;green;WF5;Wallfollowing_5_(aktuelle_Entwicklungsversion)
+#sim-old-20200515/speed_over_time.dat;blue;WF2;Wallfollowing_2_(alte_Version)
+
+# Timesets to use for plots seperated by spaces or linebreaks
+# Please ensure, that the data files hold enough datasets
+# Format: COUNT;DIVT;DIVD
+#     COUNT Number of datasets to use on Plots
+#     DIVT  Steps for plots by time
+#     DIVD  Steps for plots by distance
+#2000;20;100;20
+#1000;10;50;10
+REPORTSETS="
+500;5;25;5
+200;2;10;2
+"
