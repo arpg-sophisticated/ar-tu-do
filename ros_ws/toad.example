@@ -81,3 +81,6 @@ SLACKCARSSH="0"
 SLACKCARREBUILD="0"
 SLACKCARRESETBUILD="0"
 SLACKCARRUN="0"
+
+# settings for video conversion
+VIDEOSDIR="../data/videos"

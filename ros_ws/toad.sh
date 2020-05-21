@@ -712,6 +712,31 @@ case $1 in
             ;;
         esac
     ;;
+    video)
+        # exit when no second parameter is given
+        if [[ $# -le 1 ]]; then
+            toadHelpVideo
+            echo
+            exit 1
+        fi
+        case $2 in
+            list)
+                toadVideosList
+            ;;
+            convert)
+                # exit when no third parameter is given
+                if [[ $# -le 2 ]]; then
+                    toadHelpVideo
+                    echo
+                    exit 1
+                fi
+                toadVideosConvert $3
+            ;;
+            *)
+                toadHelpVideo
+            ;;
+        esac
+    ;;
     *)
         toadHelpMain
         echo
