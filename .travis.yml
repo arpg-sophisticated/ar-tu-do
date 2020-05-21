@@ -1,6 +1,6 @@
-
-sudo: true
+os: linux
 dist: bionic
+language: minimal
 
 env:
   global:
