@@ -14,7 +14,7 @@ env:
 jobs:
   include:
     - # build project
-      if: type = pull_request
+      if: type = pull_request OR branch = development
 
       addons:
         apt:
@@ -72,7 +72,7 @@ jobs:
         - ./../scripts/travis/check-consistency.sh || travis_terminate 1
       
     - # create documentation
-      if: type != pull_request AND branch = development
+      if: type != pull_request AND branch = master
       
       addons:
         apt:
