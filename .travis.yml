@@ -21,7 +21,7 @@ jobs:
             - libeigen3-dev
             - python-wstool
             - libsdl2-dev
-            - clang-format-3.8
+            - clang-format-3.9
             - libyaml-cpp0.5v5
 
       cache:
