@@ -72,7 +72,7 @@ jobs:
         - ./../scripts/travis/check-consistency.sh || travis_terminate 1
       
     - # create documentation
-      if: type != pull_request AND branch = master
+      if: type != pull_request AND branch = development
       
       addons:
         apt:
