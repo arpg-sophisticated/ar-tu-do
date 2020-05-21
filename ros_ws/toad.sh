@@ -145,10 +145,10 @@ case $1 in
                     sendSlackMessage custom "Starting simulation with following arguments: $ARGUMENTS"
                 fi
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
-		mkdir -p ./videos/$RECORDTIME
+		mkdir -p ../data/videos/$RECORDTIME
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
-		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
-		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpSystem
@@ -252,10 +252,10 @@ case $1 in
                     sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
-		mkdir -p ./videos/$RECORDTIME
+		mkdir -p ../data/videos/$RECORDTIME
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
-		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
-		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             remote)
                 source $PATHROS
@@ -282,10 +282,10 @@ case $1 in
                     sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
                 fi
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
-		mkdir -p ./videos/$RECORDTIME
+		mkdir -p ../data/videos/$RECORDTIME
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
-		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
-		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             record)
                 case $3 in
@@ -309,10 +309,10 @@ case $1 in
 		export ROS_HOSTNAME="$CARIP"
 		export ROS_MASTER_URI="http://$CARIP:11311"
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
-		mkdir -p ./videos/$RECORDTIME
+		mkdir -p ../data/videos/$RECORDTIME
                 rviz -d src/car_control/launch/car.rviz
-		mv ~/.ros/output-cam.avi ./videos/$RECORDTIME/cam.avi > /dev/null 2>&1
-		mv ~/.ros/output.avi ./videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpCar
