@@ -291,11 +291,11 @@ case $1 in
                 case $3 in
                     camera)
                         BAGNAME="camera-$(date +%s).bag"
-                        mkdir -p rosbags > /dev/null 2>&1
+                        mkdir -p ../data/rosbags > /dev/null 2>&1
                         echo "This will record camera data to file $BAGNAME"
                         source $PATHROS
                         source $PATHSETUP
-                        rosbag record -O rosbags/$BAGNAME /camera/left/camera_info /camera/right/camera_info /camera/left/image_raw/compressed /camera/right/image_raw/compressed /tf
+                        rosbag record -O ../data/rosbags/$BAGNAME /camera/left/camera_info /camera/right/camera_info /camera/left/image_raw/compressed /camera/right/image_raw/compressed /tf
                     ;;
                     *)
                         toadHelpCar
