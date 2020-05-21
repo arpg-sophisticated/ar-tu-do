@@ -1,6 +1,6 @@
 # Autonomous Racing Software Stack and Simulation Enviroment
 
-[![Build Status](https://travis-ci.com/Autonomous-Racing-PG/ar-tu-do.svg?branch=master)](https://travis-ci.com/Autonomous-Racing-PG/ar-tu-do)
+[![Build Status](https://travis-ci.com/arpg-sophisticated/ar-tu-do.svg?branch=development)](https://travis-ci.com/arpg-sophisticated/ar-tu-do)
 
 This repository contains software for 1/10th scale autonomous race cars to compete in the [F1/10 competition](http://f1tenth.org/). It is developed by the Autonomous Racing Project Group of [TU Dortmund](https://ls12-www.cs.tu-dortmund.de/daes/).
 
