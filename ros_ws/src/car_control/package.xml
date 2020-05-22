@@ -19,5 +19,6 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>vesc_sim</depend>
+  <depend>car_config</depend>
   <depend>rviz_imu_plugin</depend>
 </package>

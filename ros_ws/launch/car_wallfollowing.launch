@@ -20,6 +20,10 @@
     </include>
     
     <!-- zed camera launch file -->
+    <!-- pick resolution of camera - please enable only one -->
+    <!-- Include racer with 720p camera -->
+    <!--<include file="./launch/zed_720.launch"/>-->
+    <!-- Include racer with VGA camera -->
     <include file="./launch/zed.launch"/>
 
     <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
@@ -30,7 +34,14 @@
 
     <include file="$(find vesc_ackermann)/launch/vesc_to_odom_node.launch"/>
 
-    <include file="$(find wallfollowing3)/launch/autonomous_driving_physical.launch"/>
+    
+    <!-- wallfollowing start - please enable only one -->
+    <!-- current implementation -->
+    <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch"/>
+    
+    <!-- former implementation of previous group -->
+    <!-- <include file="$(find wallfollowing2)/launch/autonomous_driving_physical.launch"/> -->
+    <!-- wallfollowing end -->
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
 
@@ -38,7 +49,13 @@
     
     <arg name="show_rviz" default="1"/>
     <group if="$(eval arg('show_rviz') == 1)">
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find car_control)/launch/car.rviz" />
+        <!-- rviz start - please enable only one -->
+        <!-- default rviz config -->
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/car.rviz"/>
+
+        <!-- rviz config with enabled video recording -->
+        <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/car_record.rviz"/> -->
+        <!-- rviz end - please enable only one -->
     </group>
 
     <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node">
@@ -68,4 +85,13 @@
     <node pkg="urg_node" type="urg_node" name="urg_node">
         <param name="ip_address" value="192.168.1.10"/>
     </node>
+
+    <!-- needed for logging telemetry data and provide node for rviz -->
+    <!-- arguments -->
+    <!-- 1: log prefix (string), default: none -->
+    <!-- 2: length for min/max arrays (int), default: 100 -->
+    <!-- 3: smoothing value of acceleration (int), default: 5 -->
+    <!-- 4: whether its simulation or not (string: yes|no), default: no -->
+    <!-- 5: whether write statistics or not (string: yes|no), default: no -->
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no no"/>
 </launch>

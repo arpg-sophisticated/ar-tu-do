@@ -24,6 +24,8 @@ function toadHelpMain {
     echo "               system help"
     echo "               car help"
     echo "               slack help"
+    echo "               video help"
+    echo "               telemetry help"
     echo "               init help"
 }
 
@@ -32,60 +34,100 @@ function toadHelpSystem {
     echo "usage: toad.sh system help"
     echo
     echo "       toad.sh system sshkeys [cron]"
-    echo "       Overwrites current users authorized keys from"
-    echo "       branch given in settings ($BRANCHBUILD)."
-    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "           Overwrites current users authorized keys from"
+    echo "           branch given in settings ($BRANCHBUILD)."
+    echo "           Add cron argument to suppress confirmation request"
     echo
     echo "       toad.sh system rebuild [cron]"
-    echo "       Rebuilds branch given in settings ($BRANCHBUILD)."
-    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "           Rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "           Add cron argument to suppress confirmation request"
     echo
     echo "       toad.sh system resetbuild [cron]"
-    echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
-    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "           Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "           Add cron argument to suppress confirmation request"
     echo
     echo "       toad.sh system run [nogui,fast,drive,manual,customtrack] [trackname]"
-    echo "       Starts simulation, add"
-    echo "           nogui       - disable gazebo client"
-    echo "           fast        - for fast mode to be true"
-    echo "           drive       - to enforce autonomous driving"
-    echo "           manual      - to enforce manual driving"
-    echo "           customtrack - start simulation with custom track as configured in toad.settings"
-    echo "                         you may add a trackname as 4th parameter to override track in settings"
+    echo
+    echo "           Starts simulation, add"
+    echo "               nogui       - disable gazebo client"
+    echo "               fast        - for fast mode to be true"
+    echo "               drive       - to enforce autonomous driving"
+    echo "               manual      - to enforce manual driving"
+    echo "               customtrack - start simulation with custom track as configured in toad.settings"
+    echo "                             you may add a trackname as 4th parameter to override track in settings"
+}
+
+# help message for telemetry mode
+function toadHelpTelemetry {
+    echo "usage: toad.sh telemetry help"
+    echo
+    echo "       toad.sh telemetry list"
+    echo
+    echo "           List available datasets for reports to include in configuration"
+    echo
+    echo "       toad.sh telemetry report"
+    echo
+    echo "           Create tex/pdf report with plots from collected telemetry data."
+    echo
+    echo "       Please ensure proper configuration in toad.settings."
+}
+
+# help message for video mode
+function toadHelpVideo {
+    echo "usage: toad.sh video help"
+    echo
+    echo "       toad.sh video list"
+    echo
+    echo "           List available datasets for video conversion"
+    echo
+    echo "       toad.sh video convert DATASET"
+    echo
+    echo "           Converts videos from given DATASET"
 }
 
 # help message for car mode
 function toadHelpCar {
+    echo "usage: toad.sh car help"
     echo
     echo "       toad.sh car sshkeys [cron]"
-    echo "       Overwrites current users authorized keys from"
-    echo "       branch given in settings ($BRANCHBUILD)."
-    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "           Overwrites current users authorized keys from"
+    echo "           branch given in settings ($BRANCHBUILD)."
+    echo "           Add cron argument to suppress confirmation request"
     echo
     echo "       toad.sh car rebuild [cron]"
-    echo "       Rebuilds branch given in settings ($BRANCHBUILD)."
-    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "           Rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "           Add cron argument to suppress confirmation request"
     echo
     echo "       toad.sh car resetbuild [cron]"
-    echo "       Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
-    echo "       Add cron argument to suppress confirmation request"
+    echo
+    echo "           Resets, pulls and rebuilds branch given in settings ($BRANCHBUILD)."
+    echo "           Add cron argument to suppress confirmation request"
     echo
     echo "       toad.sh car run"
-    echo "       Starts software on car, add"
-    echo "           drive       - to enforce autonomous driving"
-    echo "           manual      - to enforce manual driving"
+    echo
+    echo "           Starts software on car, add"
+    echo "               drive       - to enforce autonomous driving"
+    echo "               manual      - to enforce manual driving"
     echo
     echo "       toad.sh car record"
-    echo "       Records rosbag on car to folder rosbags, add"
-    echo "           camera      - to record rosbag from camera"
+    echo
+    echo "           Records rosbag on car to folder rosbags, add"
+    echo "               camera      - to record rosbag from camera"
     echo
     echo "       toad.sh car remote"
-    echo "       Starts software on car without rviz, add"
-    echo "           drive       - to enforce autonomous driving"
-    echo "           manual      - to enforce manual driving"
+    echo
+    echo "           Starts software on car without rviz, add"
+    echo "               drive       - to enforce autonomous driving"
+    echo "               manual      - to enforce manual driving"
     echo
     echo "       toad.sh car control"
-    echo "       Starts rviz connecting to the car."
+    echo
+    echo "           Starts rviz connecting to the car."
 }
 
 # help message for initializing the system
@@ -95,26 +137,31 @@ function toadHelpInit {
     echo "       This stuff is hardly untested, please report results or patches" 
     echo
     echo "       toad.sh init env [force]"
-    echo "       Setups the environment relative to the current directory"
-    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "           Setups the environment relative to the current directory"
+    echo "           Add force argument to suppress compatibility check"
     echo
     echo "       toad.sh init system [force]"
-    echo "       This will install everything you need on system side."
-    echo "       Please ensure, that you're allowed to sudo."
-    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "           This will install everything you need on system side."
+    echo "           Please ensure, that you're allowed to sudo."
+    echo "           Add force argument to suppress compatibility check"
     echo
     echo "       toad.sh init ros [force]"
-    echo "       This will install everything you need on ros side."
-    echo "       Please ensure, that you're allowed to sudo."
-    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "           This will install everything you need on ros side."
+    echo "           Please ensure, that you're allowed to sudo."
+    echo "           Add force argument to suppress compatibility check"
     echo
     echo "       toad.sh init ide [force]"
-    echo "       This will install IDEs and provide information about plugins"
-    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "           This will install IDEs and provide information about plugins"
+    echo "           Add force argument to suppress compatibility check"
     echo
     echo "       toad.sh init camstream [force]"
-    echo "       This will install all packages required for camera streaming"
-    echo "       Add force argument to suppress compatibility check"
+    echo
+    echo "           This will install all packages required for camera streaming"
+    echo "           Add force argument to suppress compatibility check"
 }
 
 # help message for slack interaction
@@ -122,10 +169,10 @@ function toadHelpSlack {
     echo "usage: toad.sh slack help"
     echo
     echo "       toad.sh slack status"
-    echo "       Sends status message to preconfigured channel"
+    echo "           Sends status message to preconfigured channel"
     echo
     echo "       toad.sh slack custom 'MESSAGE'"
-    echo "       Sends custom message MESSAGE to preconfigured channel"
+    echo "           Sends custom message MESSAGE to preconfigured channel"
 }
 
 # get number of active display session
@@ -298,4 +345,246 @@ function sendSlackMessage {
 # get address of given interface
 function getAddressByInterface {
     ifconfig $1 | grep inet | grep netmask | awk {'print $2'}
+}
+
+# print available videos list
+function toadVideosList {
+    echo "Available recordings for conversion:"
+    for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
+        if test -f $VIDEODIR/cam.avi; then
+            if test -f $VIDEODIR/rviz.avi; then
+                LENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,//)
+                SIZE=$(($(du -shm $VIDEODIR/rviz.avi | awk {'print $1'})+$(du -shm $VIDEODIR/cam.avi | awk {'print $1'})))
+                echo "    $(echo $VIDEODIR | rev | cut -d "/" -f 1 | rev) ($LENGTH, "$SIZE"M)"
+            fi
+        fi
+    done
+}
+
+# convert videos 
+# 1: directory: name of directory in videos folder to convert
+function toadVideosConvert {
+    # check for files
+    VIDEODIR=$VIDEOSDIR"/"$1
+    if test -f $VIDEODIR/cam.avi; then
+        if test -f $VIDEODIR/rviz.avi; then
+            printf "Converting $1, please wait ."
+            # calculate factor
+            CAMLENGTH=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2]}')
+            RVIZLENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2] }')
+            NEWLENGTH=$(python -c "print($RVIZLENGTH*1.0/$CAMLENGTH*1.0)" | cut -b -6)
+
+            # convert videos
+            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS" -c:v libx264 $VIDEODIR/cam.mp4 > /dev/null 2>&1
+            printf "."
+            ffmpeg -y -i $VIDEODIR/rviz.avi -c:v libx264 $VIDEODIR/rviz.mp4 > /dev/null 2>&1
+            printf "."
+
+            # stitch videos
+            ffmpeg -y \
+              -i $VIDEODIR/cam.mp4 \
+              -i $VIDEODIR/rviz.mp4 \
+              -filter_complex '[0:v]pad=iw*2:ih[int];[int][1:v]overlay=W/2:0[vid]' \
+              -map [vid] \
+              -c:v libx264 \
+              -crf 23 \
+              -preset veryfast \
+              $VIDEODIR/splitview.mp4 > /dev/null 2>&1
+            echo " done"
+        else
+            echo "Folder $1 invalid, file rviz.avi not existant"
+            echo
+            exit 1
+        fi
+    else
+        echo "Folder $1 invalid, file cam.avi not existant"
+        echo
+        exit 1
+    fi
+}
+
+# print available report list
+function toadTelemetryList {
+    echo "Available telemetry data for reports:"
+    for REPORTDATAFILE in $(find $REPORTDATADIR -type f | grep "\.dat"); do
+        SIZE=$(($(wc -l $REPORTDATAFILE | cut -d " " -f 1)-1))
+        echo "    $REPORTDATAFILE ($SIZE lines)"
+    done
+}
+
+# create report
+function toadTelemetryReport { 
+    REPORTDATE=$(date +%Y%m%d-%H%M%S)
+    REPORTTARGET=$REPORTDIR/$REPORTDATE
+    # check if files exist
+    for REPORTDATAFILE in $REPORTDATAFILES; do
+        if ! test -f $REPORTDATADIR/$(echo $REPORTDATAFILE | cut -d ";" -f 1); then
+            echo "File $(echo $REPORTDATAFILE | cut -d ";" -f 1) not found"
+            echo
+            exit 1
+        fi  
+    done
+
+    # check if files contain enough datasets
+    for REPORTDATAFILE in $REPORTDATAFILES; do
+        for REPORTSET in $REPORTSETS; do
+            if [[ $(($(wc -l $REPORTDATADIR/$(echo $REPORTDATAFILE | cut -d ";" -f 1) | cut -d " " -f 1))) -le $(echo $REPORTSET | cut -d ";" -f 1) ]]; then
+                echo "File $(echo $REPORTDATAFILE | cut -d ";" -f 1): not enough data, max available: $(($(wc -l $REPORTDATADIR/$(echo $REPORTDATAFILE | cut -d ";" -f 1) | cut -d " " -f 1)-1))"
+                echo
+                exit 1
+            fi        
+        done      
+    done 
+
+    printf "Preparing report, please wait ..."
+    # create datafiles
+    mkdir -p $REPORTTARGET
+    for REPORTDATAFILE in $REPORTDATAFILES; do
+        FILENAME=$(echo $REPORTDATAFILE | cut -d ";" -f 1)
+        TITLE=$(echo $REPORTDATAFILE | cut -d ";" -f 3)
+        for REPORTSET in $REPORTSETS; do
+            SIZE=$(echo $REPORTSET | cut -d ";" -f 1)
+            head -$(($SIZE+1)) $REPORTDATADIR/$FILENAME > $REPORTTARGET/latex-data-$TITLE-$SIZE.dat
+        done      
+    done  
+
+    # create variables for main
+    PH_INCLUDES=""
+    PH_DATAITEMS="\\n"
+    PH_SETS="\\n"
+
+    # create list for datasets
+    for REPORTDATAFILE in $REPORTDATAFILES; do
+        FILENAME="$(echo $REPORTDATAFILE | cut -d ";" -f 1)"
+        TITLE="$(echo $REPORTDATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+        DESC="$(echo $REPORTDATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+        PH_DATAITEMS=$PH_DATAITEMS"\\\item \\\textbf{$TITLE:} $DESC\\n"
+    done
+
+    # create list for setsizes
+    for REPORTSET in $REPORTSETS; do
+        SIZE="$(echo $REPORTSET | cut -d ";" -f 1)"
+        SMOOTH="$(echo $REPORTSET | cut -d ";" -f 4)"
+        PH_SETS=$PH_SETS"\\\item $SIZE Messwerte, Glättung: $SMOOTH\\n"
+    done
+
+    # create subsections from single
+    for REPORTDATAFILE in $REPORTDATAFILES; do
+        TITLEFILE="$(echo $REPORTDATAFILE | cut -d ";" -f 3)"
+        TITLE="$(echo $REPORTDATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+        DESC="$(echo $REPORTDATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+        for REPORTSET in $REPORTSETS; do
+            SIZE=$(echo $REPORTSET | cut -d ";" -f 1)
+            FILENAME="latex-data-$TITLEFILE-$SIZE"
+            DIVT=$(echo $REPORTSET | cut -d ";" -f 2)
+            DIVD=$(echo $REPORTSET | cut -d ";" -f 3)
+            SMOOTH=$(echo $REPORTSET | cut -d ";" -f 4)
+            AVERAGE=$(head -2 $REPORTTARGET/$FILENAME.dat | tail -1 | cut -d " " -f 3)
+
+            cat $REPORTTEMPLATES/section.tex \
+                | sed "s&___PH_DESC___&$DESC&g" \
+                | sed "s&___PH_SIZE___&$SIZE&g" \
+                | sed "s&___PH_DIVD___&$DIVD&g" \
+                | sed "s&___PH_DIVT___&$DIVT&g" \
+                | sed "s&___PH_SMOOTH___&$SMOOTH&g" \
+                | sed "s&___PH_AVERAGE___&$AVERAGE&g" \
+                | sed "s&___PH_FILENAME___&$FILENAME&g" \
+                | sed "s&___PH_TITLE___&$TITLE&g" \
+                > $REPORTTARGET/section-$TITLEFILE-$SIZE.tex
+            PH_INCLUDES=$PH_INCLUDES"\\\include{section-$TITLEFILE-$SIZE}\\n"
+        done      
+    done
+
+    # create comparisons
+    for REPORTSET in $REPORTSETS; do
+        PH_PLOT1=""
+        PH_LEGEND1=""
+        PH_PLOT2=""
+        PH_LEGEND2=""
+        PH_PLOT3=""
+        PH_LEGEND3=""
+        PH_PLOT4=""
+        PH_LEGEND4=""
+        PH_PLOT5=""
+        PH_LEGEND5=""
+        PH_PLOT6=""
+        PH_LEGEND6=""
+        PH_PLOT7=""
+        PH_LEGEND7=""
+        PH_PLOT8=""
+        PH_LEGEND8=""
+
+        SIZE=$(echo $REPORTSET | cut -d ";" -f 1)
+        DIVT=$(echo $REPORTSET | cut -d ";" -f 2)
+        DIVD=$(echo $REPORTSET | cut -d ";" -f 3)
+        SMOOTH=$(echo $REPORTSET | cut -d ";" -f 4)
+        for REPORTDATAFILE in $REPORTDATAFILES; do
+            COLOR="$(echo $REPORTDATAFILE | cut -d ";" -f 2)"
+            TITLEFILE="$(echo $REPORTDATAFILE | cut -d ";" -f 3)"
+            TITLE="$(echo $REPORTDATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+            DESC="$(echo $REPORTDATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+            FILENAME="latex-data-$TITLEFILE-$SIZE"
+            AVERAGE=$(head -2 $REPORTTARGET/$FILENAME.dat | tail -1 | cut -d " " -f 3)
+
+            PH_PLOT1=$PH_PLOT1"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=distance]{$FILENAME.dat};\\n"
+            PH_LEGEND1=$PH_LEGEND1"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
+
+            PH_PLOT5=$PH_PLOT5"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=distance]{$FILENAME.dat};\\n"
+            PH_LEGEND5=$PH_LEGEND5"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
+
+            PH_PLOT2=$PH_PLOT2"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=time]{$FILENAME.dat};\\n"
+            PH_LEGEND2=$PH_LEGEND2"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
+
+            PH_PLOT6=$PH_PLOT6"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=time]{$FILENAME.dat};\\n"
+            PH_LEGEND6=$PH_LEGEND6"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
+
+            PH_PLOT3=$PH_PLOT3"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
+            PH_LEGEND3=$PH_LEGEND3"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
+
+            PH_PLOT7=$PH_PLOT7"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
+            PH_LEGEND7=$PH_LEGEND7"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
+
+            PH_PLOT4=$PH_PLOT4"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
+            PH_LEGEND4=$PH_LEGEND4"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
+
+            PH_PLOT8=$PH_PLOT8"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
+            PH_LEGEND8=$PH_LEGEND8"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
+        done  
+
+        cat $REPORTTEMPLATES/compare.tex \
+            | sed "s&___PH_DESC___&$DESC&g" \
+            | sed "s&___PH_AVERAGE___&$AVERAGE&g" \
+            | sed "s&___PH_SIZE___&$SIZE&g" \
+            | sed "s&___PH_DIVD___&$DIVD&g" \
+            | sed "s&___PH_DIVT___&$DIVT&g" \
+            | sed "s&___PH_FILENAME___&$FILENAME&g" \
+            | sed "s&___PH_TITLE___&$TITLE&g" \
+            | sed "s&___PH_PLOT1___&$PH_PLOT1&g" \
+            | sed "s&___PH_LEGEND1___&$PH_LEGEND1&g" \
+            | sed "s&___PH_PLOT2___&$PH_PLOT2&g" \
+            | sed "s&___PH_LEGEND2___&$PH_LEGEND2&g" \
+            | sed "s&___PH_PLOT3___&$PH_PLOT3&g" \
+            | sed "s&___PH_LEGEND3___&$PH_LEGEND3&g" \
+            | sed "s&___PH_PLOT4___&$PH_PLOT4&g" \
+            | sed "s&___PH_LEGEND4___&$PH_LEGEND4&g" \
+            | sed "s&___PH_PLOT5___&$PH_PLOT5&g" \
+            | sed "s&___PH_LEGEND5___&$PH_LEGEND5&g" \
+            | sed "s&___PH_PLOT6___&$PH_PLOT6&g" \
+            | sed "s&___PH_LEGEND6___&$PH_LEGEND6&g" \
+            | sed "s&___PH_PLOT7___&$PH_PLOT7&g" \
+            | sed "s&___PH_LEGEND7___&$PH_LEGEND7&g" \
+            | sed "s&___PH_PLOT8___&$PH_PLOT8&g" \
+            | sed "s&___PH_LEGEND8___&$PH_LEGEND8&g" \
+            | sed "s&___PH_SMOOTH___&$SMOOTH&g" \
+            > $REPORTTARGET/compare-$SIZE.tex
+        PH_INCLUDES=$PH_INCLUDES"\\\include{compare-$SIZE}\\n" 
+    done
+    cat $REPORTTEMPLATES/main.tex | sed "s&___PH_DATAITEMS___&$PH_DATAITEMS&" | sed "s&___PH_SETS___&$PH_SETS&" | sed "s&___PH_INCLUDES___&$PH_INCLUDES&" > $REPORTTARGET/report.tex
+    echo " done"
+
+    printf "Compiling report, please wait ..."
+    cd $REPORTTARGET && pdflatex report.tex > /dev/null 2>&1
+    echo " done"
+    echo
+    echo "Report created at $REPORTTARGET/report.pdf"
 }
