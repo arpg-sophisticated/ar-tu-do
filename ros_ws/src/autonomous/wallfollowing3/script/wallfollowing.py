@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 import rospy
 from std_msgs.msg import ColorRGBA
 from sensor_msgs.msg import LaserScan
@@ -136,8 +137,14 @@ def get_scan_as_cartesian(laser_scan):
             if r < 0:
                 not_skipped_ranges_after.append(r)
                 not_skipped_angles_after.append(a)
-        angles = np.concatenate((not_skipped_angles_before, angles[skip_left:-1 - skip_right], not_skipped_angles_after), axis=None)
-        ranges = np.concatenate((not_skipped_ranges_before, ranges[skip_left:-1 - skip_right], not_skipped_ranges_after), axis=None)
+        angles = np.concatenate((not_skipped_angles_before,
+                                 angles[skip_left:-1 - skip_right],
+                                 not_skipped_angles_after),
+                                axis=None)
+        ranges = np.concatenate((not_skipped_ranges_before,
+                                 ranges[skip_left:-1 - skip_right],
+                                 not_skipped_ranges_after),
+                                axis=None)
 
     inf_mask = np.isinf(ranges)
     if inf_mask.any():
@@ -254,7 +261,8 @@ def calc_steering_radius(steering_angle):
 def calc_angle_moving_average():
     if len(last_angle_moving_average[0]) == 0:
         return 0
-    return float(sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
+    return float(
+        sum(last_angle_moving_average[0])) / float(len(last_angle_moving_average[0]))
 
 
 def add_angle_moving_average(angle):
@@ -263,29 +271,40 @@ def add_angle_moving_average(angle):
         last_angle_moving_average[0] = last_angle_moving_average[0][1:]
     last_angle_moving_average[0].append(angle)
 
+
 """
 Returns a predicted point and distance to this point which is a possible future position if the car would drive straight.
 This position is important to calculate the error for the pid-controller.
 """
+
+
 def calc_predicted_car_position(remaining_distance, offset_distance):
     prediction_distance = min(0.1 + last_speed * 0.35, 2.0)
-    if remaining_distance is not None and remaining_distance + offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
+    if remaining_distance is not None and remaining_distance + \
+            offset_distance > 0 and prediction_distance > remaining_distance + offset_distance:
         prediction_distance = remaining_distance
     # steering_radius = calc_steering_radius(calc_angle_moving_average())
     # circle_section_angle = prediction_distance / steering_radius
     # print steering_radius, circle_section_angle, Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
-    # return Point(-steering_radius * math.cos(circle_section_angle) + steering_radius, abs(steering_radius * math.sin(circle_section_angle))), prediction_distance
+    # return Point(-steering_radius * math.cos(circle_section_angle) +
+    # steering_radius, abs(steering_radius * math.sin(circle_section_angle))),
+    # prediction_distance
     return Point(0, prediction_distance), prediction_distance
 
 
 def calc_circle_intersections(circle_a, circle_b):
     # calc vector between the two circles
-    ab = Point(circle_b.center.x - circle_a.center.x, circle_b.center.y - circle_a.center.y)
+    ab = Point(
+        circle_b.center.x -
+        circle_a.center.x,
+        circle_b.center.y -
+        circle_a.center.y)
     distance = math.sqrt(ab.x**2 + ab.y**2)
     if distance == 0:
         # no distance between centers
         return []
-    x = (circle_a.radius**2 + distance**2 - circle_b.radius**2) / (2 * distance)
+    x = (circle_a.radius**2 + distance**2 -
+         circle_b.radius**2) / (2 * distance)
     y = circle_a.radius**2 - x**2
     if y < 0:
         # no intersection
@@ -306,8 +325,13 @@ def calc_circle_intersections(circle_a, circle_b):
 
 
 def calc_circle_tangent(circle_a, outside_point):
-    distance = math.sqrt((circle_a.center.x - outside_point.x)**2 + (circle_a.center.y - outside_point.y)**2) / 2
-    circle_b = Circle(Point((circle_a.center.x - outside_point.x) / 2, (circle_a.center.y - outside_point.y) / 2), distance)
+    distance = math.sqrt((circle_a.center.x - outside_point.x)
+                         ** 2 + (circle_a.center.y - outside_point.y)**2) / 2
+    circle_b = Circle(
+        Point(
+            (circle_a.center.x - outside_point.x) / 2,
+            (circle_a.center.y - outside_point.y) / 2),
+        distance)
     intersections = calc_circle_intersections(circle_a, circle_b)
     intersections.sort(key=lambda intersection: intersection.y, reverse=True)
     if len(intersections) > 0:
@@ -359,13 +383,15 @@ def calc_polygon_tangent_point(points, demanded_side):
             return point
     return None
 
+
 def calc_closest_collision_point(points, demanded_side, safety_distance):
     tangent_point = calc_polygon_tangent_point(points, demanded_side)
     result_point = None
     result_distance_to_car = 0
     for point in points:
         if point[1] > 0:
-            shortest_distance_to_vector = calc_shortest_distance_to_vector(np.array([0, 0]), np.array(tangent_point) ,point)
+            shortest_distance_to_vector = calc_shortest_distance_to_vector(
+                np.array([0, 0]), np.array(tangent_point), point)
             if shortest_distance_to_vector > safety_distance:
                 distance_to_car = calc_distance([0, 0], point)
                 if distance_to_car > result_distance_to_car:
@@ -375,11 +401,12 @@ def calc_closest_collision_point(points, demanded_side, safety_distance):
 
 
 def calc_shortest_distance_to_vector(p1, p2, p3):
-    return np.linalg.norm(np.cross(p2-p1, p1-p3))/np.linalg.norm(p2-p1)
+    return np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
 
 
 def calc_distance(point_a, point_b):
-    return math.sqrt((point_a[0] - point_b[0])**2 + (point_a[1] - point_b[1])**2)
+    return math.sqrt((point_a[0] - point_b[0])**2 +
+                     (point_a[1] - point_b[1])**2)
 
 
 def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
@@ -387,14 +414,17 @@ def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
     closest_distance = 1000000
     for point in points:
         if point[1] > 0.3:
-            distance = calc_shortest_distance_to_vector(np.array(line_point_a), np.array(line_point_b), np.array(point))
+            distance = calc_shortest_distance_to_vector(
+                np.array(line_point_a), np.array(line_point_b), np.array(point))
             if closest_distance > distance:
                 closest_distance = distance
                 closest_point = point
     return closest_point
 
+
 def calc_distance(point_a, point_b):
-    return math.sqrt((point_a[0] - point_b[0])**2 + (point_a[1] - point_b[1])**2)
+    return math.sqrt((point_a[0] - point_b[0])**2 +
+                     (point_a[1] - point_b[1])**2)
 
 
 def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
@@ -402,7 +432,8 @@ def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
     closest_distance = 1000000
     for point in points:
         if point[1] > 0.3:
-            distance = calc_shortest_distance_to_vector(np.array(line_point_a), np.array(line_point_b), np.array(point))
+            distance = calc_shortest_distance_to_vector(
+                np.array(line_point_a), np.array(line_point_b), np.array(point))
             if closest_distance > distance:
                 closest_distance = distance
                 closest_point = point
@@ -412,6 +443,7 @@ def calc_shortest_distance_point_to_vector(line_point_a, line_point_b, points):
 # return min([calc_shortest_distance_to_vector(np.array(point_a),
 # np.array(point_b), np.array(point)) for point in points])
 
+
 """
 Calculates the point which is the end of a vector which is orthogonal to a line between point_a and point_b.
 This vector is safety_distance long and is on the demanded side.
@@ -420,12 +452,37 @@ point_b: end point of the line
 demanded_side: 1 -> right side, -1 -> left side
 safety_distance: result point should be safety_distance times the car width away from the line between point_a and point_b.
 """
-def calc_orthogonal_point(point_a, point_b, start_point, demanded_side, safety_distance):
-    distance = math.sqrt((point_a[0] - point_b[0])**2 + (point_a[1] - point_b[1])**2)
+
+
+def calc_orthogonal_point(
+        point_a,
+        point_b,
+        start_point,
+        demanded_side,
+        safety_distance):
+    distance = math.sqrt((point_a[0] - point_b[0])
+                         ** 2 + (point_a[1] - point_b[1])**2)
     if demanded_side > 0:
-        return Point(start_point[0] - point_b[1] / distance * safety_distance, start_point[1] + point_b[0] / distance * safety_distance)
+        return Point(
+            start_point[0] -
+            point_b[1] /
+            distance *
+            safety_distance,
+            start_point[1] +
+            point_b[0] /
+            distance *
+            safety_distance)
     else:
-        return Point(start_point[0] + point_b[1] / distance * safety_distance, start_point[1] - point_b[0] / distance * safety_distance)
+        return Point(
+            start_point[0] +
+            point_b[1] /
+            distance *
+            safety_distance,
+            start_point[1] -
+            point_b[0] /
+            distance *
+            safety_distance)
+
 
 """
 Calculates the target car position which is used to calculate the error for the pid-controller.
@@ -483,21 +540,43 @@ def calc_target_car_position(
     right_tangent_point = None
     start_position = None
     # left curve
-    if left_circle.center.x < 0 and right_circle.center.x < 0 and (left_circle.radius < 1000 or right_circle.radius < 1000): #calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], left_wall) < CAR_WIDTH
+    # calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], left_wall) < CAR_WIDTH
+    if left_circle.center.x < 0 and right_circle.center.x < 0 and (
+            left_circle.radius < 1000 or right_circle.radius < 1000):
         # left_tangent_point = calc_closest_collision_point(left_wall, -1, safety_distance)
-        left_tangent_point = calc_circle_tangent(Circle(left_circle.center, left_circle.radius + safety_distance), Point(0, 0))
+        left_tangent_point = calc_circle_tangent(
+            Circle(
+                left_circle.center,
+                left_circle.radius +
+                safety_distance),
+            Point(
+                0,
+                0))
         if left_tangent_point is not None:
             # start_position = calc_shortest_distance_point_to_vector([0, 0], left_tangent_point, left_wall)
             # target_position = calc_orthogonal_point([0, 0], left_tangent_point, start_position, -1, safety_distance)
-            target_position = Point(left_tangent_point[0], left_tangent_point[1])
+            target_position = Point(
+                left_tangent_point[0],
+                left_tangent_point[1])
     # right curve
-    if left_circle.center.x > 0 and right_circle.center.x > 0 and (left_circle.radius < 1000 or right_circle.radius < 1000): #calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], right_wall) < CAR_WIDTH
+    # calc_smallest_distance_to_points([0, 0], [target_position.x, target_position.y], right_wall) < CAR_WIDTH
+    if left_circle.center.x > 0 and right_circle.center.x > 0 and (
+            left_circle.radius < 1000 or right_circle.radius < 1000):
         # right_tangent_point = calc_closest_collision_point(right_wall, 1, safety_distance)
-        right_tangent_point = calc_circle_tangent(Circle(right_circle.center, right_circle.radius + safety_distance), Point(0, 0))
+        right_tangent_point = calc_circle_tangent(
+            Circle(
+                right_circle.center,
+                right_circle.radius +
+                safety_distance),
+            Point(
+                0,
+                0))
         if right_tangent_point is not None:
             # start_position = calc_shortest_distance_point_to_vector([0, 0], right_tangent_point, right_wall)
             # target_position = calc_orthogonal_point([0, 0], right_tangent_point, start_position, 1, safety_distance)
-            target_position = Point(right_tangent_point[0], right_tangent_point[1])
+            target_position = Point(
+                right_tangent_point[0],
+                right_tangent_point[1])
 
     if left_tangent_point is not None:
         show_line_in_rviz(
@@ -518,8 +597,11 @@ def calc_target_car_position(
     else:
         delete_marker(21)
     if start_position is not None:
-        show_line_in_rviz(22, [target_position, Point(start_position[0], start_position[1])],
-                        color=ColorRGBA(0, 1.0, 0, 1.0))
+        show_line_in_rviz(
+            22, [
+                target_position, Point(
+                    start_position[0], start_position[1])], color=ColorRGBA(
+                0, 1.0, 0, 1.0))
     else:
         delete_marker(22)
 
@@ -551,8 +633,15 @@ def calc_target_car_position(
 #     return np.stack((x_points, y_points), axis=1)
 
 def show_steering_angle():
-    show_line_in_rviz(35, [Point(0, 0), Point(math.sin(calc_angle_moving_average()), math.cos(calc_angle_moving_average()))],
-                      color=ColorRGBA(1, 0, 0, 0.3))
+    show_line_in_rviz(
+        35, [
+            Point(
+                0, 0), Point(
+                math.sin(
+                    calc_angle_moving_average()), math.cos(
+                        calc_angle_moving_average()))], color=ColorRGBA(
+                            1, 0, 0, 0.3))
+
 
 """
 Determines speed and steering angle for the car based on a wall following algorithm.
@@ -578,8 +667,17 @@ def follow_walls(
         delta_time):
     global last_speed
     show_steering_angle()
-    predicted_car_position, prediction_distance = calc_predicted_car_position(remaining_distance, CAR_WIDTH)
-    target_position = calc_target_car_position(predicted_car_position, curve_type, left_circle, right_circle, upper_circle, left_wall, right_wall, remaining_distance)
+    predicted_car_position, prediction_distance = calc_predicted_car_position(
+        remaining_distance, CAR_WIDTH)
+    target_position = calc_target_car_position(
+        predicted_car_position,
+        curve_type,
+        left_circle,
+        right_circle,
+        upper_circle,
+        left_wall,
+        right_wall,
+        remaining_distance)
 
     distance_to_target = math.sqrt(target_position.x**2 + target_position.y**2)
 
@@ -640,13 +738,15 @@ def follow_walls(
 
 
 def calc_nearest_point_to_point(point, points):
-    return points[np.argmin(np.array([calc_distance(point, p) for p in points]))]
+    return points[np.argmin(
+        np.array([calc_distance(point, p) for p in points]))]
 
 
 def is_curve_entry_in_front(curve_entry_point, lowest_point, threshold):
     if lowest_point[0] - curve_entry_point[0] == 0:
         return True
-    return abs((lowest_point[1] - curve_entry_point[1]) / (lowest_point[0] - curve_entry_point[0])) > threshold
+    return abs((lowest_point[1] - curve_entry_point[1]) /
+               (lowest_point[0] - curve_entry_point[0])) > threshold
 
 
 def handle_scan(laser_scan, delta_time):
@@ -690,32 +790,39 @@ def handle_scan(laser_scan, delta_time):
         radius_proportions_right = right_circle.radius / left_circle.radius
         if radius_proportions_left > 1.2 and right_circle.center.x < 0:
             curve_entry_point = left_wall[np.argmax(left_wall[:, 1])]
-            if is_curve_entry_in_front(curve_entry_point, calc_nearest_point_to_point([0, 0], left_wall), 1):
-                upper_wall = np.array([point for point in right_wall if point[1] >= curve_entry_point[1] - 1.5])
-                right_wall = np.array([point for point in right_wall if point[1] <= curve_entry_point[1]])
+            if is_curve_entry_in_front(
+                    curve_entry_point, calc_nearest_point_to_point([0, 0], left_wall), 1):
+                upper_wall = np.array(
+                    [point for point in right_wall if point[1] >= curve_entry_point[1] - 1.5])
+                right_wall = np.array(
+                    [point for point in right_wall if point[1] <= curve_entry_point[1]])
                 if len(right_wall) == 0:
                     right_wall = upper_wall[0: 1]
                 try:
                     right_circle = Circle.fit(right_wall)
-                except:
+                except BaseException:
                     print right_wall, upper_wall
                 curve_type = CURVE_TYPE_LEFT
         elif radius_proportions_right > 1.2 and right_circle.center.x > 0:
             curve_entry_point = right_wall[np.argmax(right_wall[:, 1])]
-            if is_curve_entry_in_front(curve_entry_point, calc_nearest_point_to_point([0, 0], right_wall), 1):
-                upper_wall = np.array([point for point in left_wall if point[1] >= curve_entry_point[1] - 1.5])
-                left_wall = np.array([point for point in left_wall if point[1] <= curve_entry_point[1]])
+            if is_curve_entry_in_front(
+                    curve_entry_point, calc_nearest_point_to_point([0, 0], right_wall), 1):
+                upper_wall = np.array(
+                    [point for point in left_wall if point[1] >= curve_entry_point[1] - 1.5])
+                left_wall = np.array(
+                    [point for point in left_wall if point[1] <= curve_entry_point[1]])
                 if len(left_wall) == 0:
                     left_wall = upper_wall[-2: -1]
                 try:
                     left_circle = Circle.fit(left_wall)
-                except:
+                except BaseException:
                     print left_wall, upper_wall
                 curve_type = CURVE_TYPE_RIGHT
 
     upper_circle = None
     remaining_distance = None
-    if curve_entry_point is not None and upper_wall is not None and len(upper_wall) > 0:
+    if curve_entry_point is not None and upper_wall is not None and len(
+            upper_wall) > 0:
         remaining_distance = curve_entry_point[1]
         upper_circle = Circle.fit(upper_wall)
         show_line_in_rviz(6,
@@ -750,7 +857,7 @@ last_scan = None
 
 
 def laser_callback(scan_message):
-    global last_scan # total_scan_count, total_scan_time
+    global last_scan  # total_scan_count, total_scan_time
     # t_start = time.time()
     scan_time = scan_message.header.stamp.to_sec()
     if last_scan is not None and abs(scan_time - last_scan) > 0.0001 and scan_time > last_scan:  # nopep8
@@ -762,7 +869,8 @@ def laser_callback(scan_message):
     # total_scan_time += t_delta
     # total_scan_count += 1
     # if total_scan_count % 40 == 0:
-    #     print "mean_scan_time:", total_scan_time / float(total_scan_count) * 1000.0, "ms", "scan_time:", delta_time, "s"
+    # print "mean_scan_time:", total_scan_time / float(total_scan_count) *
+    # 1000.0, "ms", "scan_time:", delta_time, "s"
 
 
 def speed_callback(speed_message):
