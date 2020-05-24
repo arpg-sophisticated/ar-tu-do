@@ -6,6 +6,10 @@ for FILE in $(git diff-index --cached --name-only HEAD); do
                 clang-format -i ${FILE} -style=file
                 git add ${FILE}
                 ;;
+            *.py)
+                autopep8 --in-place --aggressive --aggressive ${FILE}
+                git add ${FILE}
+                ;;
             *)
                 ;;
         esac
