@@ -45,6 +45,9 @@ void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& v
         tmp.x = (*inputCloud)[i].x;
         tmp.y = (*inputCloud)[i].y;
         tmp.z = (*inputCloud)[i].z;
+        tmp.r = (*inputCloud)[i].r;
+        tmp.g = (*inputCloud)[i].g;
+        tmp.b = (*inputCloud)[i].b;
         tmp.clusterID = -1;
         dbScanPoints.push_back(tmp);
     }
