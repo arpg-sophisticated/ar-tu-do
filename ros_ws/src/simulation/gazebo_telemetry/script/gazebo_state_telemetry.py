@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 import rospy
 from gazebo_msgs.msg import ModelState, ModelStates, LinkState, LinkStates
 from drive_msgs.msg import gazebo_state_telemetry
@@ -58,7 +59,7 @@ def calculate_wheel_velocity():
 
     angle_velocities = [(t.x**2 + t.y**2)**0.5 for t in twists]
     if(len(angle_velocities) == 0):
-        wheel_velocity = 0 
+        wheel_velocity = 0
         return
     angular_velocity = sum(angle_velocities) / len(angle_velocities)
     wheel_velocity = angular_velocity * WHEEL_RADIUS

@@ -6,6 +6,7 @@
 # 4: whether its simulation or not (string: yes|no), default: no
 # 5: whether write statistics or not (string: yes|no), default: no
 
+
 import rospy
 import os
 import sys
@@ -14,7 +15,7 @@ from datetime import datetime
 from rospkg import RosPack
 from simulation_tools.track import track
 from simulation_tools.reset_car import Point
-from drive_msgs.msg import drive_param,gazebo_state_telemetry
+from drive_msgs.msg import drive_param, gazebo_state_telemetry
 from gazebo_msgs.msg import ModelStates
 from jsk_rviz_plugins.msg import OverlayText
 from jsk_rviz_plugins.overlay_text_interface import OverlayTextInterface
@@ -24,8 +25,8 @@ TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 
 # file handler
-global logfile_handler_csv;
-global logfile_handler_dat;
+global logfile_handler_csv
+global logfile_handler_dat
 
 # misc car messages
 global last_drive_message
@@ -140,8 +141,9 @@ global angle_last
 angle_last = 0
 # relative change in wheels angle
 global angle_delta
-angle_delta = 0  
-    
+angle_delta = 0
+
+
 def getDataPath():
     fullpath = RosPack().get_path("simulation_tools").split("/")
     fullpath.reverse()
@@ -152,18 +154,18 @@ def getDataPath():
             insert = True
         if insert:
             relativepath = part + "/" + relativepath
-    return relativepath.replace("//","/")
+    return relativepath.replace("//", "/")
 
 
 def drive_param_callback(message):
     global last_drive_message
-    
+
     # is it simulation?
     simulation = False
-    if len(sys.argv) > 4: 
+    if len(sys.argv) > 4:
         if str(sys.argv[4]) == "yes":
             simulation = True
-        
+
     # set current drive based on if it is simulation
     if simulation:
         last_drive_message = message
@@ -171,7 +173,7 @@ def drive_param_callback(message):
         # TODO insert real drive information
         last_drive_message = message
 
- 
+
 def speed_callback(speed_message):
     global speed_current
     global speed_last
@@ -181,55 +183,55 @@ def speed_callback(speed_message):
     global speed_max
     global speed_maxtime
     global speed_smooth
-    
+
     speed_last = speed_current
-    
+
     # is it simulation?
     simulation = False
-    if len(sys.argv) > 4: 
+    if len(sys.argv) > 4:
         if str(sys.argv[4]) == "yes":
             simulation = True
-        
+
     # set current speed based on if it is simulation
     if simulation:
         speed_current = speed_message.wheel_speed
     else:
         # TODO insert real speed information
         speed_current = speed_message.wheel_speed
-        
+
     speed_delta = speed_current - speed_last
     if logentry > 0:
-        speed_avg = ( speed_avg * ( logentry - 1 ) + speed_current ) / logentry
+        speed_avg = (speed_avg * (logentry - 1) + speed_current) / logentry
     else:
         speed_avg += speed_current
-    
+
     if speed_current > speed_max:
         speed_max = speed_current
-    
+
     time = 100
-    if len(sys.argv) > 2: 
+    if len(sys.argv) > 2:
         time = int(sys.argv[2])
-    
+
     smooth = 5
-    if len(sys.argv) > 3: 
+    if len(sys.argv) > 3:
         smooth = int(sys.argv[3])
-    
+
     speed_maxtime.append(speed_current)
     if len(speed_maxtime) > time:
         speed_maxtime.pop(0)
-    
+
     speed_avgtime.append(speed_current)
     if len(speed_avgtime) > time:
         speed_avgtime.pop(0)
-    
+
     speed_smooth.append(speed_current)
     if len(speed_smooth) > smooth:
         speed_smooth.pop(0)
-            
+
     log_message()
 
 # disabled as we don't need this information
-#def on_model_state_callback(message):
+# def on_model_state_callback(message):
 #    if len(message.pose) < 2:
 #        return
 #    global car_position
@@ -241,6 +243,7 @@ def speed_callback(speed_message):
 #    car_orientation = message.pose[1].orientation
 #    track_position = track.localize(car_position)
 
+
 def log_message():
     global last_drive_message
 # disabled as we don't need it here
@@ -248,7 +251,7 @@ def log_message():
 #    global car_position
     global logpath
     global logentry
-    
+
     global speed_current
     global speed_last
     global speed_delta
@@ -257,20 +260,20 @@ def log_message():
     global speed_max
     global speed_maxtime
     global speed_smooth
-    
+
     global maxspeed_current
     global maxspeed_last
     global maxspeed_delta
     global maxspeed_avg
-    
+
     global time_current
     global time_last
     global time_delta
-    
+
     global distance_current
     global distance_last
     global distance_delta
-    
+
     global acceleration_current
     global acceleration_last
     global acceleration_min
@@ -279,82 +282,82 @@ def log_message():
     global acceleration_maxtime
     global acceleration_smooth
     global acceleration_delta
-    
+
     global angle_current
     global angle_last
     global angle_delta
-    
-    global logfile_handler_csv;
-    global logfile_handler_dat;
-    
+
+    global logfile_handler_csv
+    global logfile_handler_dat
+
     if(last_drive_message is not None):
         maxspeed_last = maxspeed_current
         maxspeed_current = last_drive_message.velocity
         maxspeed_delta = maxspeed_current - maxspeed_last
         if logentry > 0:
-            maxspeed_avg = ( maxspeed_avg * ( logentry - 1 ) + maxspeed_current ) / logentry
+            maxspeed_avg = (maxspeed_avg * (logentry - 1) +
+                            maxspeed_current) / logentry
         else:
             maxspeed_avg += maxspeed_current
-        
+
         angle_last = angle_current
         angle_current = last_drive_message.angle
         angle_delta = angle_current - angle_last
-        
-        
+
     time_last = time_current
     time_current = rospy.get_time()
     time_delta = time_current - time_last
-    
+
     distance_delta = time_delta * speed_current
     distance_last = distance_current
     distance_current += distance_delta
-    
+
     acceleration_last = acceleration_current
     acceleration_current = 0
     if time_delta > 0:
         acceleration_current = speed_delta / time_delta
     acceleration_delta = acceleration_current - acceleration_last
-    
+
     if acceleration_current > acceleration_max:
         acceleration_max = acceleration_current
-    
+
     if acceleration_current < acceleration_min:
         acceleration_min = acceleration_current
-            
+
     time = 100
-    if len(sys.argv) > 2: 
+    if len(sys.argv) > 2:
         time = int(sys.argv[2])
-            
+
     smooth = 5
-    if len(sys.argv) > 3: 
+    if len(sys.argv) > 3:
         smooth = int(sys.argv[3])
-    
+
     acceleration_maxtime.append(acceleration_current)
     if len(acceleration_maxtime) > time:
         acceleration_maxtime.pop(0)
-    
+
     acceleration_mintime.append(acceleration_current)
     if len(acceleration_mintime) > time:
         acceleration_mintime.pop(0)
-    
+
     acceleration_mintime.append(acceleration_current)
     if len(acceleration_mintime) > time:
         acceleration_mintime.pop(0)
-    
+
     acceleration_smooth.append(acceleration_current)
     if len(acceleration_smooth) > smooth:
         acceleration_smooth.pop(0)
-    
+
     datapath = getDataPath()
     if logentry == 0:
         # log writing enabled
         logwriting = False
-        if len(sys.argv) > 5: 
+        if len(sys.argv) > 5:
             if str(sys.argv[5]) == "yes":
                 logwriting = True
-        
+
         if logwriting:
-            dateTimeObj = datetime.now()    
+            dateTimeObj = datetime.now()
             timestampStr = dateTimeObj.strftime("%Y%m%d-%H%M%S")
             loginstance = ""
             if len(sys.argv) > 1:
@@ -364,7 +367,7 @@ def log_message():
             # create logpath for session if nonexistant
             try:
                 os.makedirs(logpath)
-            except:
+            except BaseException:
                 pass
 
             # create handlers
@@ -398,14 +401,17 @@ def log_message():
                 "DistanceDelta" + \
                 "\n"
             logfile_handler_csv.write(logstring_header)
-            logfile_handler_dat.write(logstring_header.replace(";"," ").replace("Datapoint","x").lower())
+            logfile_handler_dat.write(
+                logstring_header.replace(
+                    ";", " ").replace(
+                    "Datapoint", "x").lower())
 
     # log writing enabled
     logwriting = False
-    if len(sys.argv) > 5: 
+    if len(sys.argv) > 5:
         if str(sys.argv[5]) == "yes":
             logwriting = True
-            
+
     if logwriting:
         logfile_handler_csv = open(logpath + "/speed_over_time.csv", "a")
         logfile_handler_dat = open(logpath + "/speed_over_time.dat", "a")
@@ -438,8 +444,8 @@ def log_message():
             ";" + str('%.2f' % distance_delta) + \
             "\n"
         logfile_handler_csv.write(logstring)
-        logfile_handler_dat.write(logstring.replace(";"," "))
-    
+        logfile_handler_dat.write(logstring.replace(";", " "))
+
     hudstring = \
         "Time: " + str('%.2f' % time_current) + " s\n" + \
         "Vcur: " + str('%.2f' % speed_current) + " m/s\n" + \
@@ -468,7 +474,10 @@ def log_message():
 rospy.init_node('log_stats', anonymous=False)
 # disabled as we don't need it here
 #rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
-rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, speed_callback)
+rospy.Subscriber(
+    TOPIC_GAZEBO_STATE_TELEMETRY,
+    gazebo_state_telemetry,
+    speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
 
 global text_interface
