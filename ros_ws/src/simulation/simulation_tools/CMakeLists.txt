@@ -63,7 +63,6 @@ add_dependencies(chase_cam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 add_executable(speed_info
   src/speed_info.cpp
   src/process_track.cpp
-  src/circle.cpp
   src/circle_fit.cpp
   src/geometric_math.cpp
 )
