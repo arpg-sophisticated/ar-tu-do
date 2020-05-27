@@ -9,6 +9,9 @@ SpeedInfo::SpeedInfo()
     m_controlled_drive_parameters_subscriber =
         m_node_handle.subscribe<drive_msgs::drive_param>(TOPIC_CONTROLLED_DRIVE_PARAM, 1,
                                                          &SpeedInfo::controlledDriveParametersCallback, this);
+    m_gazebo_state_telemetry_subscriber =
+        m_node_handle.subscribe<drive_msgs::gazebo_state_telemetry>(TOPIC_GAZEBO_STATE_TELEMETRY, 1,
+                                                                    &SpeedInfo::gazeboStateTelemetryCallback, this);
     m_max_speed_publisher = m_node_handle.advertise<std_msgs::Float64>(TOPIC_MAX_SPEED, 1);
 }
 
@@ -106,7 +109,16 @@ void SpeedInfo::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& lasers
 
 void SpeedInfo::controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters)
 {
-    m_current_speed = parameters->velocity;
+    if (!m_is_simulated)
+    {
+        m_current_speed = parameters->velocity;
+    }
+}
+
+void SpeedInfo::gazeboStateTelemetryCallback(const drive_msgs::gazebo_state_telemetry::ConstPtr& parameters)
+{
+    m_current_speed = parameters->car_speed;
+    m_is_simulated = true;
 }
 
 int main(int argc, char** argv)
