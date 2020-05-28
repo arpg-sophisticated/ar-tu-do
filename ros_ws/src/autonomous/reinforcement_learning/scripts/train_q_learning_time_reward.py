@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from topics import TOPIC_DRIVE_PARAMETERS_WF
+from topics import TOPIC_DRIVE_PARAMETERS_WF_AND_SENSOR_DATA
 from training_node import TrainingNode, device
 import random
 import math
@@ -58,32 +58,32 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
         self.car_crashed =False
 
-        self.sector_times_set = False
+        self.training_part_times_set = False
 
-        self.sector_times = [None] * len(CUSTOM_SEGMENTS)
+        self.training_part_times = [None] * len(TRAINING_PARTS)
 
-        self.crash_segment_index = None
+        self.crash_training_part_index = None
 
-        self.current_custom_segment_index = None
+        self.current_training_part_index = None
 
-        self.reset_car_to_segment(0)
+        self.reset_car_to_start_of_training_part(0)
 
-        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, wallfollowing_to_reinforcementlearning, self.wallfollowing_drive_param_callback)
+        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF_AND_SENSOR_DATA, wallfollowing_to_reinforcementlearning, self.wallfollowing_drive_param_callback)
         rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, self.speed_callback)
 
         if CONTINUE:
             self.policy.load()
 
+    #called to subscribe TOPIC_GAZEBO_STATE_TELEMETRY
     def speed_callback(self,speed_message):
         self.current_speed = speed_message.wheel_speed
-        #print("Speed: "+ str(self.current_speed))
 
+    #called to subscribe TOPIC_DRIVE_PARAMETERS_WF_AND_SENSOR_DATA
     def wallfollowing_drive_param_callback(self,message):
         self.lastWFmessage = message
-
         self.set_current_point()
 
-        if(not self.check_sector_times_set()):
+        if(not self.check_training_part_times_set()):
             if(self.sleeping()):
                 self.perform_action(NULL_ACTION_INDEX,False)
                 return
@@ -91,7 +91,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             drive_param_message = drive_param()
             drive_param_message.angle = message.angle
             drive_param_message.velocity = message.velocity
-            self.drive_parameters_publisher.publish(drive_param_message) # do wallfollowing to get sector_times
+            self.drive_parameters_publisher.publish(drive_param_message) # do wallfollowing to get TrainingPartsTimes
             return
 
         if(self.sleeping()):
@@ -107,13 +107,11 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.assign_rewards_and_to_memory()
             self.replay()
             self.episode_memory.clear()
-            if(self.crash_segment_index is None):
-                self.reset_car_to_segment(random.randint(0,len(CUSTOM_SEGMENTS)-1))
+            if(self.crash_training_part_index is None):
+                self.reset_car_to_start_of_training_part(random.randint(0,len(TRAINING_PARTS)-1))
             else:
-                self.reset_car_to_segment(self.crash_segment_index)
-            #self.reset_car_to_segment(1)
+                self.reset_car_to_start_of_training_part(self.crash_training_part_index)
             return
-
 
         if self.state is not None:
             self.on_complete_step(self.state, self.action, new_state)
@@ -121,7 +119,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.reached_target_time = rospy.get_time()
             playsound('/home/marvin/Downloads/power-up.mp3')  
             print("-- REACHED TARGET --")
-            self.crash_segment_index = None    
+            self.crash_training_part_index = None    
             self.perform_action(NULL_ACTION_INDEX,False)
             self.sleep_after_reached_target=150
             self.reached_target = True
@@ -133,48 +131,50 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.episode_length += 1
             self.total_step_count += 1
 
-    def check_sector_times_set(self):
-        if self.sector_times_set:
+    #returns True, if training_part_times are completed. Also resets car on completion
+    def check_training_part_times_set(self):
+        if self.training_part_times_set:
             return True
-        for sector_time in self.sector_times:
-            if sector_time is None or sector_time ==0:
+        for training_part_time in self.training_part_times:
+            if training_part_time is None or training_part_time ==0:
                 #print(sector_time)
                 return False
         #print("sector times set!")
-        self.sector_times_set = True
-        print(str(self.sector_times))
+        self.training_part_times_set = True
+        print(str(self.training_part_times))
         self.sleep_after_reached_target =150
-        self.reset_car_to_segment(random.randint(0,len(CUSTOM_SEGMENTS)-1))
+        self.reset_car_to_start_of_training_part(random.randint(0,len(TRAINING_PARTS)-1))
         return True
 
+    #drive with WF to get a TrainingPartsTime for each sector from TRAINING_PARTS
     def set_sector_times(self):
         still_driving = False
-        for i in range(len(self.sector_times)):
-            if self.sector_times[i] ==0:
+        for i in range(len(self.training_part_times)):
+            if self.training_part_times[i] ==0:
                 still_driving = True
         if self.reached_target_point() and still_driving:
             print("Sector Time Summary:")
-            print("Startpoint: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][0]))
-            print("Endpoint: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][1]))
-            print("Rounds: "+str(CUSTOM_SEGMENTS[self.current_custom_segment_index][3]))
+            print("Startpoint: "+str(TRAINING_PARTS[self.current_training_part_index][0]))
+            print("Endpoint: "+str(TRAINING_PARTS[self.current_training_part_index][1]))
+            print("Rounds: "+str(TRAINING_PARTS[self.current_training_part_index][3]))
 
             print("Starttime: "+str(self.episode_starttime))
             print("Endtime: "+str(rospy.get_time()))
 
             episode_time = rospy.get_time()-self.episode_starttime
             print("Time: " +str(episode_time))
-            self.sector_times[self.current_custom_segment_index]=episode_time
+            self.training_part_times[self.current_training_part_index]=episode_time
             self.sleep_after_reached_target =150
             return
-        for i in range(len(self.sector_times)):
-            if self.sector_times[i] ==0:
+        for i in range(len(self.training_part_times)):
+            if self.training_part_times[i] ==0:
                 return
-            if self.sector_times[i] is None:
-                self.reset_car_to_segment(i)
-                self.sector_times[i]=0
+            if self.training_part_times[i] is None:
+                self.reset_car_to_start_of_training_part(i)
+                self.training_part_times[i]=0
                 return  
         
-
+    # returns true, if car should not do any action
     def sleeping(self):
         sleep = self.sleep_after_reached_target+self.sleep_after_crash+self.sleep_after_reset
         sleeping=sleep>0
@@ -209,7 +209,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         #print("------ "+str(track.get_closest_segment(self.car_position))+" ------")
         if(self.target_point is not None):
             self.target_point
-            rounds_to_complete = CUSTOM_SEGMENTS[self.current_custom_segment_index][3]
+            rounds_to_complete = TRAINING_PARTS[self.current_training_part_index][3]
             return self.current_closest_point ==self.target_point and self.rounds_in_segment_completed == rounds_to_complete
         return False
 
@@ -221,22 +221,22 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.cumulative_reward += reward
         self.episode_memory.clear()
 
-    def reset_car_to_segment(self,segment_index):
+    def reset_car_to_start_of_training_part(self,segment_index):
         print("--RESET--")
         self.sleep_after_reset = 100
-        self.drive_forward = CUSTOM_SEGMENTS[segment_index][2]
+        self.drive_forward = TRAINING_PARTS[segment_index][2]
         #self.drive_forward = random.random() > 0.5 #TODO: bisher nicht benutzt
 
-        self.current_custom_segment_index =segment_index
+        self.current_training_part_index =segment_index
         if(self.drive_forward):
-            start_point =  CUSTOM_SEGMENTS[segment_index][0]
-            self.target_point= CUSTOM_SEGMENTS[segment_index][1]
+            start_point =  TRAINING_PARTS[segment_index][0]
+            self.target_point= TRAINING_PARTS[segment_index][1]
         else:
-            start_point =  CUSTOM_SEGMENTS[segment_index][1]
-            self.target_point= CUSTOM_SEGMENTS[segment_index][0]
+            start_point =  TRAINING_PARTS[segment_index][1]
+            self.target_point= TRAINING_PARTS[segment_index][0]
 
         self.car_position=reset_car.reset_to_segment(start_point,forward =self.drive_forward)
-        print("---- start_point = "+str(start_point)+ ",target_point = "+str(self.target_point)+" rounds: "+ str(CUSTOM_SEGMENTS[segment_index][3])+" ----")
+        print("---- start_point = "+str(start_point)+ ",target_point = "+str(self.target_point)+" rounds: "+ str(TRAINING_PARTS[segment_index][3])+" ----")
         self.is_terminal_step = False
         self.state = None
         if self.episode_length != 0:
@@ -283,7 +283,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     def select_action(self, state):
         use_epsilon_greedy = self.episode_count % 2 > 0
-        use_epsilon_greedy_with_segment = use_epsilon_greedy and random.random() <= CUSTOM_SEGMENTS[self.current_custom_segment_index][5]
+        use_epsilon_greedy_with_segment = use_epsilon_greedy and random.random() <= TRAINING_PARTS[self.current_training_part_index][5]
         if use_epsilon_greedy_with_segment and random.random() < self.get_epsilon_greedy_threshold():
             return random.randrange(ACTION_COUNT)
 
@@ -311,17 +311,18 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         #print(str(angle)+", "+ str(velocity))
         self.drive_parameters_publisher.publish(message)
 
+    #returns reward for current_training_part_index
     def get_reward(self):        
         if(self.reached_target):
-            wallfollowing_episode_time = self.sector_times[self.current_custom_segment_index]
-            print("wallfollowing episode time: " + str(wallfollowing_episode_time))
+            wallfollowing_training_part_time = self.training_part_times[self.current_training_part_index]
+            print("wallfollowing training part time: " + str(wallfollowing_training_part_time))
             episode_time = self.reached_target_time-self.episode_starttime
-            print("episode time: " +str(episode_time))
+            print("training part time: " +str(episode_time))
 
-            time_difference = wallfollowing_episode_time - episode_time
+            time_difference = wallfollowing_training_part_time - episode_time
             print("----------------------------DIFFERENCE "+ str(time_difference)+ " -----------------------" )
 
-            difference_multiplikator = CUSTOM_SEGMENTS[self.current_custom_segment_index][4]
+            difference_multiplikator = TRAINING_PARTS[self.current_training_part_index][4]
             reward =  (((1+(time_difference* difference_multiplikator)-0.05)**3)-1)/3.0
             if(reward<=0):
                 reward=0
@@ -332,17 +333,15 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("reward 0")
             return 0
 
+    #skip returning a summary for the episode
     def get_episode_summary(self):
         return
-        return TrainingNode.get_episode_summary(self) + ' ' \
-            + ("memory: {0:d} / {1:d}, ".format(len(self.memory), MEMORY_SIZE) if len(self.memory) < MEMORY_SIZE else "") \
-            + "ε-greedy: " + str(int(self.get_epsilon_greedy_threshold() * 100)) + "% random, " \
-            + "replays: " + str(self.optimization_step_count) + ", " \
-            + "q: [" + self.net_output_debug_string + "], "
 
+    #add state,action, next_state to memory (no reward assigned yet)
     def on_complete_step(self, state, action, next_state):
         self.episode_memory.append((state, action, next_state, self.is_terminal_step))  # nopep8
 
+    #called to subscribe TOPIC_CRASH
     def on_crash(self,_):
         if(not self.is_terminal_step):
             if(not self.reached_target_point()):
@@ -350,7 +349,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
                 self.perform_action(NULL_ACTION_INDEX,False)
                 self.is_terminal_step = True
                 self.sleep_after_crash =100
-                self.crash_segment_index=self.current_custom_segment_index
+                self.crash_training_part_index=self.current_training_part_index
                 playsound('/home/marvin/Downloads/bowser-falls.mp3') 
                 episode_memory_list= list(self.episode_memory)[-300:]
                 self.episode_memory.clear()

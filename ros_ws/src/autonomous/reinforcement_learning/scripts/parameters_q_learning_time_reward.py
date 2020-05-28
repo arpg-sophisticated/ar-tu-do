@@ -13,12 +13,12 @@ ACTIONS = [(0.5, 1.0), (0.5, 0.0), (0, -1.0), (0, 0.0), (0, 1.0), (-0.5, 0.0), (
 ACTION_COUNT = len(ACTIONS)
 NULL_ACTION_INDEX =3
 
-# Custom segments(startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
-CUSTOM_SEGMENTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),
+#(startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
+TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),
                     (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1)]
-#CUSTOM_SEGMENTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),
+#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),
 #                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5)]
-#CUSTOM_SEGMENTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),(40,0,False,3,0.08,0.33),
+#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),(40,0,False,3,0.08,0.33),
 #                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5),(1,11,True,3,0.08,0.33)]
 
 
