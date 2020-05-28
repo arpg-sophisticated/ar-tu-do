@@ -1,0 +1,163 @@
+\section{Vergleich - ___PH_SIZE___}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+xmin=1]
+
+___PH_PLOT1___
+___PH_LEGEND1___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+xmin=1]
+
+___PH_PLOT5___
+___PH_LEGEND5___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Werte, Glättung ___PH_SMOOTH___
+\end{figure}
+
+
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVT___,
+xmin=1]
+
+%\addplot[smooth,red,solid] table [y=speed,x=time]{___PH_FILENAME___.dat};
+%\addlegendentry{Vergleich $v_{cur}(t)$}
+___PH_PLOT2___
+___PH_LEGEND2___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{Vergleich:} Geschwindigkeit $v$ nach Zeit $t$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVT___,
+xmin=1]
+
+___PH_PLOT6___
+___PH_LEGEND6___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{Vergleich:} Geschwindigkeit $v$ nach Zeit $t$ - ___PH_SIZE___ Werte, Glättung ___PH_SMOOTH___
+\end{figure}
+
+
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
+xtick distance=___PH_DIVD___,
+xmin=1]
+
+___PH_PLOT3___
+___PH_LEGEND3___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{Vergleich:} Beschleunigung $a$ nach Distanz $d$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
+xtick distance=___PH_DIVD___,
+xmin=1]
+
+___PH_PLOT7___
+___PH_LEGEND7___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{Vergleich:} Beschleunigung $a$ nach Distanz $d$ - ___PH_SIZE___ Werte, Glättung ___PH_SMOOTH___
+\end{figure}
+
+
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
+xtick distance=___PH_DIVT___,
+xmin=1]
+
+___PH_PLOT4___
+___PH_LEGEND4___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{Vergleich:} Beschleunigung $a$ nach Zeit $t$ - ___PH_SIZE___ Schritte
+\end{figure}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
+xtick distance=___PH_DIVT___,
+xmin=1]
+
+___PH_PLOT8___
+___PH_LEGEND8___
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{Vergleich:} Beschleunigung $a$ nach Zeit $t$ - ___PH_SIZE___ Werte, Glättung ___PH_SMOOTH___
+\end{figure}
+
+%\newpage

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+<!-- Launches all necessary nodes that let the car drive autonomously. -->
+    <!-- wall_following node -->
+
+    <node
+      pkg="wallfollowing5"
+      type="wallfollowing"
+      name="wallfollowing"
+      output="screen" 
+      respawn="true" />
+
+</launch>

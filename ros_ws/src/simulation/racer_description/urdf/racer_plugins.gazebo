@@ -61,7 +61,7 @@
         <depth_camera>
         </depth_camera>
         <clip>
-          <near>0.3</near>
+          <near>0.25</near>
           <far>20</far>
         </clip>
       </camera>
