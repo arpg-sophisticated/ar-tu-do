@@ -5,9 +5,9 @@
 #include <limits>
 #include <map>
 #include <math.h>
-#include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/crop_box.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/filters/random_sample.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -59,6 +59,7 @@ Boxing::Boxing()
         m_colors_enabled = cfg.enable_colors;
         m_adjacent_voxels = cfg.adjacent_voxels;
         m_color_levels = cfg.color_levels;
+        m_color_samples = cfg.color_samples;
     });
 }
 
@@ -76,10 +77,16 @@ void Boxing::colored_input_callback(const sensor_msgs::PointCloud2::ConstPtr& co
     }
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr colors(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr colorsTransformed(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromROSMsg(*coloredCloud, *colors);
+    this->m_colored_cloud = colors;
+    this->m_colored_cloud_dirty = true;
+}
 
-    pcl_ros::transformPointCloud(reference_frame, *colors, *colorsTransformed, transform_listener);
+void Boxing::preprocess_colored_cloud()
+{
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr colorsTransformed(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+    pcl_ros::transformPointCloud(reference_frame, *this->m_colored_cloud, *colorsTransformed, transform_listener);
 
     // crop this pointcloud as we only need the colours on the height of our voxels.
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr colorsCropped(new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -93,19 +100,19 @@ void Boxing::colored_input_callback(const sensor_msgs::PointCloud2::ConstPtr& co
 
     // now downsample using a voxel grid
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr colorsDownsampled(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::ApproximateVoxelGrid<pcl::PointXYZRGB> downsample;
+    pcl::RandomSample<pcl::PointXYZRGB> downsample;
     downsample.setInputCloud(colorsCropped);
-    downsample.setLeafSize(m_voxel_size / 50.0f, m_voxel_size / 50.0f, m_voxel_size / 50.0f);
+    downsample.setSample(m_color_samples);
     downsample.filter(*colorsDownsampled);
 
     this->m_colored_cloud = colorsDownsampled;
+    this->m_colored_cloud_dirty = false;
 }
 
 uint128_t Boxing::get_voxel_id(float x, float y, float z)
 {
     uint128_t voxel_id = 0;
-    union
-    {
+    union {
         float floaty;
         uint32_t inty;
     } float_uint;
@@ -234,6 +241,9 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
     if (m_colored_cloud && m_colors_enabled)
     {
+        if (this->m_colored_cloud_dirty)
+            this->preprocess_colored_cloud();
+
         // now we iterate over every point in the colored pointcloud and build a color histogram for
         // every voxel
         std::map<uint128_t, std::map<uint32_t, uint16_t>> histograms;

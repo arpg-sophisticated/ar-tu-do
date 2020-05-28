@@ -48,7 +48,9 @@ class Boxing
 
     bool m_colors_enabled;
     uint32_t m_color_levels;
+    bool m_colored_cloud_dirty;
     bool m_adjacent_voxels;
+    int m_color_samples;
 
     float m_maximum_x = 0;
     float m_minimum_x = 0;
@@ -60,6 +62,7 @@ class Boxing
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr m_colored_cloud;
 
     uint128_t get_voxel_id(float x, float y, float z);
+    void preprocess_colored_cloud();
 
     public:
     Boxing();
