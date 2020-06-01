@@ -14,7 +14,7 @@ env:
 jobs:
   include:
     - # build project
-      #if: type = pull_request OR branch = development
+      if: type = pull_request OR branch = development
 
       addons:
         apt:
