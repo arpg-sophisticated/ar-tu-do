@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package format="2">
-  <name>simulation_tools</name>
+  <name>geometric_math</name>
   <version>0.0.0</version>
-  <description>Useful scripts and tools to work with out-of-scenario information</description>
+  <description>Performs various geometric calculations like fitting circles in a pointcloud</description>
 
   <!-- Maintainer -->
   <maintainer email="f110@ls12.cs.uni-dortmund.de">PG F1/10</maintainer>
@@ -14,12 +14,6 @@
   <!-- Dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rospy</depend>
   <depend>roscpp</depend>
-  <depend>std_msgs</depend>
-  <depend>car_config</depend>
-  <depend>vesc_sim</depend>
-  <depend>drive_msgs</depend>
-  <depend>geometric_math</depend>
 
 </package>

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_msgs
   car_config
   vesc_sim
+  geometric_math
 )
 
 find_package(gazebo REQUIRED)
@@ -30,7 +31,7 @@ catkin_python_setup()
 ## Declare things to be passed to dependent projects
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim geometric_math
 )
 
 
@@ -63,8 +64,6 @@ add_dependencies(chase_cam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 add_executable(speed_info
   src/speed_info.cpp
   src/process_track.cpp
-  src/circle_fit.cpp
-  src/geometric_math.cpp
 )
 target_link_libraries(speed_info ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(speed_info ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

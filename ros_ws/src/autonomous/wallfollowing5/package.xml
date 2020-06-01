@@ -23,5 +23,6 @@
   <depend>car_config</depend>
   <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
+  <depend>geometric_math</depend>
 
 </package>
