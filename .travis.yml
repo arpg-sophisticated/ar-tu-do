@@ -14,7 +14,7 @@ env:
 jobs:
   include:
     - # build project
-      if: type = pull_request OR branch = development
+      #if: type = pull_request OR branch = development
 
       addons:
         apt:
@@ -24,6 +24,7 @@ jobs:
             - libsdl2-dev
             - clang-format-3.9
             - libyaml-cpp0.5v5
+            - ca-certificates
 
       cache:
           apt: true
