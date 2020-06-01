@@ -16,11 +16,13 @@ from rospkg import RosPack
 from simulation_tools.track import track
 from simulation_tools.reset_car import Point
 from drive_msgs.msg import drive_param, gazebo_state_telemetry
+from std_msgs.msg import Float64
 from gazebo_msgs.msg import ModelStates
 from jsk_rviz_plugins.msg import OverlayText
 from jsk_rviz_plugins.overlay_text_interface import OverlayTextInterface
 
-TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
+TOPIC_MAX_SPEED = "/speed_info/max_speed"
+TOPIC_DRIVE_PARAMETERS = "/commands/controlled_drive_param"
 TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 
@@ -31,6 +33,9 @@ global logfile_handler_dat
 # misc car messages
 global last_drive_message
 last_drive_message = None
+# max possible speed
+global last_max_speed_message
+last_max_speed_message = None
 # disabled as we don't need it here
 #global car_position
 #car_position = None
@@ -174,6 +179,23 @@ def drive_param_callback(message):
         last_drive_message = message
 
 
+def max_speed_callback(message):
+    global last_max_speed_message
+
+    # is it simulation?
+    simulation = False
+    if len(sys.argv) > 4:
+        if str(sys.argv[4]) == "yes":
+            simulation = True
+
+    # set current drive based on if it is simulation
+    if simulation:
+        last_max_speed_message = message
+    else:
+        # TODO insert real drive information
+        last_max_speed_message = message
+
+
 def speed_callback(speed_message):
     global speed_current
     global speed_last
@@ -245,7 +267,7 @@ def speed_callback(speed_message):
 
 
 def log_message():
-    global last_drive_message
+    global last_max_speed_message
 # disabled as we don't need it here
 #    global track_position
 #    global car_position
@@ -290,9 +312,9 @@ def log_message():
     global logfile_handler_csv
     global logfile_handler_dat
 
-    if(last_drive_message is not None):
+    if(last_max_speed_message is not None):
         maxspeed_last = maxspeed_current
-        maxspeed_current = last_drive_message.velocity
+        maxspeed_current = last_max_speed_message.data
         maxspeed_delta = maxspeed_current - maxspeed_last
         if logentry > 0:
             maxspeed_avg = (maxspeed_avg * (logentry - 1) +
@@ -478,6 +500,7 @@ rospy.Subscriber(
     TOPIC_GAZEBO_STATE_TELEMETRY,
     gazebo_state_telemetry,
     speed_callback)
+rospy.Subscriber(TOPIC_MAX_SPEED, Float64, max_speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
 
 global text_interface

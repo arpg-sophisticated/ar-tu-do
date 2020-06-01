@@ -86,7 +86,7 @@
     </include>
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
-    <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
+    <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" respawn="true" output="screen"/>
     
     <!-- wallfollowing start - please enable only one -->
     <!-- current implementation -->
@@ -114,6 +114,8 @@
     </node>
     <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />
 
+    <!-- publishes the approximated maximal possible speed for a certain position on the track -->
+    <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
     <!-- needed for logging telemetry data and provide node for rviz -->
     <!-- arguments -->
     <!-- 1: log prefix (string), default: none -->
@@ -121,7 +123,7 @@
     <!-- 3: smoothing value of acceleration (int), default: 5 -->
     <!-- 4: whether its simulation or not (string: yes|no), default: no -->
     <!-- 5: whether write statistics or not (string: yes|no), default: no -->
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="gazebo 100 10 yes no"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" respawn="true" output="screen" args="gazebo 100 10 yes no"/>
     
     <!-- record camera video, comment to disable -->
 <!--    <node pkg="image_view" type="video_recorder" name="video_record_cam">
