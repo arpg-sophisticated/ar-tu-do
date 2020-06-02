@@ -27,6 +27,7 @@ VoxelClassifier::VoxelClassifier()
     m_dyn_cfg_server.setCallback([&](voxel_classifier::voxel_classifierConfig& cfg, uint32_t) {
         m_epsilon = cfg.cluster_epsilon;
         m_minimum_points = cfg.cluster_minimum_points;
+        m_color_weight = cfg.color_weight;
     });
 }
 
@@ -52,7 +53,7 @@ void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& v
         dbScanPoints.push_back(tmp);
     }
 
-    DBSCAN ds(m_minimum_points, m_epsilon * m_epsilon, &dbScanPoints);
+    DBSCAN ds(m_minimum_points, m_epsilon * m_epsilon, m_color_weight, &dbScanPoints);
     ds.run();
 
     cluster_publish(&dbScanPoints);
