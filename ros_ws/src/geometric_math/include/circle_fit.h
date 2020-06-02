@@ -17,4 +17,4 @@ class CircleFit
     public:
     static bool pointcloudIsValid(std::vector<Point>& pointcloud);
     static Circle hyperFit(std::vector<Point>& pointcloud, int iter_max = 99);
-};
+}; // namespace CircleFit

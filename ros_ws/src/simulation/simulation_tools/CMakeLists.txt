@@ -2,14 +2,18 @@ cmake_minimum_required(VERSION 2.8.3)
 project(simulation_tools)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+  drive_msgs
   roscpp
   rospy
   std_msgs
   gazebo_msgs
+  car_config
+  vesc_sim
+  geometric_math
 )
 
 find_package(gazebo REQUIRED)
@@ -27,7 +31,7 @@ catkin_python_setup()
 ## Declare things to be passed to dependent projects
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim geometric_math
 )
 
 
@@ -43,10 +47,23 @@ include_directories(
 )
 
 # Declare crash detector node executable
-add_executable(crash_detector src/crash_detector.cpp)
+add_executable(crash_detector
+  src/crash_detector.cpp
+)
 target_link_libraries(crash_detector ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(crash_detector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(chase_cam src/chase_cam.cpp)
+# Declare chase cam node executable
+add_executable(chase_cam
+  src/chase_cam.cpp
+)
 target_link_libraries(chase_cam ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(chase_cam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+# Declare speed info node executable
+add_executable(speed_info
+  src/speed_info.cpp
+  src/process_track.cpp
+)
+target_link_libraries(speed_info ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(speed_info ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
