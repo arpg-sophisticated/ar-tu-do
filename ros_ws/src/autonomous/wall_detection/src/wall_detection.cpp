@@ -100,6 +100,10 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
         tmp.x = (*wallLeft)[i].x;
         tmp.y = (*wallLeft)[i].y;
         tmp.z = (*wallLeft)[i].z;
+        tmp.r = (*wallLeft)[i].r;
+        tmp.g = (*wallLeft)[i].g;
+        tmp.b = (*wallLeft)[i].b;
+
         tmp.label = 1;
 
         msg->push_back(tmp);
@@ -111,6 +115,9 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
         tmp.x = (*wallRight)[i].x;
         tmp.y = (*wallRight)[i].y;
         tmp.z = (*wallRight)[i].z;
+        tmp.r = (*wallRight)[i].r;
+        tmp.g = (*wallRight)[i].g;
+        tmp.b = (*wallRight)[i].b;
         tmp.label = 0;
 
         msg->push_back(tmp);

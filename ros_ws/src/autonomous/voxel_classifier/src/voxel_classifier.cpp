@@ -70,7 +70,10 @@ void VoxelClassifier::cluster_publish(std::vector<Point_>* clusters)
         tmp.x = (*clusters)[i].x;
         tmp.y = (*clusters)[i].y;
         tmp.z = (*clusters)[i].z;
-        tmp.label = (*clusters)[i].clusterID; // todo: we lose color information here!
+        tmp.r = (*clusters)[i].r;
+        tmp.g = (*clusters)[i].g;
+        tmp.b = (*clusters)[i].b;
+        tmp.label = (*clusters)[i].clusterID;
         msg->push_back(tmp);
     }
 
