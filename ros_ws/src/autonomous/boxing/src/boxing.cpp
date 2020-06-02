@@ -112,7 +112,8 @@ void Boxing::preprocess_colored_cloud()
 uint128_t Boxing::get_voxel_id(float x, float y, float z)
 {
     uint128_t voxel_id = 0;
-    union {
+    union
+    {
         float floaty;
         uint32_t inty;
     } float_uint;
@@ -246,7 +247,9 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
         // now we iterate over every point in the colored pointcloud and build a color histogram for
         // every voxel
-        std::map<uint128_t, std::map<uint32_t, uint16_t>> histograms;
+        std::map<uint128_t, std::map<uint32_t, uint32_t>> histograms;
+
+        std::map<uint32_t, uint32_t> global_histogram; // to determine the most used color for uncolored voxels
 
         for (size_t i = 0; i < m_colored_cloud->size(); i++)
         {
@@ -270,6 +273,26 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
             else
             {
                 histograms[voxel_id][rgb] = 1;
+            }
+
+            if (global_histogram.count(rgb) > 0)
+            {
+                global_histogram[rgb] = global_histogram[rgb] + 1;
+            }
+            else
+            {
+                global_histogram[rgb] = 1;
+            }
+        }
+
+        // determine global maximum color
+        uint32_t global_maximum_color = 0, global_maximum_count = 0;
+        for (auto& it : global_histogram)
+        {
+            if (it.second > global_maximum_count)
+            {
+                global_maximum_color = it.first;
+                global_maximum_count = it.second;
             }
         }
 
@@ -318,8 +341,11 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
                 }
             }
 
-            if (largest_rgb == 0)
-                largest_rgb = 0 << 16 | 255 << 8 | 0;
+            if (largest_color_count == 0)
+            {
+                // no matching colors in that voxel, pull global maximum for this...
+                largest_rgb = global_maximum_color;
+            }
 
             quantized_cloud->points[j].r = (largest_rgb >> 16) & 0xff;
             quantized_cloud->points[j].g = (largest_rgb >> 8) & 0xff;
