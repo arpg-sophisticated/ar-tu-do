@@ -85,6 +85,13 @@
     <node pkg="urg_node" type="urg_node" name="urg_node">
         <param name="ip_address" value="192.168.1.10"/>
     </node>
+    
+<!--     record camera video, comment to disable 
+    <node pkg="image_view" type="video_recorder" name="video_record_cam">
+        <remap from="image" to="/racer/camera1/image_raw"/>
+        <param name="fps" value="30" />
+        <param name="filename" value="output-cam.avi" />
+    </node>        -->
 
     <!-- publishes the approximated maximal possible speed for a certain position on the track -->
     <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
