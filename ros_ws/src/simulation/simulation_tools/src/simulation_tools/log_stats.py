@@ -332,19 +332,22 @@ def log_message():
         angle_delta = angle_current - angle_last
 
         
-
+    # calculate bias on first run
+    if (time_bias == 0):
+        time_bias = rospy.get_time()
+        
     time_last = time_current
     # is it simulation?
     simulation = False
     if len(sys.argv) > 4:
         if str(sys.argv[4]) == "yes":
-            # calculate bias on first run
-            if (time_bias == 0):
-                time_bias = rospy.get_time()
+            simulation = True
             
-            time_current = rospy.get_time() - time_bias
-    else:
+    if simulation:        
         time_current = rospy.get_time()
+            
+    else:
+        time_current = rospy.get_time() - time_bias
             
     time_delta = time_current - time_last
 
