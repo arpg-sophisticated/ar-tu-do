@@ -94,6 +94,9 @@ maxspeed_delta = 0
 global maxspeed_avg
 maxspeed_avg = 0
 
+# current time bias only needed in real mode
+global time_bias
+time_bias = 0
 # current time stamp
 global time_current
 time_current = 0
@@ -289,6 +292,7 @@ def log_message():
     global maxspeed_delta
     global maxspeed_avg
 
+    global time_bias
     global time_current
     global time_last
     global time_delta
@@ -327,8 +331,21 @@ def log_message():
         angle_current = last_drive_message.angle
         angle_delta = angle_current - angle_last
 
+        
+
     time_last = time_current
-    time_current = rospy.get_time()
+    # is it simulation?
+    simulation = False
+    if len(sys.argv) > 4:
+        if str(sys.argv[4]) == "yes":
+            # calculate bias on first run
+            if (time_bias == 0):
+                time_bias = rospy.get_time()
+            
+            time_current = rospy.get_time() - time_bias
+    else:
+        time_current = rospy.get_time()
+            
     time_delta = time_current - time_last
 
     distance_delta = time_delta * speed_current
