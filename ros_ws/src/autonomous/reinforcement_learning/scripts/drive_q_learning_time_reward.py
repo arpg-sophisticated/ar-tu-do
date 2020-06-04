@@ -8,7 +8,6 @@ import torch
 from topics import TOPIC_DRIVE_PARAMETERS_WF
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 from drive_msgs.msg import drive_param
-from drive_msgs.msg import wallfollowing_to_reinforcementlearning
 from drive_msgs.msg import gazebo_state_telemetry
 
 
@@ -32,7 +31,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
 
         ReinforcementLearningNode.__init__(self, ACTIONS, LASER_SAMPLE_COUNT)
 
-        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF, wallfollowing_to_reinforcementlearning, self.wallfollowing_drive_param_callback)
+        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, self.wallfollowing_drive_param_callback)
         rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, self.speed_callback)
 
      # override implemented function of reinforcement_learning_node

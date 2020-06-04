@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from topics import TOPIC_DRIVE_PARAMETERS_WF_AND_SENSOR_DATA
 from training_node import TrainingNode, device
 import random
 import math
 from collections import deque
 from parameters_q_learning_time_reward import *
 import rospy
-from drive_msgs.msg import wallfollowing_to_reinforcementlearning
 from drive_msgs.msg import drive_param
 from drive_msgs.msg import gazebo_state_telemetry
 
@@ -68,7 +66,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
         self.reset_car_to_start_of_training_part(0)
 
-        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS_WF_AND_SENSOR_DATA, wallfollowing_to_reinforcementlearning, self.wallfollowing_drive_param_callback)
+        rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, self.wallfollowing_drive_param_callback)
         rospy.Subscriber(TOPIC_GAZEBO_STATE_TELEMETRY, gazebo_state_telemetry, self.speed_callback)
 
         if CONTINUE:

@@ -1,5 +1,4 @@
 TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
-TOPIC_DRIVE_PARAMETERS_WF_AND_SENSOR_DATA = "/input/drive_param/autonomousWF"
 TOPIC_SCAN = "/scan"
 TOPIC_CRASH = "/crash"
 TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
