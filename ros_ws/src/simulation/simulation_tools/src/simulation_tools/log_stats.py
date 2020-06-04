@@ -13,8 +13,8 @@ import sys
 import numpy as np
 from datetime import datetime
 from rospkg import RosPack
-from simulation_tools.track import track
-from simulation_tools.reset_car import Point
+#from simulation_tools.track import track
+#from simulation_tools.reset_car import Point
 from drive_msgs.msg import drive_param, gazebo_state_telemetry
 from std_msgs.msg import Float64
 from gazebo_msgs.msg import ModelStates
@@ -25,6 +25,7 @@ TOPIC_MAX_SPEED = "/speed_info/max_speed"
 TOPIC_DRIVE_PARAMETERS = "/commands/controlled_drive_param"
 TOPIC_GAZEBO_MODEL_STATE = "/gazebo/model_states"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
+TOPIC_CONTROLLED_DRIVE_PARAM = "/commands/controlled_drive_param"
 
 # file handler
 global logfile_handler_csv
