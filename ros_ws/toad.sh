@@ -9,6 +9,7 @@ PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/gam
 # functions
 . ./toad.functions
 
+
 # execution
 superSophisticatedHello
 
@@ -47,10 +48,6 @@ case $1 in
         fi
         case $2 in
             sshkeys)
-                if [[ "$3" != "cron" ]]; then
-                    toadConfirmationRequest "This will replace your ssh keys"
-                    toadConfirmationRequest "WARNING: This will gain access to this system to all group members - dont try this at home"
-                fi
                 echo "Replacing local SSH keys, please wait ..."
                 echo
                 OLDBRANCH=$(getActiveBranch)
@@ -61,15 +58,8 @@ case $1 in
                     cat ../ssh/*.pub > ~/.ssh/authorized_keys
                 echo
                 git checkout $OLDBRANCH
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMSSH -ge 1 ]]; then
-                    echo
-                    sendSlackMessage ssh
-                fi
             ;;
             rebuild)
-                if [[ "$3" != "cron" ]]; then
-                    toadConfirmationRequest "This will delete and rebuild"
-                fi
                 echo "Starting rebuild, please wait ..."
                 echo
                 OLDBRANCH=$(getActiveBranch)
@@ -78,13 +68,9 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMREBUILD -ge 1 ]]; then
-                    echo
-                    sendSlackMessage rebuild
-                fi
             ;;
             resetbuild)
                 if [[ "$3" != "cron" ]]; then
@@ -101,16 +87,11 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRESETBUILD -ge 1 ]]; then
-                    echo
-                    sendSlackMessage resetbuild
-                fi
             ;;
             run)
-                toadConfirmationRequest "Please ensure a running and logged in X Session with GDM3"
                 if [[ $(ps aux | grep gdm | grep session | grep -v grep | grep $(whoami) | wc -l) -le 0 ]]; then
                     echo
                     echo "No running gdm-x-session process found, exiting"
@@ -140,10 +121,6 @@ case $1 in
                 fi
                 source $PATHROS
                 source $PATHSETUP
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRUN -ge 1 ]]; then
-                    echo
-                    sendSlackMessage custom "Starting simulation with following arguments: $ARGUMENTS"
-                fi
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ../data/videos/$RECORDTIME
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
@@ -164,10 +141,6 @@ case $1 in
         fi
         case $2 in
             sshkeys)
-                if [[ "$3" != "cron" ]]; then
-                    toadConfirmationRequest "This will replace your ssh keys"
-                    toadConfirmationRequest "WARNING: This will gain access to this system to all group members - dont try this at home"
-                fi
                 echo "Replacing local SSH keys, please wait ..."
                 echo
                 OLDBRANCH=$(getActiveBranch)
@@ -178,15 +151,8 @@ case $1 in
                     cat ../ssh/*.pub > ~/.ssh/authorized_keys
                 echo
                 git checkout $OLDBRANCH
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARSSH -ge 1 ]]; then
-                    echo
-                    sendSlackMessage ssh
-                fi
             ;;
             rebuild)
-                if [[ "$3" != "cron" ]]; then
-                    toadConfirmationRequest "This will delete and rebuild"
-                fi
                 echo "Starting rebuild, please wait ..."
                 echo
                 OLDBRANCH=$(getActiveBranch)
@@ -196,13 +162,9 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARREBUILD -ge 1 ]]; then
-                    echo
-                    sendSlackMessage rebuild
-                fi
             ;;
             resetbuild)
                 if [[ "$3" != "cron" ]]; then
@@ -219,13 +181,9 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRESETBUILD -ge 1 ]]; then
-                    echo
-                    sendSlackMessage resetbuild
-                fi
             ;;
             run)
                 source $PATHROS
@@ -246,10 +204,6 @@ case $1 in
                 fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
-                fi
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
-                    echo
-                    sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ../data/videos/$RECORDTIME
@@ -277,31 +231,13 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
-                if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
-                    echo
-                    sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
-                fi
 		RECORDTIME=$(date +%Y%m%d-%H%M%S)
 		mkdir -p ../data/videos/$RECORDTIME
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
-            record)
-                case $3 in
-                    camera)
-                        BAGNAME="camera-$(date +%s).bag"
-                        mkdir -p ../data/rosbags > /dev/null 2>&1
-                        echo "This will record camera data to file $BAGNAME"
-                        source $PATHROS
-                        source $PATHSETUP
-                        rosbag record -O ../data/rosbags/$BAGNAME /camera/left/camera_info /camera/right/camera_info /camera/left/image_raw/compressed /camera/right/image_raw/compressed /tf
-                    ;;
-                    *)
-                        toadHelpCar
-                    ;;
-                esac
-            ;;
+
             control)
                 source $PATHROS
                 source $PATHSETUP
@@ -316,399 +252,6 @@ case $1 in
             ;;
             *)
                 toadHelpCar
-            ;;
-        esac
-    ;;
-    init)
-        # exit when no second parameter is given
-        if [[ $# -le 1 ]]; then
-            toadHelpInit
-            echo
-            exit 1
-        fi
-        DISTRIBUTION=$(lsb_release -i | awk {'print $3'})
-        VERSION=$(lsb_release -r | awk {'print $2'})
-        CODENAME=$(lsb_release -c | awk {'print $2'})
-        FORCED="yes"
-        if [[ $3 != 'force' ]] && [[ $4 != 'force' ]]; then
-            if [[ $DISTRIBUTION != 'Ubuntu' ]]; then
-                echo "Your distribution ($DISTRIBUTION) is not supported"
-                echo "You may use the force argument, but be warned!"
-                echo
-                exit 1
-            fi
-            if [[ $VERSION != '16.04' ]] && [[ $VERSION != '18.04' ]]; then
-                echo "Your Ubuntu version ($VERSION) is not supported"
-                echo "You may use the force argument, but be warned!"
-                echo
-                exit 1
-            fi
-            FORCED="no"
-        fi
-        
-        CI="yes"
-        if [[ $3 != 'ci' ]] && [[ $4 != 'ci' ]]; then
-          CI="no"
-        fi
-        
-        #
-        #read RESULT
-        #while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-        #    toadConfirmationEnter "This will install all required system packages"
-        #    read RESULT
-        #done
-        #echo $RESULT
-#exit
-
-        case $2 in
-            system)
-                toadInitParameters
-                if [[ $CI != "yes" ]]; then
-                  toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                  toadConfirmationRequest "This will install all required system packages"
-                fi
-                if [[ $VERSION == '16.04' ]]; then
-                    source $PATHROS
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Update packages and upgrade system"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-                        sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-                        sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-                        wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-                        sudo apt-get update -qq
-			if [[ $CI != 'yes' ]]; then
-                       	 sudo apt-get upgrade -y
-			fi
-                    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we install OS Packages"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' && $CI == 'no' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin ros-kinetic-depthimage-to-laserscan ros-kinetic-jsk-rviz-plugins
-                        sudo apt-get install -y libignition-math2-dev
-                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
-			sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-kinetic-ros-base ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base
-			sudo apt-get install -y libignition-math2-dev
-			sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-		    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we init ROS"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo rosdep init
-                    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we reset pip and install python packages"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        source $PATHROS
-                        sudo python -m pip uninstall -y pip
-                        sudo apt-get install -y python-pip
-                        sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
-                        sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
-                    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we install range_libc"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        cd ../.. && git clone http://github.com/kctess5/range_libc
-                        cd ../../range_libc/pywrapper && ./compile.sh
-                    else
-                        echo "Skipping"
-                    fi
-                else
-                    source $PATHROS
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Update packages and upgrade system"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-                        sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-                        sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-                        wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-                        sudo apt-get update -qq
-			if [[ $CI != 'yes' ]]; then
-                          sudo apt-get upgrade -y
-			fi
-                    fi
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we reset pip and install python packages"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' && $CI == 'no' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin ros-melodic-depthimage-to-laserscan ros-melodic-jsk-rviz-plugins
-                        sudo apt-get install -y libignition-math2-dev
-                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
-		    	sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-ros-base ros-melodic-gazebo-ros-control
-			sudo apt-get install -y libignition-math2-dev
-                        sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
-		    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we init ROS"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo rosdep init
-                    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we reset pip and install python packages"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        source $PATHROS
-                        sudo python -m pip uninstall -y pip
-                        sudo apt-get install -y python-pip
-                        sudo apt-get install -y libsdl2-dev clang-format python-pyqtgraph
-                        sudo python2 -m pip install --upgrade pip --force
-                        sudo python2 -m pip install --no-cache-dir torch autopep8 cython circle-fit slack-cli
-                    else
-                        echo "Skipping"
-                    fi
-
-                    RESULT=""
-                    if [[ $CI == 'yes' ]]; then
-                        RESULT="p"
-                    fi
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "Now we install range_libc"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        WS_DIR=$(pwd)
-                        cd ../.. && git clone http://github.com/kctess5/range_libc
-                        cd ../range_libc/pywrapper && ./compile.sh
-                        cd $WS_DIR
-                    else
-                        echo "Skipping"
-                    fi
-                fi
-            ;;
-            ros)
-                toadInitParameters
-                if [[ $CI != 'yes' ]]; then
-                    toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                    toadConfirmationRequest "This will install all required ros packages"
-                fi
-		source $PATHROS
-                if [[ $VERSION == '16.04' ]]; then
-                    source $PATHROS
-                    cd $WORKDIR/.. && git submodule init
-                    cd $WORKDIR/.. && git submodule update --recursive
-                    cd $WORKDIR/.. && rosdep update
-                    cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro kinetic 
-                    catkin_make
-                fi
-                if [[ $VERSION == '18.04' ]]; then
-                    cd $WORKDIR/.. && git submodule init
-                    cd $WORKDIR/.. && git submodule update --recursive
-                    cd $WORKDIR/.. && rosdep update
-                    cd $WORKDIR && rosdep install -y --from-paths ./src --ignore-src --rosdistro melodic 
-                    catkin_make
-                fi
-            ;;
-            camstream)
-                toadInitParameters
-                toadConfirmationRequest "This stuff is hardly untested, please report results or supply patches"
-                toadConfirmationRequest "This will install all required packages for camera streaming server and client"
-                if [[ $VERSION == '16.04' ]]; then
-                    apt-get install mplayer mencoder ffmpeg netcat
-                else
-                    apt-get install mplayer mencoder ffmpeg netcat
-                fi
-            ;;
-            ide)
-                toadInitParameters
-                toadConfirmationRequest "This will install all required ide packages"
-                if [[ $VERSION == '16.04' ]]; then
-                    RESULT=""
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "This will install Visual Studio Code"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-                        sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
-                        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-                        sudo apt-get install apt-transport-https
-                        sudo apt-get update
-                        sudo apt-get install code
-                        rm packages.microsoft.gpg
-                        echo
-                        echo
-                        toadConfirmationRequest "To install plugin, follow instructions from" "https://marketplace.visualstudio.com/items?itemName=ms-iot.vscode-ros"
-                    else
-                        echo "Skipping"
-                    fi
-                    RESULT=""
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "This will install Netbeans"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-                        sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
-                        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-                        sudo apt-get install apt-transport-https
-                        sudo apt-get update
-                        sudo apt-get install code
-                        echo
-                        echo
-                        toadConfirmationRequest "To install plugin, follow instructions from" "http://plugins.netbeans.org/plugin/60486/netbeans-ros-pack"
-                    else
-                        echo "Skipping"
-                    fi
-                else
-                    RESULT=""
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "This will install Visual Studio Code"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-                        sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
-                        sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-                        sudo apt-get install apt-transport-https
-                        sudo apt-get update
-                        sudo apt-get install code
-                        rm packages.microsoft.gpg
-                        echo
-                        echo
-                        toadConfirmationRequest "To install plugin, follow instructions from" "https://marketplace.visualstudio.com/items?itemName=ms-iot.vscode-ros"
-                    else
-                        echo "Skipping"
-                    fi
-                    RESULT=""
-                    while [[ $RESULT != 's' && $RESULT != 'p' ]]; do
-                        toadConfirmationEnter "This will install Netbeans"
-                        read RESULT
-                    done
-                    if [[ $RESULT == 'p' ]]; then
-                        sudo apt-get install netbeans
-                        echo
-                        echo
-                        toadConfirmationRequest "To install plugin, follow instructions from" "http://plugins.netbeans.org/plugin/60486/netbeans-ros-pack"
-                    else
-                        echo "Skipping"
-                    fi
-                fi
-            ;;
-            env)
-                toadInitParameters
-                toadConfirmationRequest "This will update your environment settings"
-                if [[ $VERSION == '16.04' ]]; then
-                    source $PATHROS
-                    source $PATHSETUP
-                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
-                    export ROS_IP=$MAINIPADDRESS
-                    export ROS_HOSTNAME=$MAINIPADDRESS
-                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
-                else
-                    source $PATHROS
-                    source $PATHSETUP
-                    MAINIPADDRESS=$(getAddressByInterface $CARINTERFACE)
-                    export ROS_IP=$MAINIPADDRESS
-                    export ROS_HOSTNAME=$MAINIPADDRESS
-                    export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
-                fi
-                echo "Done:"
-                echo
-                env | grep ROS
-            ;;
-            *)
-                toadHelpInit
-            ;;
-        esac
-    ;;
-    slack)
-        # exit when no second parameter is given
-        if [[ $# -le 1 ]]; then
-            toadHelpSlack
-            echo
-            exit 1
-        fi
-        case $2 in
-            status)
-                sendSlackMessage status
-            ;;
-            custom)
-                sendSlackMessage custom "$3"
-            ;;
-            rebuild)
-                sendSlackMessage rebuild
-            ;;
-            resetbuild)
-                sendSlackMessage resetbuild
-            ;;
-            ssh)
-                sendSlackMessage ssh
-            ;;
-            *)
-                toadHelpSlack
             ;;
         esac
     ;;
