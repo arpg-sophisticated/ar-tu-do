@@ -24,6 +24,7 @@ jobs:
             - libsdl2-dev
             - clang-format-3.9
             - libyaml-cpp0.5v5
+            - ca-certificates
 
       cache:
           apt: true
