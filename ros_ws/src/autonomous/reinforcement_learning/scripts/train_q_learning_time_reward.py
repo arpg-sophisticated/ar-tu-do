@@ -52,7 +52,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.reached_target = False
 
         self.current_closest_point = None
-        self.rounds_in_segment_completed =0
+        self.training_part_completet_rounds =0
 
         self.reached_target_time = None
 
@@ -196,11 +196,11 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
     def set_current_point(self):
         if(self.drive_forward):
             if((self.current_closest_point == track.get_length()-1) and track.get_closest_segment(self.car_position) == 0):
-                self.rounds_in_segment_completed +=1    
+                self.training_part_completet_rounds +=1    
                 print("----------- ROUND COMPLETED ----------------")    
         else:
             if((self.current_closest_point == 0) and track.get_closest_segment(self.car_position) == track.get_length()-1):
-                self.rounds_in_segment_completed +=1    
+                self.training_part_completet_rounds +=1    
                 print("----------- ROUND COMPLETED ----------------")
         self.current_closest_point = track.get_closest_segment(self.car_position)
 
@@ -210,7 +210,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         if(self.target_point is not None):
             self.target_point
             rounds_to_complete = TRAINING_PARTS[self.current_training_part_index][3]
-            return self.current_closest_point ==self.target_point and self.rounds_in_segment_completed == rounds_to_complete
+            return self.current_closest_point ==self.target_point and self.training_part_completet_rounds >= rounds_to_complete
         return False
 
     def assign_rewards_and_to_memory(self):
@@ -221,22 +221,22 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.cumulative_reward += reward
         self.episode_memory.clear()
 
-    def reset_car_to_start_of_training_part(self,segment_index):
+    def reset_car_to_start_of_training_part(self,part_index):
         print("--RESET--")
         self.sleep_after_reset = 100
-        self.drive_forward = TRAINING_PARTS[segment_index][2]
+        self.drive_forward = TRAINING_PARTS[part_index][2]
         #self.drive_forward = random.random() > 0.5 #TODO: bisher nicht benutzt
 
-        self.current_training_part_index =segment_index
+        self.current_training_part_index =part_index
         if(self.drive_forward):
-            start_point =  TRAINING_PARTS[segment_index][0]
-            self.target_point= TRAINING_PARTS[segment_index][1]
+            start_point =  TRAINING_PARTS[part_index][0]
+            self.target_point= TRAINING_PARTS[part_index][1]
         else:
-            start_point =  TRAINING_PARTS[segment_index][1]
-            self.target_point= TRAINING_PARTS[segment_index][0]
+            start_point =  TRAINING_PARTS[part_index][1]
+            self.target_point= TRAINING_PARTS[part_index][0]
 
         self.car_position=reset_car.reset_to_segment(start_point,forward =self.drive_forward)
-        print("---- start_point = "+str(start_point)+ ",target_point = "+str(self.target_point)+" rounds: "+ str(TRAINING_PARTS[segment_index][3])+" ----")
+        print("---- start_point = "+str(start_point)+ ",target_point = "+str(self.target_point)+" rounds: "+ str(TRAINING_PARTS[part_index][3])+" ----")
         self.is_terminal_step = False
         self.state = None
         if self.episode_length != 0:
@@ -244,7 +244,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.on_complete_episode()
         self.episode_starttime= rospy.get_time()
         self.reached_target = False
-        self.rounds_in_segment_completed =0
+        self.training_part_completet_rounds =0
 
     def replay(self): #TODO: this was done every step, now we are doing it after an episode, raise stepsize of update?
         print("---- replay (memory size: "+ str(len(self.memory))+")----")
@@ -283,8 +283,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
     def select_action(self, state):
         use_epsilon_greedy = self.episode_count % 2 > 0
-        use_epsilon_greedy_with_segment = use_epsilon_greedy and random.random() <= TRAINING_PARTS[self.current_training_part_index][5]
-        if use_epsilon_greedy_with_segment and random.random() < self.get_epsilon_greedy_threshold():
+        use_epsilon_greedy_with_part_factor = use_epsilon_greedy and random.random() <= TRAINING_PARTS[self.current_training_part_index][5]
+        if use_epsilon_greedy_with_part_factor and random.random() < self.get_epsilon_greedy_threshold():
             return random.randrange(ACTION_COUNT)
 
         with torch.no_grad():

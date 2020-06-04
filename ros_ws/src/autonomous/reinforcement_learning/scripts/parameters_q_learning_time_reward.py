@@ -14,12 +14,12 @@ ACTION_COUNT = len(ACTIONS)
 NULL_ACTION_INDEX =3
 
 #(startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
-TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),
-                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1)]
-#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),
-#                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5)]
-#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,1,0.2,0.5),(40,0,False,3,0.08,0.33),
-#                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5),(1,11,True,3,0.08,0.33)]
+#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),
+#                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1)]
+#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,2,0.2,0.5),
+#                   (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5)]
+TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,2,0.2,0.5),(40,0,False,2,0.12,0.4),
+                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5),(1,11,True,2,0.12,0.4)]
 
 
 # Only use some of the LIDAR measurements
@@ -36,7 +36,7 @@ MODEL_FILENAME = os.path.join(RosPack().get_path(
 
 # Start by loading previously trained parameters.
 # If this is False, training will start from scratch
-CONTINUE = False
+CONTINUE = True
 
 DISCOUNT_FACTOR = 0.99  # aka gamma
 
