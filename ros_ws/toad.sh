@@ -67,7 +67,7 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
             ;;
@@ -86,7 +86,7 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
             ;;
@@ -161,7 +161,7 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
             ;;
@@ -180,7 +180,7 @@ case $1 in
                 rm -fr ./build
                 source $PATHROS
                 source $PATHSETUP
-                catkin_make
+                catkin_make --make-args -j $(($(cat /proc/cpuinfo  | grep processor | wc -l) + 1))
                 echo
                 git checkout $OLDBRANCH
             ;;
