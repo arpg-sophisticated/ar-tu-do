@@ -6,6 +6,9 @@ Wallfollowing::Wallfollowing()
         m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &Wallfollowing::laserScanCallback, this);
     m_voxel_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(TOPIC_VOXEL, 1, &Wallfollowing::voxelCallback, this);
+    m_cluster_subscriber =
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_CLUSTER, 1, &Wallfollowing::clusterCallback,
+                                                                 this);
     m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
 }
 
@@ -210,9 +213,9 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
     m_last_scan_time = scan_time;
 }
 
-// void Wallfollowing::clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster)
-// {
-// }
+void Wallfollowing::clusterCallback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& cluster)
+{
+}
 
 void Wallfollowing::voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg)
 {
