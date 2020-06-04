@@ -124,7 +124,7 @@
     <!-- 3: smoothing value of acceleration (int), default: 5 -->
     <!-- 4: whether its simulation or not (string: yes|no), default: no -->
     <!-- 5: whether write statistics or not (string: yes|no), default: no -->
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" respawn="true" output="screen" args="gazebo 100 10 yes no"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" respawn="true" output="screen" args="gazebo 100 10 yes yes"/>
     
     <!-- record camera video, comment to disable -->
 <!--    <node pkg="image_view" type="video_recorder" name="video_record_cam">

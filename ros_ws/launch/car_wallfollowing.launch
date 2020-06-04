@@ -22,9 +22,9 @@
     <!-- zed camera launch file -->
     <!-- pick resolution of camera - please enable only one -->
     <!-- Include racer with 720p camera -->
-    <!--<include file="./launch/zed_720.launch"/>-->
+    <include file="./launch/zed_720.launch"/>
     <!-- Include racer with VGA camera -->
-    <include file="./launch/zed.launch"/>
+    <!--<include file="./launch/zed.launch"/>-->
 
     <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
 
@@ -88,7 +88,7 @@
     
 <!--     record camera video, comment to disable 
     <node pkg="image_view" type="video_recorder" name="video_record_cam">
-        <remap from="image" to="/racer/camera1/image_raw"/>
+        <remap from="image" to="/zed/zed/zed_node/left/image_rect_color"/>
         <param name="fps" value="30" />
         <param name="filename" value="output-cam.avi" />
     </node>        -->
@@ -103,5 +103,5 @@
     <!-- 3: smoothing value of acceleration (int), default: 5 -->
     <!-- 4: whether its simulation or not (string: yes|no), default: no -->
     <!-- 5: whether write statistics or not (string: yes|no), default: no -->
-    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no no"/>
+    <node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no yes"/>
 </launch>
