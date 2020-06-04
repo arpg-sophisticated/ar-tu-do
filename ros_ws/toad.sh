@@ -126,6 +126,8 @@ case $1 in
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ./output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpSystem
@@ -236,6 +238,8 @@ case $1 in
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
 
             control)
@@ -249,6 +253,8 @@ case $1 in
                 rviz -d src/car_control/launch/car.rviz
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpCar
