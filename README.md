@@ -1,14 +1,29 @@
-# IMPORTANT: This is an initial fork by the new group - will be updated soon.
-
-
 # Autonomous Racing Software Stack and Simulation Enviroment
 
-[![Build Status](https://travis-ci.com/Autonomous-Racing-PG/ar-tu-do.svg?branch=master)](https://travis-ci.com/Autonomous-Racing-PG/ar-tu-do)
+[![Build Status](https://travis-ci.org/arpg-sophisticated/ar-tu-do.svg?branch=development)](https://travis-ci.org/arpg-sophisticated/ar-tu-do)
 
 This repository contains software for 1/10th scale autonomous race cars to compete in the [F1/10 competition](http://f1tenth.org/). It is developed by the Autonomous Racing Project Group of [TU Dortmund](https://ls12-www.cs.tu-dortmund.de/daes/).
 
 ![](doc/racing_example.gif "Racing with a wallfollowing algorithm")
 ![](doc/racing_example_real.gif "Racing with the real car in our lab")
+
+## Newsflash
+
+### Connector Monitor/Supply/Board
+
+These pictures show, how to connect these three parts correctly.
+
+![](doc/connector1.jpg "Connector Monitor")
+![](doc/connector2.jpg "Connector Supply")
+![](doc/connector3.jpg "Connector Board") |
+
+### USB2Serial
+
+Important: Since we included the IMU, there are now 2 USB2Serial devices in the system. Please ensure that
+- VESC is always detected as ttyACM0
+- IMU as ttyACM1
+
+On Ubuntu 16.04. we used a file in /etc/udev/rules.d to ensure that, after update to 18.04. we didn't need that anymore as the system detects the devices by the order of the USB plugs on the hub.
 
 ## Features
 

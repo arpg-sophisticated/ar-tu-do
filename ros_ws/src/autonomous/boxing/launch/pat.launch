@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="world" default="racetrack_decorated_2"/>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="verbose" default="true"/>
+    <arg name="use_gpu" default="false"/>
+    <arg name="joystick_type" default="xbox360"/>
+    <arg name="visualize_lidar" default="false"/>
+    <arg name="emergency_stop" default="true"/>
+
+    <!-- Mode Override
+        1 forces manual driving
+        2 forces autonomous driving
+        0 uses user input to enable the modes
+    -->
+    <arg name="mode_override" default="0"/>
+
+    <param name="world_name" value="$(arg world)"/>
+
+    <include file="$(find racer_world)/launch/racer_gazebo.launch">
+        <arg name="world" value="$(arg world)"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" value="$(arg verbose)"/>
+        <arg name="use_gpu" value="$(arg use_gpu)"/>
+        <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
+    </include>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find boxing)/launch/rviz_config.rviz"/>
+
+    <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
+    <include file="$(find car_control)/launch/car_control.launch">
+        <arg name="mode_override" value="$(arg mode_override)"/>
+    </include>
+    <include file="$(find teleoperation)/launch/remote_control.launch">
+        <arg name="joystick_type" value="$(arg joystick_type)"/>
+    </include>
+    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
+
+    <include file="$(find boxing)/launch/boxing.launch">
+      <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
+      <arg name="topic_voxels" value="/scan/voxels" />
+    </include>
+
+    <include file="$(find car_tf)/launch/car_transformer.launch" />
+
+    <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
+    </node>
+    <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />
+</launch>

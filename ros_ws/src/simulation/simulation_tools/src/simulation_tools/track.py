@@ -80,7 +80,8 @@ class Track():
 
     def get_closest_segment(self, point):
         local = np.array([point.x, point.y]) - self.points
-        distances = np.sqrt(np.multiply(local[:,0],local[:,0]) + np.multiply(local[:,1],local[:,1]))
+        distances = np.sqrt(np.multiply(
+            local[:, 0], local[:, 0]) + np.multiply(local[:, 1], local[:, 1]))
         return np.argmin(distances)
 
     def get_position(self, total_distance, distance_to_center=0):
@@ -100,15 +101,14 @@ class Track():
     def get_position_from_segment(self, segment, distance_to_center=0):
         ''' Returns a TrackPosition object based on the on-track distance from the start
         line and the distance to the center of the track. '''
-        
+
         x = self.points[segment, 0]
         y = self.points[segment, 1]
         return TrackPosition(segment, distance_to_center,  # nopep8
             0, Point(x, y), self)  # nopep8
 
     def get_length(self):
-        return len(PATH)-1
-
+        return len(PATH) - 1
 
 
 world_name = rospy.get_param("world_name")
@@ -117,7 +117,7 @@ if world_name not in [
     "racetrack_decorated",
     "racetrack_decorated_2",
     "racetrack_decorated_2_big",
-    "racer_empty"]:
+        "racer_empty"]:
     print "ERROR: Racetrack not supported by track.py"
     sys.exit(1)
 

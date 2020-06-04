@@ -140,11 +140,15 @@ case $1 in
                 fi
                 source $PATHROS
                 source $PATHSETUP
-                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKSYSTEMRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Starting simulation with following arguments: $ARGUMENTS"
                 fi
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ../data/videos/$RECORDTIME
+                roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpSystem
@@ -243,11 +247,15 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
-                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Watch you feet, I'm on the road"
                 fi
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ../data/videos/$RECORDTIME
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             remote)
                 source $PATHROS
@@ -269,11 +277,30 @@ case $1 in
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
-                roslaunch launch/$LAUNCHCAR $ARGUMENTS
                 if [[ $SLACK -ge 1 ]] && [[ $SLACKCARRUN -ge 1 ]]; then
                     echo
                     sendSlackMessage custom "Watch you feet, I'm on the road (remote controlled)"
                 fi
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ../data/videos/$RECORDTIME
+                roslaunch launch/$LAUNCHCAR $ARGUMENTS
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+            ;;
+            record)
+                case $3 in
+                    camera)
+                        BAGNAME="camera-$(date +%s).bag"
+                        mkdir -p ../data/rosbags > /dev/null 2>&1
+                        echo "This will record camera data to file $BAGNAME"
+                        source $PATHROS
+                        source $PATHSETUP
+                        rosbag record -O ../data/rosbags/$BAGNAME /camera/left/camera_info /camera/right/camera_info /camera/left/image_raw/compressed /camera/right/image_raw/compressed /tf
+                    ;;
+                    *)
+                        toadHelpCar
+                    ;;
+                esac
             ;;
             control)
                 source $PATHROS
@@ -281,7 +308,11 @@ case $1 in
 		export ROS_IP="$CARIP"
 		export ROS_HOSTNAME="$CARIP"
 		export ROS_MASTER_URI="http://$CARIP:11311"
+		RECORDTIME=$(date +%Y%m%d-%H%M%S)
+		mkdir -p ../data/videos/$RECORDTIME
                 rviz -d src/car_control/launch/car.rviz
+		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpCar
@@ -352,7 +383,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                       	 sudo apt-get upgrade -y
+			fi
                     else
                         echo "Skipping"
                     fi
@@ -366,7 +399,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' && $CI == 'no' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin ros-kinetic-depthimage-to-laserscan
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-kinetic-ackermann-msgs ros-melodic-serial ros-kinetic-desktop-full gazebo7 libgazebo7-dev ros-kinetic-gazebo-ros-control ros-kinetic-joy ros-kinetic-map-server ros-kinetic-move-base mplayer ffmpeg mencoder netcat ros-kinetic-rviz-imu-plugin ros-kinetic-depthimage-to-laserscan ros-kinetic-jsk-rviz-plugins
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
@@ -440,7 +473,9 @@ case $1 in
                         sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
                         wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
                         sudo apt-get update -qq
-                        sudo apt-get upgrade -y
+			if [[ $CI != 'yes' ]]; then
+                          sudo apt-get upgrade -y
+			fi
                     fi
                     RESULT=""
                     if [[ $CI == 'yes' ]]; then
@@ -451,7 +486,7 @@ case $1 in
                         read RESULT
                     done
                     if [[ $RESULT == 'p' && $CI == 'no' ]]; then
-                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin ros-melodic-depthimage-to-laserscan
+                        sudo apt-get install -y python-catkin-tools libsdl2-dev ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-desktop-full gazebo9 libgazebo9-dev ros-melodic-gazebo-ros-control mplayer ffmpeg mencoder netcat ros-melodic-rviz-imu-plugin ros-melodic-depthimage-to-laserscan ros-melodic-jsk-rviz-plugins
                         sudo apt-get install -y libignition-math2-dev
                         sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential
 		    elif [[ $RESULT == 'p' && $CI == 'yes' ]]; then
@@ -674,6 +709,62 @@ case $1 in
             ;;
             *)
                 toadHelpSlack
+            ;;
+        esac
+    ;;
+    video)
+        # exit when no second parameter is given
+        if [[ $# -le 1 ]]; then
+            toadHelpVideo
+            echo
+            exit 1
+        fi
+        case $2 in
+            list)
+                toadVideosList
+            ;;
+            convert)
+                # exit when no third parameter is given
+                if [[ $# -le 2 ]]; then
+                    toadHelpVideo
+                    echo
+                    exit 1
+                fi
+                toadVideosConvert $3
+            ;;
+            *)
+                toadHelpVideo
+            ;;
+        esac
+    ;;
+    telemetry)
+        # exit when no second parameter is given
+        if [[ $# -le 1 ]]; then
+            toadHelpTelemetry
+            echo
+            exit 1
+        fi
+        case $2 in
+            list)
+                # exit when not configured
+                if [[ $REPORTCONFIGURED != "1" ]]; then
+                    echo "Report not configured, exiting"
+                    echo
+                    exit 1
+                fi
+                toadTelemetryList
+            ;;
+            report)
+                # exit when not configured
+                if [[ $REPORTCONFIGURED != "1" ]]; then
+                    echo "Report not configured, exiting"
+                    echo
+                    exit 1
+                fi
+                toadTelemetryReport
+            ;;
+            *)
+                toadHelpTelemetry
             ;;
         esac
     ;;

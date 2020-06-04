@@ -9,8 +9,8 @@
 #include <tf/transform_listener.h>
 #pragma GCC diagnostic pop
 
-constexpr const char* TOPIC_LASER_SCAN = "/racer/laser/scan";
-constexpr const char* TOPIC_LASER_SCAN_POINTCLOUD = "/racer/laser/tf_pointcloud";
+constexpr const char* TOPIC_LASER_SCAN = "/scan";
+constexpr const char* TOPIC_LASER_SCAN_POINTCLOUD = "/scan/lidar/cartesian";
 constexpr const char* MODEL_BASE_LINK = "base_link";
 
 /**
@@ -28,6 +28,7 @@ class LaserscanTransformer
 
     private:
     ros::NodeHandle m_node_handle;
+    ros::NodeHandle m_private_node_handle;
     ros::Subscriber m_laserscan_subscriber;
     ros::Publisher m_pointcloud_publisher;
     laser_geometry::LaserProjection m_projector;

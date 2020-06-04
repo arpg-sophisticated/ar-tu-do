@@ -16,8 +16,11 @@
   <!-- ZED -->
   <gazebo reference="camera">
     <sensor type="depth" name="camera1">
+      <!-- 672x376@100Hz - 87deg - 1.51844 -->
+      <update_rate>30.0</update_rate>
+      
       <!-- 854x480@100Hz - 87deg - 1.51844 -->
-      <update_rate>100.0</update_rate>
+      <!--<update_rate>100.0</update_rate>-->
       
       <!-- 1280x720@60Hz - 85deg - 1.48353 -->
       <!--<update_rate>60.0</update_rate>-->
@@ -25,8 +28,11 @@
       <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
       <!--<update_rate>30.0</update_rate>-->
       <camera name="head">
-        <!-- 854x480@100Hz - 87deg - 1.51844 -->
+        <!-- 672x376@100Hz - 87deg - 1.51844 -->
         <horizontal_fov>1.51844</horizontal_fov>
+        
+        <!-- 854x480@100Hz - 87deg - 1.51844 -->
+        <!--<horizontal_fov>1.51844</horizontal_fov>-->
         
         <!-- 1280x720@60Hz - 85deg - 1.48353 -->
         <!--<horizontal_fov>1.48353</horizontal_fov>-->
@@ -34,9 +40,13 @@
         <!-- 1920x1080@30Hz - 69deg - 1.20428 -->
         <!--<horizontal_fov>1.20428</horizontal_fov>-->
         <image>
+          <!-- 672x376@100Hz - 87deg - 1.51844 -->
+          <width>672</width>
+          <height>376</height>
+          
           <!-- 854x480@100Hz - 87deg - 1.51844 -->
-          <width>854</width>
-          <height>480</height>
+          <!--<width>854</width>-->
+          <!--<height>480</height>-->
           
           <!-- 1280x720@60Hz - 85deg - 1.48353 -->
           <!--<width>1280</width>-->
@@ -51,13 +61,14 @@
         <depth_camera>
         </depth_camera>
         <clip>
-          <near>0.4</near>
+          <near>0.25</near>
           <far>20</far>
         </clip>
       </camera>
       <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
+        <!-- update rate lowered arificially -->
+        <updateRate>30.0</updateRate>
         <cameraName>racer/camera1</cameraName>
         <!--<frameName>base_link</frameName>-->               
         <frameName>camera</frameName>               
@@ -80,39 +91,6 @@
       </plugin>
     </sensor>
   </gazebo>
-
-  <!-- Camera -->
-<!--  <gazebo reference="camera">
-    <sensor type="camera" name="camera1">
-      <update_rate>30.0</update_rate>
-      <camera name="head">
-        <horizontal_fov>1.3962634</horizontal_fov>
-        <image>
-          <width>800</width>
-          <height>600</height>
-          <format>R8G8B8</format>
-        </image>
-        <clip>
-          <near>0.02</near>
-          <far>300</far>
-        </clip>
-      </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
-        <cameraName>racer/camera1</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>camera</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
-    </sensor>
-  </gazebo>-->
   
   <!-- Hokuyo -->
   <xacro:if value="$(arg use_gpu)">

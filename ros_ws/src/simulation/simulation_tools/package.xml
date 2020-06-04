@@ -17,5 +17,9 @@
   <depend>rospy</depend>
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
+  <depend>car_config</depend>
+  <depend>vesc_sim</depend>
+  <depend>drive_msgs</depend>
+  <depend>geometric_math</depend>
 
 </package>

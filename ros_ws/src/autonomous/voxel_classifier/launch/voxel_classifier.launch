@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!--
+        Launches all necessary nodes that cluster the voxels 
+    -->
+    <arg name="topic_input_voxels" default="/scan/voxels" />
+    <arg name="topic_output_clusters" default="/scan/clusters" />
+    
+    <node
+        respawn="true"
+        pkg="voxel_classifier"
+        type="voxel_classifier"
+        name="$(anon voxel_classifier)"
+        output="screen" >
+    <param name="topic_input_voxels" type="string" value="$(arg topic_input_voxels)" />
+    <param name="topic_output_clusters" type="string" value="$(arg topic_output_clusters)" />
+</node>
+
+</launch>

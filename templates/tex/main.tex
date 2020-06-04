@@ -1,0 +1,116 @@
+\documentclass[listof=totoc,toc=sectionentrywithdots,10pt,a4paper,table]{scrartcl}
+
+%%% global settings %%%
+
+% load packages
+\usepackage[utf8x]{inputenc}
+%\usepackage[bottom]{footmisc}
+\usepackage{ngerman}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{marvosym}
+\usepackage{ifpdf}
+\usepackage{courier}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage[pdftex]{color}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage[super]{nth}
+\usepackage{arydshln}
+\usepackage{eurosym}
+\usepackage{footmisc}
+\usepackage{eso-pic,picture}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{amssymb}
+\usepackage[binary-units=true]{siunitx}
+\usepackage{pifont}
+\usepackage{tablefootnote}
+\usepackage{xfrac}
+\usepackage{ulem}
+\usepackage{ifsym}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.15}
+\usepgfplotslibrary{fillbetween}
+\usepackage{float}
+
+% global format settings
+\addtokomafont{pagenumber}{\small\sffamily}
+\geometry{a4paper, total={170mm,250mm},left=20mm,top=20mm,footskip=15mm}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\pagenumbering{arabic} 
+\setlength{\parindent}{0pt}
+\addtolength{\parskip}{5pt}
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+\renewcommand{\arraystretch}{1.1}
+\setlength{\skip\footins}{10mm plus 2mm}
+
+% library settings
+\usetikzlibrary{positioning,shadows,shapes,arrows}
+\addtokomafont{footnote}{\small\sffamily}
+\urlstyle{tt}
+
+% new commands
+\renewcommand{\ttdefault}{pcr}
+\renewcommand*{\footnotelayout}{\small\sffamily}
+\newcommand{\cmark}{\color{green}\ding{51}}
+\newcommand{\xmark}{\color{red}\ding{55}}
+\DeclareSIUnit\rpm{rpm}
+\DeclareSIUnit\ms{ms}
+\DeclareSIUnit\us{\mu s}
+\DeclareSIUnit\page{page}
+\DeclareSIUnit\pages{pages}
+\DeclareSIUnit\unit{unit}
+\DeclareSIUnit\units{units}
+\DeclareSIUnit\tuple{tuple}
+\DeclareSIUnit\tuples{tuples}
+\DeclareSIUnit\block{block}
+\DeclareSIUnit\blocks{blocks}
+\DeclareSIUnit\per{per}
+\algnewcommand\algorithmicswitch{\textbf{switch}}
+\algnewcommand\algorithmiccase{\textbf{case}}
+\algnewcommand\algorithmicassert{\texttt{assert}}
+\algnewcommand\Assert[1]{\State \algorithmicassert(#1)}
+\algdef{SE}[SWITCH]{Switch}{EndSwitch}[1]{\algorithmicswitch\ #1\ \algorithmicdo}{\algorithmicend\ \algorithmicswitch}%
+\algdef{SE}[CASE]{Case}{EndCase}[1]{\algorithmiccase\ #1}{\algorithmicend\ \algorithmiccase}%
+\algtext*{EndSwitch}%
+\algtext*{EndCase}%
+
+%%% document related settings %%%
+
+% set headers and footers
+\renewcommand{\headrulewidth}{0pt}
+\cfoot{\sffamily\thepage}
+
+%%% document itself %%%
+
+\begin{document}
+
+\sffamily
+
+\section{Auswertung Messdaten}
+
+In diesem Dokument werden die gesammelten Messdaten vom \today unter verschiedenen Gesichtspunkten ausgewertet nach Zeit und zurückgelegter Distanz ausgewertet. Aufgrund abweichender Geschwindigkeiten ist eine Verschiebung der Messreihen auf der x-Achse nicht zu vermeiden, da das Fahrzeug bei höherer oder niedriger Geschwindigkeit bestimmte Stellen auf der Strecke früher oder später erreicht und entsprechend reagiert. Dies muss bei der Betrachtung und dem Vergleich der Daten berücksichtigt werden. 
+
+Zuerst erfolgt eine Einzelbetrachtung der verschiedenen Messreihen, am Ende werden diese Verglichen. Im einzelnen sind folgende Messreihen enthalten:
+
+\begin{itemize}___PH_DATAITEMS___\end{itemize}
+
+Diese werden in folgenden Mengen ausgewertet:
+
+\begin{itemize}___PH_SETS___\end{itemize}
+
+\newpage
+
+___PH_INCLUDES___
+
+\end{document}
+

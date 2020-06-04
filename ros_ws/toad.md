@@ -109,6 +109,13 @@ Arguments:
 * drive - enforce autonomous driving
 * manual -  enforce manual driving
 
+### toad.sh car record
+
+Records rosbag on car to folder rosbags, arguments are mandatory. This command should be run parallel to the run command.
+
+Arguments:
+* camera - to record rosbag from camera
+
 ### toad.sh car control
 
 This will run rviz software on your machine connecting to the car.
@@ -156,13 +163,37 @@ This will install all packages required for camera streaming server and client.
 
 This is for sending messages to slack channels configured in settings.
 
-### toad.sh status
+### toad.sh slack status
 
 Sends a preconfigured status message (look at the code).
 
-### toad.sh custom 'MESSAGE'
+### toad.sh slack custom 'MESSAGE'
 
 Sends a custom message given in parantheses.
 
 Arguments:
 * MESSAGE - the message to send. Must be a string in parantheses.
+
+## toad.sh video
+
+This is for converting videos recorded by ros and rviz.
+
+### toad.sh video list
+
+This lists all video files available for conversion.
+
+### toad.sh video convert DATASET
+
+Converts videos from given DATASET.
+
+## toad.sh telemetry
+
+This is for creating several reports based on telemetry data. Please ensure proper configuration in toad.settings.
+
+### toad.sh telemetry list
+
+List available datasets for reports to include in configuration.
+
+### toad.sh telemetry report
+
+Create tex/pdf report with plots from collected telemetry data.

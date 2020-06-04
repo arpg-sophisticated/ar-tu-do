@@ -1,19 +1,20 @@
-
-sudo: true
-dist: xenial
+os: linux
+dist: bionic
+language: c
 
 env:
   global:
     - SRC_PATH=$(pwd)
-    - ROS_DISTRO: kinetic
+    - ROS_DISTRO: melodic
     - GH_REPO_NAME: ar-tu-do
     - DOXYFILE: $TRAVIS_BUILD_DIR/docs/master/Doxyfile
-    - GH_REPO_REF: github.com/Autonomous-Racing-PG/ar-tu-do.git
+    - GH_REPO_REF: github.com/arpg-sophisticated/ar-tu-do.git
+    - CUDA_SHORT: 10-2
 
 jobs:
   include:
     - # build project
-      if: type = pull_request
+      if: type = pull_request OR branch = development
 
       addons:
         apt:
@@ -21,19 +22,38 @@ jobs:
             - libeigen3-dev
             - python-wstool
             - libsdl2-dev
-            - clang-format-3.8
+            - clang-format-3.9
             - libyaml-cpp0.5v5
+            - ca-certificates
 
       cache:
           apt: true
           ccache: true      
 
       before_install:
+        - echo "Installing cuda"
+        - source /etc/lsb-release
+        - UBUNTU_VERSION=ubuntu${DISTRIB_RELEASE/./}
+        - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/cuda-${UBUNTU_VERSION}.pin
+        - sudo mv cuda-${UBUNTU_VERSION}.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        - sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
+        - sudo add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/ /"
+        - sudo apt update -qq
+        - sudo apt install -y cuda-${CUDA_SHORT} 
+        - sudo apt clean
+        - VERSION_CUDA_S=$(echo ${CUDA_SHORT} | sed s/-/\./g)
+        - CUDA_HOME=/usr/local/cuda-${VERSION_CUDA_S}
+        - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+        - PATH=${CUDA_HOME}/bin:${PATH}
+        - echo "Installing ZED SDK"
+        - wget https://download.stereolabs.com/zedsdk/3.1/cu102/ubuntu18 -O zed_sdk.run
+        - chmod +x ./zed_sdk.run
+        - ./zed_sdk.run -- silent skip_tools
         - cd ros_ws
         - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
         - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
         - sudo apt-get update -qq
-        - sudo apt-get install -y "ros-${ROS_DISTRO}-ros-base"
+        - sudo apt-get install -y "ros-${ROS_DISTRO}-ros-base" python-rosdep
         - source /opt/ros/${ROS_DISTRO}/setup.bash
         - sudo rosdep init
         - rosdep update
@@ -65,10 +85,9 @@ jobs:
             - graphviz
 
       cache:
-          apt: true
           ccache: true
 
       script:
         - cd $TRAVIS_BUILD_DIR
         - chmod 755 ./scripts/travis/doxygen/generate-doxygen-doc.sh
-        - ./scripts/travis/doxygen/generate-doxygen-doc.sh
+        - # ./scripts/travis/doxygen/generate-doxygen-doc.sh
