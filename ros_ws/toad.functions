@@ -23,10 +23,8 @@ function toadHelpMain {
     echo "usage: toad.sh help"
     echo "               system help"
     echo "               car help"
-    echo "               slack help"
     echo "               video help"
     echo "               telemetry help"
-    echo "               init help"
 }
 
 # help message for system mode
@@ -114,11 +112,6 @@ function toadHelpCar {
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
     echo
-    echo "       toad.sh car record"
-    echo
-    echo "           Records rosbag on car to folder rosbags, add"
-    echo "               camera      - to record rosbag from camera"
-    echo
     echo "       toad.sh car remote"
     echo
     echo "           Starts software on car without rviz, add"
@@ -128,51 +121,6 @@ function toadHelpCar {
     echo "       toad.sh car control"
     echo
     echo "           Starts rviz connecting to the car."
-}
-
-# help message for initializing the system
-function toadHelpInit {
-    echo "usage: toad.sh init help"
-    echo
-    echo "       This stuff is hardly untested, please report results or patches" 
-    echo
-    echo "       toad.sh init env [force]"
-    echo
-    echo "           Setups the environment relative to the current directory"
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init system [force]"
-    echo
-    echo "           This will install everything you need on system side."
-    echo "           Please ensure, that you're allowed to sudo."
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init ros [force]"
-    echo
-    echo "           This will install everything you need on ros side."
-    echo "           Please ensure, that you're allowed to sudo."
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init ide [force]"
-    echo
-    echo "           This will install IDEs and provide information about plugins"
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init camstream [force]"
-    echo
-    echo "           This will install all packages required for camera streaming"
-    echo "           Add force argument to suppress compatibility check"
-}
-
-# help message for slack interaction
-function toadHelpSlack {
-    echo "usage: toad.sh slack help"
-    echo
-    echo "       toad.sh slack status"
-    echo "           Sends status message to preconfigured channel"
-    echo
-    echo "       toad.sh slack custom 'MESSAGE'"
-    echo "           Sends custom message MESSAGE to preconfigured channel"
 }
 
 # get number of active display session
@@ -207,139 +155,9 @@ function toadConfirmationRequest {
     read
 }
 
-# ask user for confirmation
-# 1: message to print
-# 2: 2nd line of message
-function toadConfirmationEnter {
-    RESULT=""
-    MESSAGE="$1"
-    NEXTLINE="$2"
-    echo $MESSAGE
-    if [[ $NEXTLINE =~ [0-9A-Za-z] ]]; then
-        echo $NEXTLINE
-    fi
-    echo
-    echo "Please press:"
-    echo "    s to skip"
-    echo "    p to process commands"
-    echo
-    echo "followed by enter to proceed or Ctrl+C to cancel"
-}
-
-# print system properties for init
-function toadInitParameters {
-    echo "Distribution:        $DISTRIBUTION"
-    echo "Codename:            $CODENAME"
-    echo "Version:             $VERSION"
-    echo "Forced installation: $FORCED"
-    echo
-}
-
 # get active branch
 function getActiveBranch {
     echo $(git branch | grep "*" | cut -d " " -f 2-)
-}
-
-# send message to slack channel
-# 1: type: resetbuild,rebuild,ssh,status,custom
-# 2: message: only needed for custom mode
-function sendSlackMessage {
-    if [[ $SLACK -le 0 ]]; then
-        echo "Slack not configured, not sending a status message"
-        echo
-    else
-        case $1 in
-            resetbuild)
-                echo "Sending resetbuild message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) resetted and rebuilt project" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Done my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            rebuild)
-                echo "Sending rebuild message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) rebuilt project" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Done my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            ssh)
-                echo "Sending ssh update message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) rebuild ssh keys" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Done my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            status)
-                echo "Sending status message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) is up and running" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Network:" >> /tmp/slackstatus.txt
-                ifconfig >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Wireless:" >> /tmp/slackstatus.txt
-                iwconfig 2>/dev/null >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt                
-                echo "Services:" >> /tmp/slackstatus.txt
-                netstat -nlt | grep -v 127.0.0. | grep -v '::1' | grep tcp >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Disks:" >> /tmp/slackstatus.txt
-                df | grep -v tmpfs | grep -v loop | grep -v udev >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Ready to serve my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            custom)
-                if [[ $2 =~ [0-9A-Za-z] ]]; then
-                    echo "Sending custom message to Slack (Channel: $SLACKCHANNEL)"
-                    echo
-                    echo "Date: $(date)" > /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo "System $(hostname) custom message" >> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo $2 >> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo "Done my dark lord!">> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo "--" >> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                    rm /tmp/slackstatus.txt
-                else
-                    echo "Sending empty messages is lame... not sending"
-                    echo
-                fi
-            ;;
-        esac
-    fi
 }
 
 # get address of given interface
