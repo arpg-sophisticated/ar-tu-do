@@ -86,6 +86,9 @@
         <param name="ip_address" value="192.168.1.10"/>
     </node>
 
+    <!-- publishes the approximated maximal possible speed for a certain position on the track -->
+    <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
+
     <!-- needed for logging telemetry data and provide node for rviz -->
     <!-- arguments -->
     <!-- 1: log prefix (string), default: none -->

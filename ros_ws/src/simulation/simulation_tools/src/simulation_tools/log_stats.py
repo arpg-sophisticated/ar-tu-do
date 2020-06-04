@@ -219,7 +219,7 @@ def speed_callback(speed_message):
         speed_current = speed_message.wheel_speed
     else:
         # TODO insert real speed information
-        speed_current = speed_message.wheel_speed
+        speed_current = speed_message.velocity
 
     speed_delta = speed_current - speed_last
     if logentry > 0:
@@ -496,12 +496,25 @@ def log_message():
 rospy.init_node('log_stats', anonymous=False)
 # disabled as we don't need it here
 #rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
-rospy.Subscriber(
-    TOPIC_GAZEBO_STATE_TELEMETRY,
-    gazebo_state_telemetry,
-    speed_callback)
 rospy.Subscriber(TOPIC_MAX_SPEED, Float64, max_speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
+
+# is it simulation?
+if len(sys.argv) > 4:
+    if str(sys.argv[4]) == "yes":
+        # then we fetch current speed from gazebo node
+        rospy.Subscriber(
+            TOPIC_GAZEBO_STATE_TELEMETRY,
+            gazebo_state_telemetry,
+            speed_callback)
+    else:
+        # else we fetch current speed from acceleration controller 
+        rospy.Subscriber(
+            TOPIC_CONTROLLED_DRIVE_PARAM,
+            drive_param,
+            speed_callback,
+            queue_size=1)
+
 
 global text_interface
 text_interface = OverlayTextInterface("hud")

@@ -90,10 +90,10 @@
     
     <!-- wallfollowing start - please enable only one -->
     <!-- current implementation -->
-    <include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>
+    <!--<include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>-->
     
     <!-- former implementation of previous group -->
-    <!--<include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>-->
+    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
     <!-- wallfollowing end -->
     
     <group if="$(arg emergency_stop)">
@@ -116,6 +116,7 @@
 
     <!-- publishes the approximated maximal possible speed for a certain position on the track -->
     <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
+    
     <!-- needed for logging telemetry data and provide node for rviz -->
     <!-- arguments -->
     <!-- 1: log prefix (string), default: none -->
