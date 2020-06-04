@@ -21,7 +21,6 @@ add_message_files(
   FILES
   drive_param.msg
   gazebo_state_telemetry.msg
-  wallfollowing_to_reinforcementlearning.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
