@@ -192,10 +192,18 @@ function toadVideosConvert {
             RVIZLENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2] }')
             NEWLENGTH=$(python -c "print($RVIZLENGTH*1.0/$CAMLENGTH*1.0)" | cut -b -6)
 
+            # calculate resizing
+            CAMSIZE=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep Stream | cut -d "," -f 4 | cut -d "[" -f 1 | sed 's/ //g')
+            RVIZSIZE=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g')
+            NEWSIZE=$RVIZSIZE
+            if [[ $(echo $CAMSIZE | cut -d "x" -f 1) -ge $(echo $RVIZSIZE | cut -d "x" -f 1) ]]; then
+                NEWSIZE=$CAMSIZE
+            fi
+
             # convert videos
-            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS" -c:v libx264 $VIDEODIR/cam.mp4 > /dev/null 2>&1
+            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS,scale=$NEWSIZE" -c:v libx264 $VIDEODIR/cam.mp4 > /dev/null 2>&1
             printf "."
-            ffmpeg -y -i $VIDEODIR/rviz.avi -c:v libx264 $VIDEODIR/rviz.mp4 > /dev/null 2>&1
+            ffmpeg -y -i $VIDEODIR/rviz.avi -filter:v "scale=$NEWSIZE" -c:v libx264 $VIDEODIR/rviz.mp4 > /dev/null 2>&1
             printf "."
 
             # stitch videos
