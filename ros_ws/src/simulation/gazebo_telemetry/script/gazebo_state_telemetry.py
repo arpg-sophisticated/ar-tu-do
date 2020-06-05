@@ -53,7 +53,6 @@ WHEEL_RADIUS = 0.05
 
 def calculate_wheel_velocity():
     global wheel_velocity
-
     indices = [i for i in range(len(link_states_message.name))
                if link_states_message.name[i] in LINK_NAMES]
     twists = [link_states_message.twist[i].angular for i in indices]

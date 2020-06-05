@@ -5,7 +5,6 @@ project(drive_msgs)
 find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
-  sensor_msgs
 )
 
 ## Errors and Warnings
@@ -27,7 +26,6 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
-  sensor_msgs
 )
 
 ###################################
@@ -36,7 +34,7 @@ generate_messages(
 
 ## Declare things to be passed to dependent projects
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs sensor_msgs
+  CATKIN_DEPENDS message_runtime std_msgs
 )
 
 
