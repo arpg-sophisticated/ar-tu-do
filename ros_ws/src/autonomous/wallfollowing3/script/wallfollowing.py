@@ -20,7 +20,7 @@ import time
 from dynamic_reconfigure.server import Server
 from wallfollowing3.cfg import wallfollowing3Config
 
-TOPIC_DRIVE_PARAMETERS_WF = "/input/drive_param/autonomousWF"
+TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry"
 TOPIC_CONTROLLED_DRIVE_PARAM = "/commands/controlled_drive_param"
 TOPIC_LASER_SCAN = "/scan"
@@ -914,7 +914,7 @@ rospy.Subscriber(
     controlled_drive_param_callback,
     queue_size=1)
 drive_parameters_publisher = rospy.Publisher(
-    TOPIC_DRIVE_PARAMETERS_WF, drive_param, queue_size=1)
+    TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 
 Server(wallfollowing3Config, dynamic_configuration_callback)
 
