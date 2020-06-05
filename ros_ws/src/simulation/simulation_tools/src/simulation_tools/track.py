@@ -50,21 +50,13 @@ class TrackPosition():
 class Track():
     def __init__(self, points):
         self.points = points[:-1, :]
-        print("Points: ")
-        print(self.points)
         self.size = points.shape[0] - 1
         relative = points[1:, :] - points[:-1, :]
-        print("relatives: ")
-        print(relative)
         self.segment_length = np.linalg.norm(relative, axis=1)
         self.length = np.sum(self.segment_length)
         self.forward = relative / self.segment_length[:, np.newaxis]
-        print("forward: ")
-        print(self.forward)
         self.right = np.array(
             [self.forward[:, 1], -self.forward[:, 0]]).transpose()
-        print("right: ")
-        print(self.right)
         self.cumulative_distance = np.zeros(points.shape[0])
         self.cumulative_distance[1:] = np.cumsum(self.segment_length)
 
