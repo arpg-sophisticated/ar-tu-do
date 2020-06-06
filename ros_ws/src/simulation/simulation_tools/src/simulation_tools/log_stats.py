@@ -18,8 +18,18 @@ from rospkg import RosPack
 from drive_msgs.msg import drive_param, gazebo_state_telemetry
 from std_msgs.msg import Float64
 from gazebo_msgs.msg import ModelStates
-from jsk_rviz_plugins.msg import OverlayText
+#from jsk_rviz_plugins.msg import OverlayText
 from jsk_rviz_plugins.overlay_text_interface import OverlayTextInterface
+from std_msgs.msg import ColorRGBA, Float32, Int32
+from time import strftime
+from time import gmtime
+
+try:
+  from jsk_rviz_plugins.msg import *
+except:
+  import roslib;roslib.load_manifest("jsk_rviz_plugins")
+  from jsk_rviz_plugins.msg import *
+
 
 TOPIC_MAX_SPEED = "/speed_info/max_speed"
 TOPIC_DRIVE_PARAMETERS = "/commands/controlled_drive_param"
@@ -54,7 +64,20 @@ global logentry
 logentry = 0
 
 # interface for HUD topic
-global text_interface
+global hud_text_interface
+
+# interface for HUD speed value
+global hud_speed_value
+# interface for HUD rpm value
+global hud_rpm_value
+# interface for HUD acceleration value
+global hud_acceleration_value
+# interface for HUD angle value
+global hud_angle_value
+# interface for HUD distance value
+global hud_distance_value
+# interface for HUD clock value
+global hud_clock_value
 
 # current speed
 global speed_current
@@ -548,7 +571,64 @@ def log_message():
         "Iter: " + str(logentry) + "\n" + \
         "AvgT: " + str(time) + " (Vto+ Vav+ Ato+ Ato-)\n" + \
         "AvgS: " + str(smooth) + " (Vsmo Asmo)\n"
-    text_interface.publish(str(hudstring))
+        
+        
+    hud_text = OverlayText()
+    hud_text.width = 400
+    hud_text.height = 400
+    hud_text.left = 10
+    hud_text.top = 10
+    hud_text.text_size = 10
+    hud_text.line_width = 3
+    hud_text.font = "Cousine"
+    hud_text.text = str(hudstring)
+    hud_text.fg_color = ColorRGBA(0.93, 0.16, 0.16, 1.0)
+    hud_text.bg_color = ColorRGBA(0.0, 0.0, 0.0, 0.0)
+    hud_text_interface.publish(hud_text)
+
+    hud_clock = OverlayText()
+    hud_clock.width = 300
+    hud_clock.height = 30
+    hud_clock.left = 20
+    hud_clock.top = 20
+    hud_clock.text_size = 24
+    hud_clock.line_width = 3
+    hud_clock.font = "Cousine"
+    hud_clock.text = str(strftime("%H:%M:%S", gmtime(time_current))) + "." 
+    if (time_current * 100) % 100 > 9:
+        hud_clock.text += str('%.0f' % ((time_current * 100) % 100))
+    else:
+        hud_clock.text += "0" + str('%.0f' % ((time_current * 100) % 100))
+    hud_clock.fg_color = ColorRGBA(0.09, 1.0, 0.9, 1.0)
+    hud_clock.bg_color = ColorRGBA(0.0, 0.0, 0.0, 0.0)
+    hud_clock_value.publish(hud_clock)
+
+    hud_distance = OverlayText()
+    hud_distance.width = 300
+    hud_distance.height = 30
+    if distance_current > 10000:
+        hud_distance.left = 39
+    elif distance_current >= 1000:
+        hud_distance.left = 58
+    elif distance_current >= 100:
+        hud_distance.left = 77
+    elif distance_current >= 10:
+        hud_distance.left = 96
+    else:
+        hud_distance.left = 115
+    hud_distance.top = 50
+    hud_distance.text_size = 24
+    hud_distance.line_width = 3
+    hud_distance.font = "Cousine"
+    hud_distance.text = str('%.2f' % distance_current) + " m"
+    hud_distance.fg_color = ColorRGBA(0.09, 1.0, 0.9, 1.0)
+    hud_distance.bg_color = ColorRGBA(0.0, 0.0, 0.0, 0.0)
+    hud_distance_value.publish(hud_distance)
+
+    hud_speed_value.publish(np.mean(speed_smooth))
+    hud_rpm_value.publish(int((np.mean(speed_smooth) * speed_rpmfactor)))
+    hud_acceleration_value.publish(np.mean(acceleration_smooth))
+    hud_angle_value.publish(angle_current * (-1))
 
     logentry += 1
 
@@ -576,8 +656,21 @@ if len(sys.argv) > 4:
             queue_size=1)
 
 
-global text_interface
-text_interface = OverlayTextInterface("hud")
+global hud_text_interface
+hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
+
+global hud_speed_value
+hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
+global hud_rpm_value
+hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
+global hud_acceleration_value
+hud_acceleration_value = rospy.Publisher('hud_acceleration_value', Float32, queue_size=1)
+global hud_angle_value
+hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
+global hud_distance_value
+hud_distance_value = rospy.Publisher('hud_distance_value', OverlayText, queue_size=1)
+global hud_clock_value
+hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
 
 while not rospy.is_shutdown():
     rospy.spin()
