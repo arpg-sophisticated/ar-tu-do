@@ -80,6 +80,9 @@ speed_max = 0
 # top speed last TIME (arg) intervals
 global speed_maxtime
 speed_maxtime = []
+# rpm factor derived from code
+global speed_rpmfactor
+speed_rpmfactor = 1299.224
 
 # current maximum speed given from algorithm
 global maxspeed_current
@@ -151,6 +154,19 @@ turn_last = 0
 # relative change in wheels turn
 global turn_delta
 turn_delta = 0
+
+# current angle of wheels (-maxangle ... 0 ... maxangle in degree)
+global angle_current
+angle_current = 0
+# last intervals angle of wheels
+global angle_last
+angle_last = 0
+# relative change in wheels angle
+global angle_delta
+angle_delta = 0
+# this is a constant value measured on max turn angle the car may do (40 deg)
+global angle_max
+angle_max = 40
 
 
 def getDataPath():
@@ -286,6 +302,7 @@ def log_message():
     global speed_max
     global speed_maxtime
     global speed_smooth
+    global speed_rpmfactor
 
     global maxspeed_current
     global maxspeed_last
@@ -314,6 +331,15 @@ def log_message():
     global turn_last
     global turn_delta
 
+    global turn_current
+    global turn_last
+    global turn_delta
+
+    global angle_current
+    global angle_last
+    global angle_delta
+    global angle_max
+
     global logfile_handler_csv
     global logfile_handler_dat
 
@@ -328,8 +354,12 @@ def log_message():
             maxspeed_avg += maxspeed_current
 
         turn_last = turn_current
-        turn_current = last_drive_message.turn
+        turn_current = last_drive_message.angle
         turn_delta = turn_current - turn_last
+
+        angle_last = angle_current
+        angle_current = last_drive_message.angle * angle_max
+        angle_delta = angle_current - angle_last
 
         
     # calculate bias on first run
@@ -441,7 +471,10 @@ def log_message():
                 "AccelerationMinTime;" + \
                 "AccelerationMaxTime;" + \
                 "Distance;" + \
-                "DistanceDelta" + \
+                "DistanceDelta;" + \
+                "Turn;" + \
+                "TurnDelta;" + \
+                "RPM" + \
                 "\n"
             logfile_handler_csv.write(logstring_header)
             logfile_handler_dat.write(
@@ -474,8 +507,8 @@ def log_message():
             ";" + str('%.2f' % maxspeed_current) + \
             ";" + str('%.2f' % maxspeed_delta) + \
             ";" + str('%.2f' % maxspeed_avg) + \
-            ";" + str('%.2f' % turn_current) + \
-            ";" + str('%.2f' % turn_delta) + \
+            ";" + str('%.2f' % angle_current) + \
+            ";" + str('%.2f' % angle_delta) + \
             ";" + str('%.2f' % acceleration_current) + \
             ";" + str('%.2f' % np.mean(acceleration_smooth)) + \
             ";" + str('%.2f' % acceleration_delta) + \
@@ -485,12 +518,17 @@ def log_message():
             ";" + str('%.2f' % min(acceleration_mintime)) + \
             ";" + str('%.2f' % distance_current) + \
             ";" + str('%.2f' % distance_delta) + \
+            ";" + str('%.2f' % turn_current) + \
+            ";" + str('%.2f' % turn_delta) + \
+            ";" + str('%.2f' % (speed_current * speed_rpmfactor)) + \
             "\n"
         logfile_handler_csv.write(logstring)
         logfile_handler_dat.write(logstring.replace(";", " "))
 
     hudstring = \
         "Time: " + str('%.2f' % time_current) + " s\n" + \
+        "Rcur: " + str('%.2f' % (speed_current * speed_rpmfactor)) + " ^-1\n" + \
+        "Rsmo: " + str('%.2f' % (np.mean(speed_smooth) * speed_rpmfactor)) + " ^-1\n" + \
         "Vcur: " + str('%.2f' % speed_current) + " m/s\n" + \
         "Vsmo: " + str('%.2f' % np.mean(speed_smooth)) + " m/s\n" + \
         "Vavg: " + str('%.2f' % speed_avg) + " m/s\n" + \
@@ -498,6 +536,7 @@ def log_message():
         "Vtop: " + str('%.2f' % speed_max) + " m/s\n" + \
         "Vto+: " + str('%.2f' % max(speed_maxtime)) + " m/s\n" + \
         "Vmax: " + str('%.2f' % maxspeed_current) + " m/s\n" + \
+        "Angl: " + str('%.2f' % angle_current) + "\n" + \
         "Turn: " + str('%.2f' % turn_current) + "\n" + \
         "Acur: " + str('%.2f' % acceleration_current) + " m/s^2\n" + \
         "Asmo: " + str('%.2f' % np.mean(acceleration_smooth)) + " m/s^2\n" + \
