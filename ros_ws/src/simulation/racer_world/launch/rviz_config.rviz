@@ -12,6 +12,8 @@ Panels:
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
+        - /Speed m/s2
+        - /Target m/s2
       Splitter Ratio: 0.5305555462837219
     Tree Height: 1945
   - Class: rviz/Selection
@@ -209,12 +211,12 @@ Visualization Manager:
         Camera (Depth): true
         EmergencyStop: true
         Grid: true
+        HUD Clock: true
+        HUD Debug: true
+        HUD Distance: true
         Imu: true
         LaserScan (Camera): true
         LaserScan (Lidar): true
-        OverlayText (HUD Clock): true
-        OverlayText (HUD Distance): true
-        OverlayText (HUD Text): true
         RPM ^-1: true
         RobotModel: true
         Speed m/s: true
@@ -241,12 +243,12 @@ Visualization Manager:
         Camera (Video): true
         EmergencyStop: true
         Grid: true
+        HUD Clock: true
+        HUD Debug: true
+        HUD Distance: true
         Imu: true
         LaserScan (Camera): true
         LaserScan (Lidar): true
-        OverlayText (HUD Clock): true
-        OverlayText (HUD Distance): true
-        OverlayText (HUD Text): true
         RPM ^-1: true
         RobotModel: true
         Speed m/s: true
@@ -365,9 +367,9 @@ Visualization Manager:
       Use rainbow: true
       Value: false
     - Class: jsk_rviz_plugin/VideoCapture
-      Enabled: false
+      Enabled: true
       Name: VideoCapture
-      Value: false
+      Value: true
       filename: output.avi
       fps: 30
       height: 376
@@ -526,6 +528,81 @@ Visualization Manager:
       size: 100
       text size: 14
       top: 380
+    - Buffer length: 500
+      Class: jsk_rviz_plugin/Plotter2D
+      Enabled: true
+      Name: Speed m/s
+      Show Value: true
+      Topic: /hud_speed_value
+      Value: true
+      auto color change: false
+      auto scale: true
+      background color: 0; 0; 0
+      backround alpha: 0
+      border: true
+      foreground alpha: 1
+      foreground color: 25; 255; 240
+      height: 80
+      left: 300
+      linewidth: 1
+      max color: 255; 0; 0
+      max value: 1
+      min value: -1
+      show caption: true
+      text size: 12
+      top: 20
+      update interval: 0.03999999910593033
+      width: 200
+    - Buffer length: 500
+      Class: jsk_rviz_plugin/Plotter2D
+      Enabled: true
+      Name: Target m/s
+      Show Value: true
+      Topic: /hud_maxspeed_value
+      Value: true
+      auto color change: false
+      auto scale: true
+      background color: 0; 0; 0
+      backround alpha: 0
+      border: true
+      foreground alpha: 1
+      foreground color: 25; 255; 240
+      height: 80
+      left: 520
+      linewidth: 1
+      max color: 255; 0; 0
+      max value: 1
+      min value: -1
+      show caption: true
+      text size: 12
+      top: 20
+      update interval: 0.03999999910593033
+      width: 200
+    - Buffer length: 100
+      Class: jsk_rviz_plugin/Plotter2D
+      Enabled: true
+      Name: Acc m/s^2
+      Show Value: true
+      Topic: /hud_acceleration_value
+      Value: true
+      auto color change: false
+      auto scale: true
+      background color: 0; 0; 0
+      backround alpha: 0
+      border: true
+      foreground alpha: 1
+      foreground color: 25; 255; 240
+      height: 80
+      left: 740
+      linewidth: 1
+      max color: 255; 0; 0
+      max value: 1
+      min value: -1
+      show caption: true
+      text size: 12
+      top: 20
+      update interval: 0.03999999910593033
+      width: 200
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
