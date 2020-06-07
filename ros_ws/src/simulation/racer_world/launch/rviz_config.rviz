@@ -12,8 +12,6 @@ Panels:
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
-        - /Speed m/s2
-        - /Target m/s2
       Splitter Ratio: 0.5305555462837219
     Tree Height: 1945
   - Class: rviz/Selection
