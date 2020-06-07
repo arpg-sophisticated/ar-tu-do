@@ -109,6 +109,12 @@ case $1 in
                 if [[ "$3" =~ "drive" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=2 "
                 fi
+                if [[ "$3" =~ "record" ]]; then
+                    ARGUMENTS="$ARGUMENTS record:=true "
+                fi
+                if [[ "$3" =~ "videohd" ]]; then
+                    ARGUMENTS="$ARGUMENTS videohd:=true "
+                fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
@@ -195,6 +201,12 @@ case $1 in
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 ARGUMENTS=""
+                if [[ "$3" =~ "record" ]]; then
+                    ARGUMENTS="$ARGUMENTS record:=true "
+                fi
+                if [[ "$3" =~ "videohd" ]]; then
+                    ARGUMENTS="$ARGUMENTS videohd:=true "
+                fi
                 if [[ "$3" =~ "drive" ]]; then
                     if [[ "$LAUNCHCARINSANE" == "1" ]]; then
                         ARGUMENTS="$ARGUMENTS mode_override:=2 "
@@ -221,6 +233,12 @@ case $1 in
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 ARGUMENTS="show_rviz:=0"
+                if [[ "$3" =~ "record" ]]; then
+                    ARGUMENTS="$ARGUMENTS record:=true "
+                fi
+                if [[ "$3" =~ "videohd" ]]; then
+                    ARGUMENTS="$ARGUMENTS videohd:=true "
+                fi
                 if [[ "$3" =~ "drive" ]]; then
                     if [[ "$LAUNCHCARINSANE" == "1" ]]; then
                         ARGUMENTS="$ARGUMENTS mode_override:=2 "

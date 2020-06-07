@@ -10,6 +10,8 @@
     <arg name="joystick_type" default="xbox360"/>
     <arg name="visualize_lidar" default="false"/>
     <arg name="emergency_stop" default="true"/>
+    <arg name="record" default="false"/>
+    <arg name="videohd" default="false"/>
 
     <!-- Mode Override
         1 forces manual driving
@@ -20,20 +22,33 @@
 
     <param name="world_name" value="$(arg world)"/>
 
-    <!-- pick resolution of camera - please enable only one -->
     <!-- Include racer with 720p camera -->
-    <!--<include file="$(find racer_world)/launch/racer_gazebo_720.launch">-->
+    <group if="$(arg videohd)">
+        <include file="$(find racer_world)/launch/racer_gazebo_720.launch">
+            <arg name="world" value="$(arg world)"/>
+            <arg name="paused" value="$(arg paused)"/>
+            <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+            <arg name="gui" value="$(arg gui)"/>
+            <arg name="debug" value="$(arg debug)"/>
+            <arg name="verbose" value="$(arg verbose)"/>
+            <arg name="use_gpu" value="$(arg use_gpu)"/>
+            <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
+        </include>
+    </group>
+
     <!-- Include racer with VGA camera -->
-    <include file="$(find racer_world)/launch/racer_gazebo.launch">
-        <arg name="world" value="$(arg world)"/>
-        <arg name="paused" value="$(arg paused)"/>
-        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
-        <arg name="gui" value="$(arg gui)"/>
-        <arg name="debug" value="$(arg debug)"/>
-        <arg name="verbose" value="$(arg verbose)"/>
-        <arg name="use_gpu" value="$(arg use_gpu)"/>
-        <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
-    </include>
+    <group unless="$(arg videohd)">
+        <include file="$(find racer_world)/launch/racer_gazebo.launch">
+            <arg name="world" value="$(arg world)"/>
+            <arg name="paused" value="$(arg paused)"/>
+            <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+            <arg name="gui" value="$(arg gui)"/>
+            <arg name="debug" value="$(arg debug)"/>
+            <arg name="verbose" value="$(arg verbose)"/>
+            <arg name="use_gpu" value="$(arg use_gpu)"/>
+            <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
+        </include>
+    </group>
     
     <!-- transform laserscan to cartesian -->
     <include file="$(find car_tf)/launch/car_transformer.launch" />
@@ -126,18 +141,14 @@
     <!-- 5: whether write statistics or not (string: yes|no), default: no -->
     <node pkg="simulation_tools" type="log_stats.py" name="log_stats" respawn="true" output="screen" args="gazebo 100 10 yes yes"/>
     
-    <!-- record camera video, comment to disable -->
-<!--    <node pkg="image_view" type="video_recorder" name="video_record_cam">
-        <remap from="image" to="/racer/camera1/image_raw"/>
-        <param name="fps" value="30" />
-        <param name="filename" value="output-cam.avi" />
-    </node>        -->
+    <group if="$(arg record)">
+        <node pkg="image_view" type="video_recorder" name="video_record_cam">
+            <remap from="image" to="/racer/camera1/image_raw"/>
+            <param name="fps" value="30" />
+            <param name="filename" value="output-cam.avi" />
+        </node>        
+    </group>
     
-    <!-- rviz start - please enable only one -->
     <!-- default rviz config -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
-    
-    <!-- rviz config with 720p recording -->
-    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config_720.rviz"/>--> 
-    <!-- rviz end - please enable only one -->
 </launch>

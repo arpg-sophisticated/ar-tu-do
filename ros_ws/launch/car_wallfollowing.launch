@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
     <arg name="joystick_type" default="xbox360"/>
+    <arg name="record" default="false"/>
+    <arg name="videohd" default="false"/>
 
     <!-- Mode Override
         1 forces manual driving
@@ -20,11 +22,15 @@
     </include>
     
     <!-- zed camera launch file -->
-    <!-- pick resolution of camera - please enable only one -->
     <!-- Include racer with 720p camera -->
-    <include file="./launch/zed_720.launch"/>
+    <group if="$(arg videohd)">
+        <include file="./launch/zed_720.launch"/>
+    </group>
+    
     <!-- Include racer with VGA camera -->
-    <!--<include file="./launch/zed.launch"/>-->
+    <group if="$(arg videohd)">
+        <include file="./launch/zed.launch"/>
+    </group>
 
     <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
 
@@ -86,12 +92,13 @@
         <param name="ip_address" value="192.168.1.10"/>
     </node>
     
-<!--     record camera video, comment to disable 
-    <node pkg="image_view" type="video_recorder" name="video_record_cam">
-        <remap from="image" to="/zed/zed/zed_node/left/image_rect_color"/>
-        <param name="fps" value="30" />
-        <param name="filename" value="output-cam.avi" />
-    </node>        -->
+    <group if="$(arg record)">
+        <node pkg="image_view" type="video_recorder" name="video_record_cam">
+            <remap from="image" to="/zed/zed/zed_node/left/image_rect_color"/>
+            <param name="fps" value="30" />
+            <param name="filename" value="output-cam.avi" />
+        </node>       
+    </group>
 
     <!-- publishes the approximated maximal possible speed for a certain position on the track -->
     <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>

@@ -54,6 +54,8 @@ function toadHelpSystem {
     echo "               fast        - for fast mode to be true"
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
+    echo "               record      - start cam recording on startup"
+    echo "               videohd     - run cameras in 720p mode (else VGA)"
     echo "               customtrack - start simulation with custom track as configured in toad.settings"
     echo "                             you may add a trackname as 4th parameter to override track in settings"
 }
@@ -79,11 +81,15 @@ function toadHelpVideo {
     echo
     echo "       toad.sh video list"
     echo
-    echo "           List available datasets for video conversion"
+    echo "           List available datasets for video processing"
     echo
     echo "       toad.sh video convert DATASET"
     echo
     echo "           Converts videos from given DATASET"
+    echo
+    echo "       toad.sh video stitch DATASET"
+    echo
+    echo "           Converts and stitches videos from given DATASET"
 }
 
 # help message for car mode
@@ -111,12 +117,16 @@ function toadHelpCar {
     echo "           Starts software on car, add"
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
+    echo "               record      - start cam recording on startup"
+    echo "               videohd     - run cameras in 720p mode (else VGA)"
     echo
     echo "       toad.sh car remote"
     echo
     echo "           Starts software on car without rviz, add"
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
+    echo "               record      - start cam recording on startup"
+    echo "               videohd     - run cameras in 720p mode (else VGA)"
     echo
     echo "       toad.sh car control"
     echo
@@ -168,6 +178,15 @@ function getAddressByInterface {
 # print available videos list
 function toadVideosList {
     echo "Available recordings for conversion:"
+    for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
+        if  $(test -f $VIDEODIR/cam.avi) || $(test -f $VIDEODIR/rviz.avi); then
+            LENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,//)
+            SIZE=$(($(du -shm $VIDEODIR/rviz.avi | awk {'print $1'})+$(du -shm $VIDEODIR/cam.avi | awk {'print $1'})))
+            echo "    $(echo $VIDEODIR | rev | cut -d "/" -f 1 | rev) ($LENGTH, "$SIZE"M)"
+        fi
+    done
+    echo
+    echo "Available recordings for stitching:"
     for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
         if test -f $VIDEODIR/cam.avi; then
             if test -f $VIDEODIR/rviz.avi; then
