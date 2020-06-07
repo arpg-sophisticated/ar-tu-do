@@ -68,6 +68,8 @@ global hud_text_interface
 
 # interface for HUD speed value
 global hud_speed_value
+# interface for HUD max speed value
+global hud_maxspeed_value
 # interface for HUD rpm value
 global hud_rpm_value
 # interface for HUD acceleration value
@@ -119,6 +121,9 @@ maxspeed_delta = 0
 # average maximum speed given from algorithm
 global maxspeed_avg
 maxspeed_avg = 0
+# current maximum speed given from algorithm smoothed
+global maxspeed_smooth
+maxspeed_smooth = []
 
 # current time bias only needed in real mode
 global time_bias
@@ -190,6 +195,9 @@ angle_delta = 0
 # this is a constant value measured on max turn angle the car may do (40 deg)
 global angle_max
 angle_max = 40
+# current maximum speed given from algorithm smoothed
+global angle_smooth
+angle_smooth = []
 
 
 def getDataPath():
@@ -331,6 +339,7 @@ def log_message():
     global maxspeed_last
     global maxspeed_delta
     global maxspeed_avg
+    global maxspeed_smooth
 
     global time_bias
     global time_current
@@ -362,9 +371,14 @@ def log_message():
     global angle_last
     global angle_delta
     global angle_max
+    global angle_smooth
 
     global logfile_handler_csv
     global logfile_handler_dat
+
+    smooth = 5
+    if len(sys.argv) > 3:
+        smooth = int(sys.argv[3])
 
     if(last_max_speed_message is not None):
         maxspeed_last = maxspeed_current
@@ -375,6 +389,10 @@ def log_message():
                             maxspeed_current) / logentry
         else:
             maxspeed_avg += maxspeed_current
+            
+        maxspeed_smooth.append(maxspeed_current)
+        if len(maxspeed_smooth) > smooth:
+            maxspeed_smooth.pop(0)
 
         turn_last = turn_current
         turn_current = last_drive_message.angle
@@ -383,6 +401,10 @@ def log_message():
         angle_last = angle_current
         angle_current = last_drive_message.angle * angle_max
         angle_delta = angle_current - angle_last
+            
+        angle_smooth.append(angle_current)
+        if len(angle_smooth) > smooth:
+            angle_smooth.pop(0)
 
         
     # calculate bias on first run
@@ -559,7 +581,9 @@ def log_message():
         "Vtop: " + str('%.2f' % speed_max) + " m/s\n" + \
         "Vto+: " + str('%.2f' % max(speed_maxtime)) + " m/s\n" + \
         "Vmax: " + str('%.2f' % maxspeed_current) + " m/s\n" + \
+        "Vmsm: " + str('%.2f' % np.mean(maxspeed_smooth)) + " m/s\n" + \
         "Angl: " + str('%.2f' % angle_current) + "\n" + \
+        "Ansm: " + str('%.2f' % np.mean(angle_current)) + "\n" + \
         "Turn: " + str('%.2f' % turn_current) + "\n" + \
         "Acur: " + str('%.2f' % acceleration_current) + " m/s^2\n" + \
         "Asmo: " + str('%.2f' % np.mean(acceleration_smooth)) + " m/s^2\n" + \
@@ -575,9 +599,9 @@ def log_message():
         
     hud_text = OverlayText()
     hud_text.width = 400
-    hud_text.height = 400
-    hud_text.left = 10
-    hud_text.top = 10
+    hud_text.height = 500
+    hud_text.left = 280
+    hud_text.top = 20
     hud_text.text_size = 10
     hud_text.line_width = 3
     hud_text.font = "Cousine"
@@ -589,7 +613,7 @@ def log_message():
     hud_clock = OverlayText()
     hud_clock.width = 300
     hud_clock.height = 30
-    hud_clock.left = 20
+    hud_clock.left = 39
     hud_clock.top = 20
     hud_clock.text_size = 24
     hud_clock.line_width = 3
@@ -607,15 +631,15 @@ def log_message():
     hud_distance.width = 300
     hud_distance.height = 30
     if distance_current > 10000:
-        hud_distance.left = 39
-    elif distance_current >= 1000:
         hud_distance.left = 58
-    elif distance_current >= 100:
+    elif distance_current >= 1000:
         hud_distance.left = 77
-    elif distance_current >= 10:
+    elif distance_current >= 100:
         hud_distance.left = 96
-    else:
+    elif distance_current >= 10:
         hud_distance.left = 115
+    else:
+        hud_distance.left = 134
     hud_distance.top = 50
     hud_distance.text_size = 24
     hud_distance.line_width = 3
@@ -626,9 +650,10 @@ def log_message():
     hud_distance_value.publish(hud_distance)
 
     hud_speed_value.publish(np.mean(speed_smooth))
+    hud_maxspeed_value.publish(np.mean(maxspeed_smooth))
     hud_rpm_value.publish(int((np.mean(speed_smooth) * speed_rpmfactor)))
     hud_acceleration_value.publish(np.mean(acceleration_smooth))
-    hud_angle_value.publish(angle_current * (-1))
+    hud_angle_value.publish(np.mean(angle_current) * (-1))
 
     logentry += 1
 
@@ -659,6 +684,8 @@ if len(sys.argv) > 4:
 global hud_text_interface
 hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
 
+global hud_maxspeed_value
+hud_maxspeed_value = rospy.Publisher('hud_maxspeed_value', Float32, queue_size=1)
 global hud_speed_value
 hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
 global hud_rpm_value
