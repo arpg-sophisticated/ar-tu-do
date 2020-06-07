@@ -299,6 +299,9 @@ case $1 in
                 fi
                 toadVideosConvert $3
             ;;
+            move)
+                toadVideosMove
+            ;;
             *)
                 toadHelpVideo
             ;;
@@ -320,6 +323,9 @@ case $1 in
                     exit 1
                 fi
                 toadTelemetryList
+            ;;
+            move)
+                toadTelemetryMove
             ;;
             report)
                 # exit when not configured

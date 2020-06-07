@@ -56,6 +56,12 @@ USEGPU="false"
 # IP address of car for remote rviz
 CARIP="192.168.42.10"
 
+# Car data directory as /pathtodatafolder
+CARDATA="/home/arpg/ar-tu-do/data/"
+
+# Car SSH User
+CARUSER="arpg"
+
 # main network interface of the car, used for determining address
 CARINTERFACE="wlan0"
 
