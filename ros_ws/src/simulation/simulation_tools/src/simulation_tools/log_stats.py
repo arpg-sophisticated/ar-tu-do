@@ -42,6 +42,7 @@ global logfile_handler_dat
 # misc car messages
 global last_drive_message
 last_drive_message = None
+
 # max possible speed
 global last_max_speed_message
 last_max_speed_message = None
@@ -56,38 +57,21 @@ logentry = 0
 
 # interface for HUD topic
 global hud_text_interface
-#hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
 
 # interface for HUD speed value
 global hud_speed_value
-#hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
-
 # interface for HUD max speed value
 global hud_maxspeed_value
-# hud_maxspeed_value = rospy.Publisher(
-#    'hud_maxspeed_value', Float32, queue_size=1)
-
 # interface for HUD rpm value
 global hud_rpm_value
-#hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
-
 # interface for HUD acceleration value
 global hud_acceleration_value
-# hud_acceleration_value = rospy.Publisher(
-#    'hud_acceleration_value', Float32, queue_size=1)
-
 # interface for HUD angle value
 global hud_angle_value
-#hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
-
 # interface for HUD distance value
 global hud_distance_value
-# hud_distance_value = rospy.Publisher(
-#    'hud_distance_value', OverlayText, queue_size=1)
-
 # interface for HUD clock value
 global hud_clock_value
-#hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
 
 # current speed
 global speed_current
@@ -277,7 +261,6 @@ def speed_callback(speed_message):
     if simulation:
         speed_current = speed_message.wheel_speed
     else:
-        # TODO insert real speed information
         speed_current = speed_message.velocity
 
     speed_delta = speed_current - speed_last
@@ -363,6 +346,23 @@ def log_message():
 
     global logfile_handler_csv
     global logfile_handler_dat
+
+    global hud_text_interface
+
+    # interface for HUD speed value
+    global hud_speed_value
+    # interface for HUD max speed value
+    global hud_maxspeed_value
+    # interface for HUD rpm value
+    global hud_rpm_value
+    # interface for HUD acceleration value
+    global hud_acceleration_value
+    # interface for HUD angle value
+    global hud_angle_value
+    # interface for HUD distance value
+    global hud_distance_value
+    # interface for HUD clock value
+    global hud_clock_value
 
     smooth = 5
     if len(sys.argv) > 3:
@@ -648,6 +648,22 @@ rospy.init_node('log_stats', anonymous=False)
 rospy.Subscriber(TOPIC_MAX_SPEED, Float64, max_speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
 
+# is it simulation?
+if len(sys.argv) > 4:
+    if str(sys.argv[4]) == "yes":
+        # then we fetch current speed from gazebo node
+        rospy.Subscriber(
+            TOPIC_GAZEBO_STATE_TELEMETRY,
+            gazebo_state_telemetry,
+            speed_callback)
+    else:
+        # else we fetch current speed from acceleration controller
+        rospy.Subscriber(
+            TOPIC_CONTROLLED_DRIVE_PARAM,
+            drive_param,
+            speed_callback,
+            queue_size=1)
+
 
 # interface for HUD topic
 global hud_text_interface
@@ -683,22 +699,6 @@ hud_distance_value = rospy.Publisher(
 # interface for HUD clock value
 global hud_clock_value
 hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
-
-# is it simulation?
-if len(sys.argv) > 4:
-    if str(sys.argv[4]) == "yes":
-        # then we fetch current speed from gazebo node
-        rospy.Subscriber(
-            TOPIC_GAZEBO_STATE_TELEMETRY,
-            gazebo_state_telemetry,
-            speed_callback)
-    else:
-        # else we fetch current speed from acceleration controller
-        rospy.Subscriber(
-            TOPIC_CONTROLLED_DRIVE_PARAM,
-            drive_param,
-            speed_callback,
-            queue_size=1)
 
 while not rospy.is_shutdown():
     rospy.spin()
