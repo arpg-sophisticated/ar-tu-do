@@ -91,9 +91,17 @@ function toadHelpVideo {
     echo
     echo "           Move video files from car to local system"
     echo
-    echo "       toad.sh video convert DATASET"
+    echo "       toad.sh video rviz DATASET"
     echo
-    echo "           Converts videos from given DATASET"
+    echo "           Converts rviz video from given DATASET"
+    echo
+    echo "       toad.sh video cam DATASET"
+    echo
+    echo "           Converts cam video from given DATASET"
+    echo
+    echo "       toad.sh video stitch DATASET"
+    echo
+    echo "           Converts and stitches videos from given DATASET"
     echo
     echo "       toad.sh video stitch DATASET"
     echo
@@ -185,11 +193,20 @@ function getAddressByInterface {
 
 # print available videos list
 function toadVideosList {
-    echo "Available recordings for conversion:"
+    echo "Available recordings for rviz conversion:"
     for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
-        if  $(test -f $VIDEODIR/cam.avi) || $(test -f $VIDEODIR/rviz.avi); then
+        if  $(test -f $VIDEODIR/rviz.avi) ; then
             LENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,//)
-            SIZE=$(($(du -shm $VIDEODIR/rviz.avi | awk {'print $1'})+$(du -shm $VIDEODIR/cam.avi | awk {'print $1'})))
+            SIZE=$(($(du -shm $VIDEODIR/rviz.avi | awk {'print $1'})))
+            echo "    $(echo $VIDEODIR | rev | cut -d "/" -f 1 | rev) ($LENGTH, "$SIZE"M)"
+        fi
+    done
+    echo
+    echo "Available recordings for cam conversion:"
+    for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
+        if  $(test -f $VIDEODIR/cam.avi) ; then
+            LENGTH=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,//)
+            SIZE=$(($(du -shm $VIDEODIR/cam.avi | awk {'print $1'})))
             echo "    $(echo $VIDEODIR | rev | cut -d "/" -f 1 | rev) ($LENGTH, "$SIZE"M)"
         fi
     done
@@ -214,14 +231,79 @@ function toadVideosMove {
     ssh $CARUSER@$CARIP "rm -r $CARDATA/videos/"
 }
 
-# convert videos 
+# convert videos rviz only
 # 1: directory: name of directory in videos folder to convert
-function toadVideosConvert {
+function toadVideosRviz {
+    # check for files
+    VIDEODIR=$VIDEOSDIR"/"$1
+    if test -f $VIDEODIR/rviz.avi; then
+        printf "Converting rviz video in $1, please wait ."
+        # convert videos
+        VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+        LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+        ffmpeg -y -i $VIDEODIR/rviz.avi -c:v libx264 $VIDEODIR/rviz-orig.mp4 > /dev/null 2>&1
+        ffmpeg -i $VIDEODIR/rviz-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-orig.gif > /dev/null 2>&1
+        printf "."
+        ffmpeg -y -i $VIDEODIR/rviz.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/rviz-logo.mp4 > /dev/null 2>&1
+        ffmpeg -i $VIDEODIR/rviz-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-logo.gif > /dev/null 2>&1
+        printf "."
+
+        echo " done"
+    else
+        echo "Folder $1 invalid, file rviz.avi not existant"
+        echo
+        exit 1
+    fi
+}
+
+# convert videos cam only
+# 1: directory: name of directory in videos folder to convert
+function toadVideosCam {
+    # check for files
+    VIDEODIR=$VIDEOSDIR"/"$1
+    if test -f $VIDEODIR/cam.avi; then
+        printf "Converting cam video in $1, please wait ."
+        # convert videos
+        VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep Stream | cut -d "," -f 4 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep Stream | cut -d "," -f 4 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+        LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+        ffmpeg -y -i $VIDEODIR/cam.avi -c:v libx264 $VIDEODIR/cam-orig.mp4 > /dev/null 2>&1
+        ffmpeg -i $VIDEODIR/cam-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-orig.gif > /dev/null 2>&1
+        ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=2.0*PTS" -c:v libx264 $VIDEODIR/cam-realspeed.mp4 > /dev/null 2>&1
+        ffmpeg -i $VIDEODIR/cam-realspeed.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed.gif > /dev/null 2>&1
+        printf "."
+        ffmpeg -y -i $VIDEODIR/cam.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-logo.mp4 > /dev/null 2>&1
+        ffmpeg -i $VIDEODIR/cam-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-logo.gif > /dev/null 2>&1
+        ffmpeg -y -i $VIDEODIR/cam-realspeed.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-realspeed-logo.mp4 > /dev/null 2>&1
+        ffmpeg -i $VIDEODIR/cam-realspeed-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed-logo.gif > /dev/null 2>&1
+        printf "."
+
+        echo " done"
+    else
+        echo "Folder $1 invalid, file cam.avi not existant"
+        echo
+        exit 1
+    fi
+}
+
+# stitches videos 
+# 1: directory: name of directory in videos folder to convert
+function toadVideosStitch {
     # check for files
     VIDEODIR=$VIDEOSDIR"/"$1
     if test -f $VIDEODIR/cam.avi; then
         if test -f $VIDEODIR/rviz.avi; then
-            printf "Converting $1, please wait ."
+            toadVideosRviz $1
+            toadVideosCam $1
+
+            printf "Stitching videos in $1, please wait ."
             # calculate factor
             CAMLENGTH=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2]}')
             RVIZLENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2] }')
@@ -236,22 +318,57 @@ function toadVideosConvert {
             fi
 
             # convert videos
-            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS,scale=$NEWSIZE" -c:v libx264 $VIDEODIR/cam.mp4 > /dev/null 2>&1
+            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS,scale=$NEWSIZE" -c:v libx264 $VIDEODIR/cam-stitch.mp4 > /dev/null 2>&1
             printf "."
-            ffmpeg -y -i $VIDEODIR/rviz.avi -filter:v "scale=$NEWSIZE" -c:v libx264 $VIDEODIR/rviz.mp4 > /dev/null 2>&1
+            ffmpeg -y -i $VIDEODIR/rviz.avi -filter:v "scale=$NEWSIZE" -c:v libx264 $VIDEODIR/rviz-stitch.mp4 > /dev/null 2>&1
             printf "."
 
             # stitch videos
             ffmpeg -y \
-              -i $VIDEODIR/cam.mp4 \
-              -i $VIDEODIR/rviz.mp4 \
+              -i $VIDEODIR/cam-stitch.mp4 \
+              -i $VIDEODIR/rviz-stitch.mp4 \
               -filter_complex '[0:v]pad=iw*2:ih[int];[int][1:v]overlay=W/2:0[vid]' \
               -map [vid] \
+              -preset veryfast \
               -c:v libx264 \
               -crf 23 \
-              -preset veryfast \
               $VIDEODIR/splitview.mp4 > /dev/null 2>&1
             echo " done"
+            ffmpeg -i $VIDEODIR/splitview.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview.gif > /dev/null 2>&1
+
+            # stitch videos
+            ffmpeg -y \
+              -i $VIDEODIR/cam-stitch.mp4 \
+              -i $VIDEODIR/rviz-stitch.mp4 \
+              -filter_complex 'vstack=inputs=2' \
+              -preset veryfast \
+              -c:v libx264 \
+              -crf 23 \
+              $VIDEODIR/splitview-vertically.mp4 > /dev/null 2>&1
+            echo " done"
+            ffmpeg -i $VIDEODIR/splitview-vertically.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically.gif > /dev/null 2>&1
+
+            # create overlay video
+            VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/splitview.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/splitview.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+            LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+            ffmpeg -y -i $VIDEODIR/splitview.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/splitview-logo.mp4 > /dev/null 2>&1
+            ffmpeg -i $VIDEODIR/splitview-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-logo.gif > /dev/null 2>&1
+
+            # create overlay video vertically
+            VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/splitview-vertically.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/splitview-vertically.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+            LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+            ffmpeg -y -i $VIDEODIR/splitview-vertically.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/splitview-vertically-logo.mp4 > /dev/null 2>&1
+            ffmpeg -i $VIDEODIR/splitview-vertically-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically-logo.gif > /dev/null 2>&1
+            echo " done"
+
         else
             echo "Folder $1 invalid, file rviz.avi not existant"
             echo

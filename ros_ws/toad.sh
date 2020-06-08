@@ -290,14 +290,32 @@ case $1 in
             list)
                 toadVideosList
             ;;
-            convert)
+            cam)
                 # exit when no third parameter is given
                 if [[ $# -le 2 ]]; then
                     toadHelpVideo
                     echo
                     exit 1
                 fi
-                toadVideosConvert $3
+                toadVideosCam $3
+            ;;
+            rviz)
+                # exit when no third parameter is given
+                if [[ $# -le 2 ]]; then
+                    toadHelpVideo
+                    echo
+                    exit 1
+                fi
+                toadVideosRviz $3
+            ;;
+            stitch)
+                # exit when no third parameter is given
+                if [[ $# -le 2 ]]; then
+                    toadHelpVideo
+                    echo
+                    exit 1
+                fi
+                toadVideosStitch $3
             ;;
             move)
                 toadVideosMove
