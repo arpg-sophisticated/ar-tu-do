@@ -279,7 +279,7 @@ function toadVideosCam {
         LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
         LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
         ffmpeg -y -i $VIDEODIR/cam.avi -c:v libx264 $VIDEODIR/cam-orig.mp4 > /dev/null 2>&1
-        ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=2.0*PTS" -c:v libx264 $VIDEODIR/cam-realspeed.mp4 > /dev/null 2>&1
+        ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$VIDEOCAMFACTOR.0*PTS" -c:v libx264 $VIDEODIR/cam-realspeed.mp4 > /dev/null 2>&1
         printf "."
         ffmpeg -y -i $VIDEODIR/cam.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-logo.mp4 > /dev/null 2>&1
         ffmpeg -y -i $VIDEODIR/cam-realspeed.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-realspeed-logo.mp4 > /dev/null 2>&1
