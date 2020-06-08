@@ -246,11 +246,15 @@ function toadVideosRviz {
         LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
         LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
         ffmpeg -y -i $VIDEODIR/rviz.avi -c:v libx264 $VIDEODIR/rviz-orig.mp4 > /dev/null 2>&1
-        ffmpeg -i $VIDEODIR/rviz-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-orig.gif > /dev/null 2>&1
         printf "."
         ffmpeg -y -i $VIDEODIR/rviz.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/rviz-logo.mp4 > /dev/null 2>&1
-        ffmpeg -i $VIDEODIR/rviz-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-logo.gif > /dev/null 2>&1
         printf "."
+        if [[ $VIDEOGIFENABLE =~ "true" ]]; then
+            ffmpeg -i $VIDEODIR/rviz-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-orig.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/rviz-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-logo.gif > /dev/null 2>&1
+            printf "."
+        fi
 
         echo " done"
     else
@@ -275,15 +279,21 @@ function toadVideosCam {
         LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
         LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
         ffmpeg -y -i $VIDEODIR/cam.avi -c:v libx264 $VIDEODIR/cam-orig.mp4 > /dev/null 2>&1
-        ffmpeg -i $VIDEODIR/cam-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-orig.gif > /dev/null 2>&1
         ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=2.0*PTS" -c:v libx264 $VIDEODIR/cam-realspeed.mp4 > /dev/null 2>&1
-        ffmpeg -i $VIDEODIR/cam-realspeed.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed.gif > /dev/null 2>&1
         printf "."
         ffmpeg -y -i $VIDEODIR/cam.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-logo.mp4 > /dev/null 2>&1
-        ffmpeg -i $VIDEODIR/cam-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-logo.gif > /dev/null 2>&1
         ffmpeg -y -i $VIDEODIR/cam-realspeed.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-realspeed-logo.mp4 > /dev/null 2>&1
-        ffmpeg -i $VIDEODIR/cam-realspeed-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed-logo.gif > /dev/null 2>&1
         printf "."
+        if [[ $VIDEOGIFENABLE =~ "true" ]]; then
+            ffmpeg -i $VIDEODIR/cam-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-orig.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/cam-realspeed.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/cam-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-logo.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/cam-realspeed-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed-logo.gif > /dev/null 2>&1
+            printf "."
+        fi
 
         echo " done"
     else
@@ -300,9 +310,6 @@ function toadVideosStitch {
     VIDEODIR=$VIDEOSDIR"/"$1
     if test -f $VIDEODIR/cam.avi; then
         if test -f $VIDEODIR/rviz.avi; then
-            toadVideosRviz $1
-            toadVideosCam $1
-
             printf "Stitching videos in $1, please wait ."
             # calculate factor
             CAMLENGTH=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2]}')
@@ -333,8 +340,7 @@ function toadVideosStitch {
               -c:v libx264 \
               -crf 23 \
               $VIDEODIR/splitview.mp4 > /dev/null 2>&1
-            echo " done"
-            ffmpeg -i $VIDEODIR/splitview.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview.gif > /dev/null 2>&1
+            printf "."
 
             # stitch videos
             ffmpeg -y \
@@ -345,8 +351,7 @@ function toadVideosStitch {
               -c:v libx264 \
               -crf 23 \
               $VIDEODIR/splitview-vertically.mp4 > /dev/null 2>&1
-            echo " done"
-            ffmpeg -i $VIDEODIR/splitview-vertically.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically.gif > /dev/null 2>&1
+            printf "."
 
             # create overlay video
             VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/splitview.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
@@ -356,7 +361,7 @@ function toadVideosStitch {
             LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
             LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
             ffmpeg -y -i $VIDEODIR/splitview.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/splitview-logo.mp4 > /dev/null 2>&1
-            ffmpeg -i $VIDEODIR/splitview-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-logo.gif > /dev/null 2>&1
+            printf "."
 
             # create overlay video vertically
             VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/splitview-vertically.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
@@ -366,7 +371,19 @@ function toadVideosStitch {
             LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
             LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
             ffmpeg -y -i $VIDEODIR/splitview-vertically.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/splitview-vertically-logo.mp4 > /dev/null 2>&1
-            ffmpeg -i $VIDEODIR/splitview-vertically-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically-logo.gif > /dev/null 2>&1
+            printf "."
+
+            if [[ $VIDEOGIFENABLE =~ "true" ]]; then
+                ffmpeg -i $VIDEODIR/splitview.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview.gif > /dev/null 2>&1
+                printf "."
+                ffmpeg -i $VIDEODIR/splitview-vertically.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically.gif > /dev/null 2>&1
+                printf "."
+                ffmpeg -i $VIDEODIR/splitview-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-logo.gif > /dev/null 2>&1
+                printf "."
+                ffmpeg -i $VIDEODIR/splitview-vertically-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically-logo.gif > /dev/null 2>&1
+                printf "."
+            fi
+
             echo " done"
 
         else

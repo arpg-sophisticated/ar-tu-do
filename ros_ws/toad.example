@@ -74,6 +74,9 @@ VIDEOSDIR="../data/videos"
 # overlay image for video
 VIDEOLOGO="./src/simulation/racer_world/launch/logo_trans.png"
 
+# enable creation of gifs
+VIDEOGIFENABLE="false"
+
 # horizontal size for gifs
 VIDEOGIFSIZE="480"
 
