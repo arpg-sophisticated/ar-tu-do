@@ -56,38 +56,38 @@ logentry = 0
 
 # interface for HUD topic
 global hud_text_interface
-hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
+#hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
 
 # interface for HUD speed value
 global hud_speed_value
-hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
+#hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
 
 # interface for HUD max speed value
 global hud_maxspeed_value
-hud_maxspeed_value = rospy.Publisher(
-    'hud_maxspeed_value', Float32, queue_size=1)
+# hud_maxspeed_value = rospy.Publisher(
+#    'hud_maxspeed_value', Float32, queue_size=1)
 
 # interface for HUD rpm value
 global hud_rpm_value
-hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
+#hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
 
 # interface for HUD acceleration value
 global hud_acceleration_value
-hud_acceleration_value = rospy.Publisher(
-    'hud_acceleration_value', Float32, queue_size=1)
+# hud_acceleration_value = rospy.Publisher(
+#    'hud_acceleration_value', Float32, queue_size=1)
 
 # interface for HUD angle value
 global hud_angle_value
-hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
+#hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
 
 # interface for HUD distance value
 global hud_distance_value
-hud_distance_value = rospy.Publisher(
-    'hud_distance_value', OverlayText, queue_size=1)
+# hud_distance_value = rospy.Publisher(
+#    'hud_distance_value', OverlayText, queue_size=1)
 
 # interface for HUD clock value
 global hud_clock_value
-hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
+#hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
 
 # current speed
 global speed_current
@@ -647,6 +647,42 @@ def log_message():
 rospy.init_node('log_stats', anonymous=False)
 rospy.Subscriber(TOPIC_MAX_SPEED, Float64, max_speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
+
+
+# interface for HUD topic
+global hud_text_interface
+hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
+
+# interface for HUD speed value
+global hud_speed_value
+hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
+
+# interface for HUD max speed value
+global hud_maxspeed_value
+hud_maxspeed_value = rospy.Publisher(
+    'hud_maxspeed_value', Float32, queue_size=1)
+
+# interface for HUD rpm value
+global hud_rpm_value
+hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
+
+# interface for HUD acceleration value
+global hud_acceleration_value
+hud_acceleration_value = rospy.Publisher(
+    'hud_acceleration_value', Float32, queue_size=1)
+
+# interface for HUD angle value
+global hud_angle_value
+hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
+
+# interface for HUD distance value
+global hud_distance_value
+hud_distance_value = rospy.Publisher(
+    'hud_distance_value', OverlayText, queue_size=1)
+
+# interface for HUD clock value
+global hud_clock_value
+hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
 
 # is it simulation?
 if len(sys.argv) > 4:
