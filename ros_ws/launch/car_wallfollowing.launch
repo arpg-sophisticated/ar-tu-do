@@ -28,7 +28,7 @@
     </group>
     
     <!-- Include racer with VGA camera -->
-    <group if="$(arg videohd)">
+    <group unless="$(arg videohd)">
         <include file="./launch/zed.launch"/>
     </group>
 
