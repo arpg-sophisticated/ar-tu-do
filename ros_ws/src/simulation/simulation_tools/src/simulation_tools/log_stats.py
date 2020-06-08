@@ -13,22 +13,20 @@ import sys
 import numpy as np
 from datetime import datetime
 from rospkg import RosPack
-#from simulation_tools.track import track
-#from simulation_tools.reset_car import Point
 from drive_msgs.msg import drive_param, gazebo_state_telemetry
 from std_msgs.msg import Float64
 from gazebo_msgs.msg import ModelStates
-#from jsk_rviz_plugins.msg import OverlayText
 from jsk_rviz_plugins.overlay_text_interface import OverlayTextInterface
 from std_msgs.msg import ColorRGBA, Float32, Int32
 from time import strftime
 from time import gmtime
 
 try:
-  from jsk_rviz_plugins.msg import *
-except:
-  import roslib;roslib.load_manifest("jsk_rviz_plugins")
-  from jsk_rviz_plugins.msg import *
+    from jsk_rviz_plugins.msg import *
+except BaseException:
+    import roslib
+    roslib.load_manifest("jsk_rviz_plugins")
+    from jsk_rviz_plugins.msg import *
 
 
 TOPIC_MAX_SPEED = "/speed_info/max_speed"
@@ -47,13 +45,6 @@ last_drive_message = None
 # max possible speed
 global last_max_speed_message
 last_max_speed_message = None
-# disabled as we don't need it here
-#global car_position
-#car_position = None
-#global car_orientation
-#car_orientation = 0
-#global track_position
-#track_position = 0
 
 # logging path
 global logpath
@@ -65,21 +56,38 @@ logentry = 0
 
 # interface for HUD topic
 global hud_text_interface
+hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
 
 # interface for HUD speed value
 global hud_speed_value
+hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
+
 # interface for HUD max speed value
 global hud_maxspeed_value
+hud_maxspeed_value = rospy.Publisher(
+    'hud_maxspeed_value', Float32, queue_size=1)
+
 # interface for HUD rpm value
 global hud_rpm_value
+hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
+
 # interface for HUD acceleration value
 global hud_acceleration_value
+hud_acceleration_value = rospy.Publisher(
+    'hud_acceleration_value', Float32, queue_size=1)
+
 # interface for HUD angle value
 global hud_angle_value
+hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
+
 # interface for HUD distance value
 global hud_distance_value
+hud_distance_value = rospy.Publisher(
+    'hud_distance_value', OverlayText, queue_size=1)
+
 # interface for HUD clock value
 global hud_clock_value
+hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
 
 # current speed
 global speed_current
@@ -303,25 +311,9 @@ def speed_callback(speed_message):
 
     log_message()
 
-# disabled as we don't need this information
-# def on_model_state_callback(message):
-#    if len(message.pose) < 2:
-#        return
-#    global car_position
-#    global car_orientation
-#    global track_position
-#    car_position = Point(
-#        message.pose[1].position.x,
-#        message.pose[1].position.y)
-#    car_orientation = message.pose[1].orientation
-#    track_position = track.localize(car_position)
-
 
 def log_message():
     global last_max_speed_message
-# disabled as we don't need it here
-#    global track_position
-#    global car_position
     global logpath
     global logentry
 
@@ -363,10 +355,6 @@ def log_message():
     global turn_last
     global turn_delta
 
-    global turn_current
-    global turn_last
-    global turn_delta
-
     global angle_current
     global angle_last
     global angle_delta
@@ -389,7 +377,7 @@ def log_message():
                             maxspeed_current) / logentry
         else:
             maxspeed_avg += maxspeed_current
-            
+
         maxspeed_smooth.append(maxspeed_current)
         if len(maxspeed_smooth) > smooth:
             maxspeed_smooth.pop(0)
@@ -401,29 +389,28 @@ def log_message():
         angle_last = angle_current
         angle_current = last_drive_message.angle * angle_max
         angle_delta = angle_current - angle_last
-            
+
         angle_smooth.append(angle_current)
         if len(angle_smooth) > smooth:
             angle_smooth.pop(0)
 
-        
     # calculate bias on first run
     if (time_bias == 0):
         time_bias = rospy.get_time()
-        
+
     time_last = time_current
     # is it simulation?
     simulation = False
     if len(sys.argv) > 4:
         if str(sys.argv[4]) == "yes":
             simulation = True
-            
-    if simulation:        
+
+    if simulation:
         time_current = rospy.get_time()
-            
+
     else:
         time_current = rospy.get_time() - time_bias
-            
+
     time_delta = time_current - time_last
 
     distance_delta = time_delta * speed_current
@@ -595,8 +582,7 @@ def log_message():
         "Iter: " + str(logentry) + "\n" + \
         "AvgT: " + str(time) + " (Vto+ Vav+ Ato+ Ato-)\n" + \
         "AvgS: " + str(smooth) + " (Vsmo Asmo)\n"
-        
-        
+
     hud_text = OverlayText()
     hud_text.width = 400
     hud_text.height = 500
@@ -618,7 +604,7 @@ def log_message():
     hud_clock.text_size = 24
     hud_clock.line_width = 3
     hud_clock.font = "Cousine"
-    hud_clock.text = str(strftime("%H:%M:%S", gmtime(time_current))) + "." 
+    hud_clock.text = str(strftime("%H:%M:%S", gmtime(time_current))) + "."
     if (time_current * 100) % 100 > 9:
         hud_clock.text += str('%.0f' % ((time_current * 100) % 100))
     else:
@@ -659,8 +645,6 @@ def log_message():
 
 
 rospy.init_node('log_stats', anonymous=False)
-# disabled as we don't need it here
-#rospy.Subscriber(TOPIC_GAZEBO_MODEL_STATE, ModelStates, on_model_state_callback)
 rospy.Subscriber(TOPIC_MAX_SPEED, Float64, max_speed_callback)
 rospy.Subscriber(TOPIC_DRIVE_PARAMETERS, drive_param, drive_param_callback)
 
@@ -673,31 +657,12 @@ if len(sys.argv) > 4:
             gazebo_state_telemetry,
             speed_callback)
     else:
-        # else we fetch current speed from acceleration controller 
+        # else we fetch current speed from acceleration controller
         rospy.Subscriber(
             TOPIC_CONTROLLED_DRIVE_PARAM,
             drive_param,
             speed_callback,
             queue_size=1)
-
-
-global hud_text_interface
-hud_text_interface = rospy.Publisher('hud', OverlayText, queue_size=1)
-
-global hud_maxspeed_value
-hud_maxspeed_value = rospy.Publisher('hud_maxspeed_value', Float32, queue_size=1)
-global hud_speed_value
-hud_speed_value = rospy.Publisher('hud_speed_value', Float32, queue_size=1)
-global hud_rpm_value
-hud_rpm_value = rospy.Publisher('hud_rpm_value', Float32, queue_size=1)
-global hud_acceleration_value
-hud_acceleration_value = rospy.Publisher('hud_acceleration_value', Float32, queue_size=1)
-global hud_angle_value
-hud_angle_value = rospy.Publisher('hud_angle_value', Float32, queue_size=1)
-global hud_distance_value
-hud_distance_value = rospy.Publisher('hud_distance_value', OverlayText, queue_size=1)
-global hud_clock_value
-hud_clock_value = rospy.Publisher('hud_clock_value', OverlayText, queue_size=1)
 
 while not rospy.is_shutdown():
     rospy.spin()
