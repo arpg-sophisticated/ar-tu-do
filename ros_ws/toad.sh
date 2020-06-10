@@ -109,6 +109,12 @@ case $1 in
                 if [[ "$3" =~ "drive" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=2 "
                 fi
+                if [[ "$3" =~ "record" ]]; then
+                    ARGUMENTS="$ARGUMENTS record:=true "
+                fi
+                if [[ "$3" =~ "videohd" ]]; then
+                    ARGUMENTS="$ARGUMENTS videohd:=true "
+                fi
                 if [[ "$3" =~ "manual" ]]; then
                     ARGUMENTS="$ARGUMENTS mode_override:=1 "
                 fi
@@ -126,6 +132,8 @@ case $1 in
                 roslaunch launch/$LAUNCHBUILD use_gpu:=$USEGPU $ARGUMENTS
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
+		mv ./output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpSystem
@@ -193,6 +201,12 @@ case $1 in
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 ARGUMENTS=""
+                if [[ "$3" =~ "record" ]]; then
+                    ARGUMENTS="$ARGUMENTS record:=true "
+                fi
+                if [[ "$3" =~ "videohd" ]]; then
+                    ARGUMENTS="$ARGUMENTS videohd:=true "
+                fi
                 if [[ "$3" =~ "drive" ]]; then
                     if [[ "$LAUNCHCARINSANE" == "1" ]]; then
                         ARGUMENTS="$ARGUMENTS mode_override:=2 "
@@ -219,6 +233,12 @@ case $1 in
 		export ROS_HOSTNAME=$MAINIPADDRESS
 		export ROS_MASTER_URI="http://$MAINIPADDRESS:11311"
                 ARGUMENTS="show_rviz:=0"
+                if [[ "$3" =~ "record" ]]; then
+                    ARGUMENTS="$ARGUMENTS record:=true "
+                fi
+                if [[ "$3" =~ "videohd" ]]; then
+                    ARGUMENTS="$ARGUMENTS videohd:=true "
+                fi
                 if [[ "$3" =~ "drive" ]]; then
                     if [[ "$LAUNCHCARINSANE" == "1" ]]; then
                         ARGUMENTS="$ARGUMENTS mode_override:=2 "
@@ -236,6 +256,8 @@ case $1 in
                 roslaunch launch/$LAUNCHCAR $ARGUMENTS
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
 
             control)
@@ -249,6 +271,8 @@ case $1 in
                 rviz -d src/car_control/launch/car.rviz
 		mv ~/.ros/output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
 		mv ~/.ros/output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output.avi ../data/videos/$RECORDTIME/rviz.avi > /dev/null 2>&1
+		mv ./output-cam.avi ../data/videos/$RECORDTIME/cam.avi > /dev/null 2>&1
             ;;
             *)
                 toadHelpCar
@@ -266,14 +290,35 @@ case $1 in
             list)
                 toadVideosList
             ;;
-            convert)
+            cam)
                 # exit when no third parameter is given
                 if [[ $# -le 2 ]]; then
                     toadHelpVideo
                     echo
                     exit 1
                 fi
-                toadVideosConvert $3
+                toadVideosCam $3
+            ;;
+            rviz)
+                # exit when no third parameter is given
+                if [[ $# -le 2 ]]; then
+                    toadHelpVideo
+                    echo
+                    exit 1
+                fi
+                toadVideosRviz $3
+            ;;
+            stitch)
+                # exit when no third parameter is given
+                if [[ $# -le 2 ]]; then
+                    toadHelpVideo
+                    echo
+                    exit 1
+                fi
+                toadVideosStitch $3
+            ;;
+            move)
+                toadVideosMove
             ;;
             *)
                 toadHelpVideo
@@ -296,6 +341,9 @@ case $1 in
                     exit 1
                 fi
                 toadTelemetryList
+            ;;
+            move)
+                toadTelemetryMove
             ;;
             report)
                 # exit when not configured
