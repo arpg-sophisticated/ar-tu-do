@@ -56,34 +56,36 @@ USEGPU="false"
 # IP address of car for remote rviz
 CARIP="192.168.42.10"
 
+# Car data directory as /pathtodatafolder
+CARDATA="/home/arpg/ar-tu-do/data/"
+
+# Car SSH User
+CARUSER="arpg"
+
 # main network interface of the car, used for determining address
 CARINTERFACE="wlan0"
 
 # set to 1 after configuring
 CONFIGURED="0"
 
-# set 1 for slack configured and usable
-SLACK="0"
-
-# slack api token
-# https://api.slack.com/custom-integrations/legacy-tokens
-SLACKTOKEN="PLACEHERE"
-
-# slack channel name
-SLACKCHANNEL="nameofchannel"
-
-# sending on actions (1 to send, 0 to ignore)
-SLACKSYSTEMSSH="0"
-SLACKSYSTEMREBUILD="0"
-SLACKSYSTEMRESETBUILD="0"
-SLACKSYSTEMRUN="0"
-SLACKCARSSH="0"
-SLACKCARREBUILD="0"
-SLACKCARRESETBUILD="0"
-SLACKCARRUN="0"
-
 # settings for video conversion
 VIDEOSDIR="../data/videos"
+
+# factor on camera speed for video conversion
+# juest guess ;) Mostly around 6...
+VIDEOCAMFACTOR="6"
+
+# overlay image for video
+VIDEOLOGO="./src/simulation/racer_world/launch/logo_trans.png"
+
+# enable creation of gifs
+VIDEOGIFENABLE="false"
+
+# horizontal size for gifs
+VIDEOGIFSIZE="480"
+
+# fps for gifs
+VIDEOGIFFPS="10"
 
 # settings for latex telemetry report
 REPORTCONFIGURED="0"

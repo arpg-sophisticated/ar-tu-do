@@ -23,10 +23,8 @@ function toadHelpMain {
     echo "usage: toad.sh help"
     echo "               system help"
     echo "               car help"
-    echo "               slack help"
     echo "               video help"
     echo "               telemetry help"
-    echo "               init help"
 }
 
 # help message for system mode
@@ -56,6 +54,8 @@ function toadHelpSystem {
     echo "               fast        - for fast mode to be true"
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
+    echo "               record      - start cam recording on startup"
+    echo "               videohd     - run cameras in 720p mode (else VGA)"
     echo "               customtrack - start simulation with custom track as configured in toad.settings"
     echo "                             you may add a trackname as 4th parameter to override track in settings"
 }
@@ -67,6 +67,10 @@ function toadHelpTelemetry {
     echo "       toad.sh telemetry list"
     echo
     echo "           List available datasets for reports to include in configuration"
+    echo
+    echo "       toad.sh telemetry move"
+    echo
+    echo "           Move telemetry files from car to local system"
     echo
     echo "       toad.sh telemetry report"
     echo
@@ -81,11 +85,27 @@ function toadHelpVideo {
     echo
     echo "       toad.sh video list"
     echo
-    echo "           List available datasets for video conversion"
+    echo "           List available datasets for video processing"
     echo
-    echo "       toad.sh video convert DATASET"
+    echo "       toad.sh video move"
     echo
-    echo "           Converts videos from given DATASET"
+    echo "           Move video files from car to local system"
+    echo
+    echo "       toad.sh video rviz DATASET"
+    echo
+    echo "           Converts rviz video from given DATASET"
+    echo
+    echo "       toad.sh video cam DATASET"
+    echo
+    echo "           Converts cam video from given DATASET"
+    echo
+    echo "       toad.sh video stitch DATASET"
+    echo
+    echo "           Converts and stitches videos from given DATASET"
+    echo
+    echo "       toad.sh video stitch DATASET"
+    echo
+    echo "           Converts and stitches videos from given DATASET"
 }
 
 # help message for car mode
@@ -113,66 +133,20 @@ function toadHelpCar {
     echo "           Starts software on car, add"
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
-    echo
-    echo "       toad.sh car record"
-    echo
-    echo "           Records rosbag on car to folder rosbags, add"
-    echo "               camera      - to record rosbag from camera"
+    echo "               record      - start cam recording on startup"
+    echo "               videohd     - run cameras in 720p mode (else VGA)"
     echo
     echo "       toad.sh car remote"
     echo
     echo "           Starts software on car without rviz, add"
     echo "               drive       - to enforce autonomous driving"
     echo "               manual      - to enforce manual driving"
+    echo "               record      - start cam recording on startup"
+    echo "               videohd     - run cameras in 720p mode (else VGA)"
     echo
     echo "       toad.sh car control"
     echo
     echo "           Starts rviz connecting to the car."
-}
-
-# help message for initializing the system
-function toadHelpInit {
-    echo "usage: toad.sh init help"
-    echo
-    echo "       This stuff is hardly untested, please report results or patches" 
-    echo
-    echo "       toad.sh init env [force]"
-    echo
-    echo "           Setups the environment relative to the current directory"
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init system [force]"
-    echo
-    echo "           This will install everything you need on system side."
-    echo "           Please ensure, that you're allowed to sudo."
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init ros [force]"
-    echo
-    echo "           This will install everything you need on ros side."
-    echo "           Please ensure, that you're allowed to sudo."
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init ide [force]"
-    echo
-    echo "           This will install IDEs and provide information about plugins"
-    echo "           Add force argument to suppress compatibility check"
-    echo
-    echo "       toad.sh init camstream [force]"
-    echo
-    echo "           This will install all packages required for camera streaming"
-    echo "           Add force argument to suppress compatibility check"
-}
-
-# help message for slack interaction
-function toadHelpSlack {
-    echo "usage: toad.sh slack help"
-    echo
-    echo "       toad.sh slack status"
-    echo "           Sends status message to preconfigured channel"
-    echo
-    echo "       toad.sh slack custom 'MESSAGE'"
-    echo "           Sends custom message MESSAGE to preconfigured channel"
 }
 
 # get number of active display session
@@ -207,139 +181,9 @@ function toadConfirmationRequest {
     read
 }
 
-# ask user for confirmation
-# 1: message to print
-# 2: 2nd line of message
-function toadConfirmationEnter {
-    RESULT=""
-    MESSAGE="$1"
-    NEXTLINE="$2"
-    echo $MESSAGE
-    if [[ $NEXTLINE =~ [0-9A-Za-z] ]]; then
-        echo $NEXTLINE
-    fi
-    echo
-    echo "Please press:"
-    echo "    s to skip"
-    echo "    p to process commands"
-    echo
-    echo "followed by enter to proceed or Ctrl+C to cancel"
-}
-
-# print system properties for init
-function toadInitParameters {
-    echo "Distribution:        $DISTRIBUTION"
-    echo "Codename:            $CODENAME"
-    echo "Version:             $VERSION"
-    echo "Forced installation: $FORCED"
-    echo
-}
-
 # get active branch
 function getActiveBranch {
     echo $(git branch | grep "*" | cut -d " " -f 2-)
-}
-
-# send message to slack channel
-# 1: type: resetbuild,rebuild,ssh,status,custom
-# 2: message: only needed for custom mode
-function sendSlackMessage {
-    if [[ $SLACK -le 0 ]]; then
-        echo "Slack not configured, not sending a status message"
-        echo
-    else
-        case $1 in
-            resetbuild)
-                echo "Sending resetbuild message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) resetted and rebuilt project" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Done my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            rebuild)
-                echo "Sending rebuild message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) rebuilt project" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Done my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            ssh)
-                echo "Sending ssh update message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) rebuild ssh keys" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Done my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            status)
-                echo "Sending status message to Slack (Channel: $SLACKCHANNEL)"
-                echo
-                echo "Date: $(date)" > /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "System $(hostname) is up and running" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Network:" >> /tmp/slackstatus.txt
-                ifconfig >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Wireless:" >> /tmp/slackstatus.txt
-                iwconfig 2>/dev/null >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt                
-                echo "Services:" >> /tmp/slackstatus.txt
-                netstat -nlt | grep -v 127.0.0. | grep -v '::1' | grep tcp >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Disks:" >> /tmp/slackstatus.txt
-                df | grep -v tmpfs | grep -v loop | grep -v udev >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "Ready to serve my dark lord!">> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                echo "--" >> /tmp/slackstatus.txt
-                echo >> /tmp/slackstatus.txt
-                slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                rm /tmp/slackstatus.txt
-            ;;
-            custom)
-                if [[ $2 =~ [0-9A-Za-z] ]]; then
-                    echo "Sending custom message to Slack (Channel: $SLACKCHANNEL)"
-                    echo
-                    echo "Date: $(date)" > /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo "System $(hostname) custom message" >> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo $2 >> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo "Done my dark lord!">> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    echo "--" >> /tmp/slackstatus.txt
-                    echo >> /tmp/slackstatus.txt
-                    slack-cli -t $SLACKTOKEN -d $SLACKCHANNEL "$(cat /tmp/slackstatus.txt)"
-                    rm /tmp/slackstatus.txt
-                else
-                    echo "Sending empty messages is lame... not sending"
-                    echo
-                fi
-            ;;
-        esac
-    fi
 }
 
 # get address of given interface
@@ -349,7 +193,25 @@ function getAddressByInterface {
 
 # print available videos list
 function toadVideosList {
-    echo "Available recordings for conversion:"
+    echo "Available recordings for rviz conversion:"
+    for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
+        if  $(test -f $VIDEODIR/rviz.avi) ; then
+            LENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,//)
+            SIZE=$(($(du -shm $VIDEODIR/rviz.avi | awk {'print $1'})))
+            echo "    $(echo $VIDEODIR | rev | cut -d "/" -f 1 | rev) ($LENGTH, "$SIZE"M)"
+        fi
+    done
+    echo
+    echo "Available recordings for cam conversion:"
+    for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
+        if  $(test -f $VIDEODIR/cam.avi) ; then
+            LENGTH=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,//)
+            SIZE=$(($(du -shm $VIDEODIR/cam.avi | awk {'print $1'})))
+            echo "    $(echo $VIDEODIR | rev | cut -d "/" -f 1 | rev) ($LENGTH, "$SIZE"M)"
+        fi
+    done
+    echo
+    echo "Available recordings for stitching:"
     for VIDEODIR in $(find $VIDEOSDIR -maxdepth 1 -type d); do
         if test -f $VIDEODIR/cam.avi; then
             if test -f $VIDEODIR/rviz.avi; then
@@ -361,36 +223,169 @@ function toadVideosList {
     done
 }
 
-# convert videos 
+# copy and remove videos from remote
+function toadVideosMove {
+    echo "Starting move of video files"
+    echo
+    scp -r $CARUSER@$CARIP:$CARDATA/videos/* ../data/videos
+    ssh $CARUSER@$CARIP "rm -r $CARDATA/videos/"
+}
+
+# convert videos rviz only
 # 1: directory: name of directory in videos folder to convert
-function toadVideosConvert {
+function toadVideosRviz {
+    # check for files
+    VIDEODIR=$VIDEOSDIR"/"$1
+    if test -f $VIDEODIR/rviz.avi; then
+        printf "Converting rviz video in $1, please wait ."
+        # convert videos
+        VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+        LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+        ffmpeg -y -i $VIDEODIR/rviz.avi -c:v libx264 $VIDEODIR/rviz-orig.mp4 > /dev/null 2>&1
+        printf "."
+        ffmpeg -y -i $VIDEODIR/rviz.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/rviz-logo.mp4 > /dev/null 2>&1
+        printf "."
+        if [[ $VIDEOGIFENABLE =~ "true" ]]; then
+            ffmpeg -i $VIDEODIR/rviz-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-orig.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/rviz-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/rviz-logo.gif > /dev/null 2>&1
+            printf "."
+        fi
+
+        echo " done"
+    else
+        echo "Folder $1 invalid, file rviz.avi not existant"
+        echo
+        exit 1
+    fi
+}
+
+# convert videos cam only
+# 1: directory: name of directory in videos folder to convert
+function toadVideosCam {
+    # check for files
+    VIDEODIR=$VIDEOSDIR"/"$1
+    if test -f $VIDEODIR/cam.avi; then
+        printf "Converting cam video in $1, please wait ."
+        # convert videos
+        VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep Stream | cut -d "," -f 4 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep Stream | cut -d "," -f 4 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+        LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+        LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+        LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+        ffmpeg -y -i $VIDEODIR/cam.avi -c:v libx264 $VIDEODIR/cam-orig.mp4 > /dev/null 2>&1
+        ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$VIDEOCAMFACTOR.0*PTS" -c:v libx264 $VIDEODIR/cam-realspeed.mp4 > /dev/null 2>&1
+        printf "."
+        ffmpeg -y -i $VIDEODIR/cam.avi -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-logo.mp4 > /dev/null 2>&1
+        ffmpeg -y -i $VIDEODIR/cam-realspeed.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/cam-realspeed-logo.mp4 > /dev/null 2>&1
+        printf "."
+        if [[ $VIDEOGIFENABLE =~ "true" ]]; then
+            ffmpeg -i $VIDEODIR/cam-orig.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-orig.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/cam-realspeed.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/cam-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-logo.gif > /dev/null 2>&1
+            printf "."
+            ffmpeg -i $VIDEODIR/cam-realspeed-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/cam-realspeed-logo.gif > /dev/null 2>&1
+            printf "."
+        fi
+
+        echo " done"
+    else
+        echo "Folder $1 invalid, file cam.avi not existant"
+        echo
+        exit 1
+    fi
+}
+
+# stitches videos 
+# 1: directory: name of directory in videos folder to convert
+function toadVideosStitch {
     # check for files
     VIDEODIR=$VIDEOSDIR"/"$1
     if test -f $VIDEODIR/cam.avi; then
         if test -f $VIDEODIR/rviz.avi; then
-            printf "Converting $1, please wait ."
+            printf "Stitching videos in $1, please wait ."
             # calculate factor
             CAMLENGTH=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2]}')
             RVIZLENGTH=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | awk '{ split($1, A, ":"); split(A[3], B, "."); print 360000*A[1] + 6000*A[2] + 100*B[1] + B[2] }')
             NEWLENGTH=$(python -c "print($RVIZLENGTH*1.0/$CAMLENGTH*1.0)" | cut -b -6)
 
+            # calculate resizing
+            CAMSIZE=$(ffmpeg -i $VIDEODIR/cam.avi 2>&1 | grep Stream | cut -d "," -f 4 | cut -d "[" -f 1 | sed 's/ //g')
+            RVIZSIZE=$(ffmpeg -i $VIDEODIR/rviz.avi 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g')
+            NEWSIZE=$RVIZSIZE
+            if [[ $(echo $CAMSIZE | cut -d "x" -f 1) -ge $(echo $RVIZSIZE | cut -d "x" -f 1) ]]; then
+                NEWSIZE=$CAMSIZE
+            fi
+
             # convert videos
-            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS" -c:v libx264 $VIDEODIR/cam.mp4 > /dev/null 2>&1
+            ffmpeg -y -i $VIDEODIR/cam.avi -filter:v "setpts=$NEWLENGTH*PTS,scale=$NEWSIZE" -c:v libx264 $VIDEODIR/cam-stitch.mp4 > /dev/null 2>&1
             printf "."
-            ffmpeg -y -i $VIDEODIR/rviz.avi -c:v libx264 $VIDEODIR/rviz.mp4 > /dev/null 2>&1
+            ffmpeg -y -i $VIDEODIR/rviz.avi -filter:v "scale=$NEWSIZE" -c:v libx264 $VIDEODIR/rviz-stitch.mp4 > /dev/null 2>&1
             printf "."
 
             # stitch videos
             ffmpeg -y \
-              -i $VIDEODIR/cam.mp4 \
-              -i $VIDEODIR/rviz.mp4 \
+              -i $VIDEODIR/cam-stitch.mp4 \
+              -i $VIDEODIR/rviz-stitch.mp4 \
               -filter_complex '[0:v]pad=iw*2:ih[int];[int][1:v]overlay=W/2:0[vid]' \
               -map [vid] \
+              -preset veryfast \
               -c:v libx264 \
               -crf 23 \
-              -preset veryfast \
               $VIDEODIR/splitview.mp4 > /dev/null 2>&1
+            printf "."
+
+            # stitch videos
+            ffmpeg -y \
+              -i $VIDEODIR/cam-stitch.mp4 \
+              -i $VIDEODIR/rviz-stitch.mp4 \
+              -filter_complex 'vstack=inputs=2' \
+              -preset veryfast \
+              -c:v libx264 \
+              -crf 23 \
+              $VIDEODIR/splitview-vertically.mp4 > /dev/null 2>&1
+            printf "."
+
+            # create overlay video
+            VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/splitview.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/splitview.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+            LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+            ffmpeg -y -i $VIDEODIR/splitview.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/splitview-logo.mp4 > /dev/null 2>&1
+            printf "."
+
+            # create overlay video vertically
+            VIDEOSIZEX=$(ffmpeg -i $VIDEODIR/splitview-vertically.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            VIDEOSIZEY=$(ffmpeg -i $VIDEODIR/splitview-vertically.mp4 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOSIZEX=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 1)
+            LOGOSIZEY=$(ffmpeg -i $VIDEOLOGO 2>&1 | grep Stream | cut -d "," -f 3 | cut -d "[" -f 1 | sed 's/ //g' | cut -d "x" -f 2)
+            LOGOPOSX=$(($VIDEOSIZEX-$LOGOSIZEX-16))
+            LOGOPOSY=$(($VIDEOSIZEY-$LOGOSIZEY-9))
+            ffmpeg -y -i $VIDEODIR/splitview-vertically.mp4 -i $VIDEOLOGO -filter_complex "overlay=$LOGOPOSX:$LOGOPOSY" -c:v libx264 $VIDEODIR/splitview-vertically-logo.mp4 > /dev/null 2>&1
+            printf "."
+
+            if [[ $VIDEOGIFENABLE =~ "true" ]]; then
+                ffmpeg -i $VIDEODIR/splitview.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview.gif > /dev/null 2>&1
+                printf "."
+                ffmpeg -i $VIDEODIR/splitview-vertically.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically.gif > /dev/null 2>&1
+                printf "."
+                ffmpeg -i $VIDEODIR/splitview-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$((2*$VIDEOGIFSIZE)):-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-logo.gif > /dev/null 2>&1
+                printf "."
+                ffmpeg -i $VIDEODIR/splitview-vertically-logo.mp4 -vf "fps=$VIDEOGIFFPS,scale=$VIDEOGIFSIZE:-1:flags=lanczos" -c:v pam -f image2pipe - 2>/dev/null | convert - -loop 0 -colors 80 -fuzz "5%" -layers optimize $VIDEODIR/splitview-vertically-logo.gif > /dev/null 2>&1
+                printf "."
+            fi
+
             echo " done"
+
         else
             echo "Folder $1 invalid, file rviz.avi not existant"
             echo
@@ -401,6 +396,14 @@ function toadVideosConvert {
         echo
         exit 1
     fi
+}
+
+# copy and remove videos from remote
+function toadTelemetryMove {
+    echo "Starting move of telemetry files"
+    echo
+    scp -r $CARUSER@$CARIP:$CARDATA/telemetry/* ../data/telemetry
+    ssh $CARUSER@$CARIP "rm -r $CARDATA/telemetry/"
 }
 
 # print available report list
@@ -414,6 +417,11 @@ function toadTelemetryList {
 
 # create report
 function toadTelemetryReport { 
+    REPORTDATAFILECOUNT=0
+    for REPORTDATAFILE in $REPORTDATAFILES; do
+        REPORTDATAFILECOUNT=$(($REPORTDATAFILECOUNT+1))
+    done
+
     REPORTDATE=$(date +%Y%m%d-%H%M%S)
     REPORTTARGET=$REPORTDIR/$REPORTDATE
     # check if files exist
@@ -496,89 +504,92 @@ function toadTelemetryReport {
     done
 
     # create comparisons
-    for REPORTSET in $REPORTSETS; do
-        PH_PLOT1=""
-        PH_LEGEND1=""
-        PH_PLOT2=""
-        PH_LEGEND2=""
-        PH_PLOT3=""
-        PH_LEGEND3=""
-        PH_PLOT4=""
-        PH_LEGEND4=""
-        PH_PLOT5=""
-        PH_LEGEND5=""
-        PH_PLOT6=""
-        PH_LEGEND6=""
-        PH_PLOT7=""
-        PH_LEGEND7=""
-        PH_PLOT8=""
-        PH_LEGEND8=""
+    if [[ $REPORTDATAFILECOUNT -ge 2 ]]; then
+        for REPORTSET in $REPORTSETS; do
+            PH_PLOT1=""
+            PH_LEGEND1=""
+            PH_PLOT2=""
+            PH_LEGEND2=""
+            PH_PLOT3=""
+            PH_LEGEND3=""
+            PH_PLOT4=""
+            PH_LEGEND4=""
+            PH_PLOT5=""
+            PH_LEGEND5=""
+            PH_PLOT6=""
+            PH_LEGEND6=""
+            PH_PLOT7=""
+            PH_LEGEND7=""
+            PH_PLOT8=""
+            PH_LEGEND8=""
 
-        SIZE=$(echo $REPORTSET | cut -d ";" -f 1)
-        DIVT=$(echo $REPORTSET | cut -d ";" -f 2)
-        DIVD=$(echo $REPORTSET | cut -d ";" -f 3)
-        SMOOTH=$(echo $REPORTSET | cut -d ";" -f 4)
-        for REPORTDATAFILE in $REPORTDATAFILES; do
-            COLOR="$(echo $REPORTDATAFILE | cut -d ";" -f 2)"
-            TITLEFILE="$(echo $REPORTDATAFILE | cut -d ";" -f 3)"
-            TITLE="$(echo $REPORTDATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
-            DESC="$(echo $REPORTDATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
-            FILENAME="latex-data-$TITLEFILE-$SIZE"
-            AVERAGE=$(head -2 $REPORTTARGET/$FILENAME.dat | tail -1 | cut -d " " -f 3)
+            SIZE=$(echo $REPORTSET | cut -d ";" -f 1)
+            DIVT=$(echo $REPORTSET | cut -d ";" -f 2)
+            DIVD=$(echo $REPORTSET | cut -d ";" -f 3)
+            SMOOTH=$(echo $REPORTSET | cut -d ";" -f 4)
+            for REPORTDATAFILE in $REPORTDATAFILES; do
+                COLOR="$(echo $REPORTDATAFILE | cut -d ";" -f 2)"
+                TITLEFILE="$(echo $REPORTDATAFILE | cut -d ";" -f 3)"
+                TITLE="$(echo $REPORTDATAFILE | cut -d ";" -f 3 | sed 's/_/ /g')"
+                DESC="$(echo $REPORTDATAFILE | cut -d ";" -f 4 | sed 's/_/ /g')"
+                FILENAME="latex-data-$TITLEFILE-$SIZE"
+                AVERAGE=$(head -2 $REPORTTARGET/$FILENAME.dat | tail -1 | cut -d " " -f 3)
 
-            PH_PLOT1=$PH_PLOT1"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=distance]{$FILENAME.dat};\\n"
-            PH_LEGEND1=$PH_LEGEND1"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
+                PH_PLOT1=$PH_PLOT1"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=distance]{$FILENAME.dat};\\n"
+                PH_LEGEND1=$PH_LEGEND1"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
 
-            PH_PLOT5=$PH_PLOT5"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=distance]{$FILENAME.dat};\\n"
-            PH_LEGEND5=$PH_LEGEND5"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
+                PH_PLOT5=$PH_PLOT5"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=distance]{$FILENAME.dat};\\n"
+                PH_LEGEND5=$PH_LEGEND5"\\\addlegendentry{$TITLE \$v_{cur}(d)\$}\\n"
 
-            PH_PLOT2=$PH_PLOT2"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=time]{$FILENAME.dat};\\n"
-            PH_LEGEND2=$PH_LEGEND2"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
+                PH_PLOT2=$PH_PLOT2"\\\addplot[smooth,$COLOR,solid] table [y=speed,x=time]{$FILENAME.dat};\\n"
+                PH_LEGEND2=$PH_LEGEND2"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
 
-            PH_PLOT6=$PH_PLOT6"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=time]{$FILENAME.dat};\\n"
-            PH_LEGEND6=$PH_LEGEND6"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
+                PH_PLOT6=$PH_PLOT6"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=time]{$FILENAME.dat};\\n"
+                PH_LEGEND6=$PH_LEGEND6"\\\addlegendentry{$TITLE \$v_{cur}(t)\$}\\n"
 
-            PH_PLOT3=$PH_PLOT3"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
-            PH_LEGEND3=$PH_LEGEND3"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
+                PH_PLOT3=$PH_PLOT3"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
+                PH_LEGEND3=$PH_LEGEND3"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
 
-            PH_PLOT7=$PH_PLOT7"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
-            PH_LEGEND7=$PH_LEGEND7"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
+                PH_PLOT7=$PH_PLOT7"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=distance]{$FILENAME.dat};\\n"
+                PH_LEGEND7=$PH_LEGEND7"\\\addlegendentry{$TITLE \$a(d)\$}\\n"
 
-            PH_PLOT4=$PH_PLOT4"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
-            PH_LEGEND4=$PH_LEGEND4"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
+                PH_PLOT4=$PH_PLOT4"\\\addplot[smooth,$COLOR,solid] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
+                PH_LEGEND4=$PH_LEGEND4"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
 
-            PH_PLOT8=$PH_PLOT8"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
-            PH_LEGEND8=$PH_LEGEND8"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
-        done  
+                PH_PLOT8=$PH_PLOT8"\\\addplot[smooth,$COLOR,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=time]{$FILENAME.dat};\\n"
+                PH_LEGEND8=$PH_LEGEND8"\\\addlegendentry{$TITLE \$a(t)\$}\\n"
+            done  
 
-        cat $REPORTTEMPLATES/compare.tex \
-            | sed "s&___PH_DESC___&$DESC&g" \
-            | sed "s&___PH_AVERAGE___&$AVERAGE&g" \
-            | sed "s&___PH_SIZE___&$SIZE&g" \
-            | sed "s&___PH_DIVD___&$DIVD&g" \
-            | sed "s&___PH_DIVT___&$DIVT&g" \
-            | sed "s&___PH_FILENAME___&$FILENAME&g" \
-            | sed "s&___PH_TITLE___&$TITLE&g" \
-            | sed "s&___PH_PLOT1___&$PH_PLOT1&g" \
-            | sed "s&___PH_LEGEND1___&$PH_LEGEND1&g" \
-            | sed "s&___PH_PLOT2___&$PH_PLOT2&g" \
-            | sed "s&___PH_LEGEND2___&$PH_LEGEND2&g" \
-            | sed "s&___PH_PLOT3___&$PH_PLOT3&g" \
-            | sed "s&___PH_LEGEND3___&$PH_LEGEND3&g" \
-            | sed "s&___PH_PLOT4___&$PH_PLOT4&g" \
-            | sed "s&___PH_LEGEND4___&$PH_LEGEND4&g" \
-            | sed "s&___PH_PLOT5___&$PH_PLOT5&g" \
-            | sed "s&___PH_LEGEND5___&$PH_LEGEND5&g" \
-            | sed "s&___PH_PLOT6___&$PH_PLOT6&g" \
-            | sed "s&___PH_LEGEND6___&$PH_LEGEND6&g" \
-            | sed "s&___PH_PLOT7___&$PH_PLOT7&g" \
-            | sed "s&___PH_LEGEND7___&$PH_LEGEND7&g" \
-            | sed "s&___PH_PLOT8___&$PH_PLOT8&g" \
-            | sed "s&___PH_LEGEND8___&$PH_LEGEND8&g" \
-            | sed "s&___PH_SMOOTH___&$SMOOTH&g" \
-            > $REPORTTARGET/compare-$SIZE.tex
-        PH_INCLUDES=$PH_INCLUDES"\\\include{compare-$SIZE}\\n" 
-    done
+            cat $REPORTTEMPLATES/compare.tex \
+                | sed "s&___PH_DESC___&$DESC&g" \
+                | sed "s&___PH_AVERAGE___&$AVERAGE&g" \
+                | sed "s&___PH_SIZE___&$SIZE&g" \
+                | sed "s&___PH_DIVD___&$DIVD&g" \
+                | sed "s&___PH_DIVT___&$DIVT&g" \
+                | sed "s&___PH_FILENAME___&$FILENAME&g" \
+                | sed "s&___PH_TITLE___&$TITLE&g" \
+                | sed "s&___PH_PLOT1___&$PH_PLOT1&g" \
+                | sed "s&___PH_LEGEND1___&$PH_LEGEND1&g" \
+                | sed "s&___PH_PLOT2___&$PH_PLOT2&g" \
+                | sed "s&___PH_LEGEND2___&$PH_LEGEND2&g" \
+                | sed "s&___PH_PLOT3___&$PH_PLOT3&g" \
+                | sed "s&___PH_LEGEND3___&$PH_LEGEND3&g" \
+                | sed "s&___PH_PLOT4___&$PH_PLOT4&g" \
+                | sed "s&___PH_LEGEND4___&$PH_LEGEND4&g" \
+                | sed "s&___PH_PLOT5___&$PH_PLOT5&g" \
+                | sed "s&___PH_LEGEND5___&$PH_LEGEND5&g" \
+                | sed "s&___PH_PLOT6___&$PH_PLOT6&g" \
+                | sed "s&___PH_LEGEND6___&$PH_LEGEND6&g" \
+                | sed "s&___PH_PLOT7___&$PH_PLOT7&g" \
+                | sed "s&___PH_LEGEND7___&$PH_LEGEND7&g" \
+                | sed "s&___PH_PLOT8___&$PH_PLOT8&g" \
+                | sed "s&___PH_LEGEND8___&$PH_LEGEND8&g" \
+                | sed "s&___PH_SMOOTH___&$SMOOTH&g" \
+                > $REPORTTARGET/compare-$SIZE.tex
+            PH_INCLUDES=$PH_INCLUDES"\\\include{compare-$SIZE}\\n" 
+        done
+    fi
+
     cat $REPORTTEMPLATES/main.tex | sed "s&___PH_DATAITEMS___&$PH_DATAITEMS&" | sed "s&___PH_SETS___&$PH_SETS&" | sed "s&___PH_INCLUDES___&$PH_INCLUDES&" > $REPORTTARGET/report.tex
     echo " done"
 
