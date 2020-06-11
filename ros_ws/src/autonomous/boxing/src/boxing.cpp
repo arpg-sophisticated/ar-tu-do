@@ -112,8 +112,7 @@ void Boxing::preprocess_colored_cloud()
 uint128_t Boxing::get_voxel_id(float x, float y, float z)
 {
     uint128_t voxel_id = 0;
-    union
-    {
+    union {
         float floaty;
         uint32_t inty;
     } float_uint;
