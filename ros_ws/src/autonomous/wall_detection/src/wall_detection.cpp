@@ -141,12 +141,12 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
         {
             if ((itrVector->y > maxLeft) && (fabsf(itrVector->x) <= radius))
             {
-                maxLeft = itrVector->x;
+                maxLeft = itrVector->y;
                 maxLeftID = itrVector->label;
             }
             if ((itrVector->y < maxRight) && fabsf((itrVector->x) <= radius))
             {
-                maxRight = itrVector->x;
+                maxRight = itrVector->y;
                 maxRightID = itrVector->label;
             }
         }
