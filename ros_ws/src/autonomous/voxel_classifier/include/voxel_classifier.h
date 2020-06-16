@@ -28,6 +28,7 @@ class VoxelClassifier
     dynamic_reconfigure::Server<voxel_classifier::voxel_classifierConfig> m_dyn_cfg_server;
     double m_epsilon;
     int m_minimum_points;
+    double m_color_weight;
 
     public:
     VoxelClassifier();

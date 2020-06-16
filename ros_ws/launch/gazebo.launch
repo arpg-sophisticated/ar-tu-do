@@ -86,6 +86,7 @@
     
     <include file="$(find boxing)/launch/boxing.launch">
         <arg name="topic_input_cloud" value="/scan/fusion/cartesian" />
+        <arg name="topic_input_colored_cloud" value="/racer/camera1/depth/points" />
         <arg name="topic_voxels" value="/scan/voxels" />
     </include>
 

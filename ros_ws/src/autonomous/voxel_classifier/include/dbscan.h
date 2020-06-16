@@ -17,19 +17,20 @@ using namespace std;
 
 typedef struct Point_
 {
-    float x, y, z; // X, Y, Z position
-    int clusterID; // clustered ID
+    float x, y, z, r, g, b; // X, Y, Z position
+    int clusterID;          // clustered ID
 } Point;
 
 class DBSCAN
 {
     public:
-    DBSCAN(unsigned int minPts, float eps, vector<Point_>* points)
+    DBSCAN(unsigned int minPts, float eps, double color_weight, vector<Point_>* points)
     {
         m_minPoints = minPts;
         m_epsilon = eps;
         m_points = points;
         m_pointSize = points->size();
+        m_color_weight = color_weight;
     }
     ~DBSCAN()
     {
@@ -58,6 +59,7 @@ class DBSCAN
     unsigned int m_pointSize;
     unsigned int m_minPoints;
     float m_epsilon;
+    double m_color_weight;
 };
 
 #endif // DBSCAN_H

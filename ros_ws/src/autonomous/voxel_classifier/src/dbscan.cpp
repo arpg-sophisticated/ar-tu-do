@@ -89,5 +89,8 @@ vector<int> DBSCAN::calculateCluster(Point_ point)
 inline double DBSCAN::calculateDistance(Point_ pointCore, Point_ pointTarget)
 {
     return pow(pointCore.x - pointTarget.x, 2) + pow(pointCore.y - pointTarget.y, 2) +
-        pow(pointCore.z - pointTarget.z, 2);
+        pow(pointCore.z - pointTarget.z, 2) +
+        m_color_weight *
+        (pow(pointCore.r - pointTarget.r, 2) + pow(pointCore.g - pointTarget.g, 2) +
+         pow(pointCore.b - pointTarget.b, 2));
 }

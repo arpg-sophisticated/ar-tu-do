@@ -19,12 +19,12 @@ WallDetection::WallDetection()
         topicObstacles = topicObstacles;
 
     this->m_voxel_subscriber =
-        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZI>>(topicClusters, 1,
-                                                                 &WallDetection::wallDetection_callback, this);
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(topicClusters, 1,
+                                                                    &WallDetection::wallDetection_callback, this);
 
-    this->m_wall_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicWalls, 1);
+    this->m_wall_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZRGBL>>(topicWalls, 1);
 
-    this->m_obstacles_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZI>>(topicObstacles, 1);
+    this->m_obstacles_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZRGBL>>(topicObstacles, 1);
 
     m_wall_radius = 3;
 
@@ -32,24 +32,24 @@ WallDetection::WallDetection()
         [&](wall_detection::wall_detectionConfig& cfg, uint32_t) { m_wall_radius = cfg.wall_search_radius; });
 }
 
-void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& inputVoxels)
+void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& inputVoxels)
 {
 
     frameID = inputVoxels->header.frame_id;
 
-    std::unordered_map<int, std::vector<pcl::PointXYZI>*> clustersUsed;
-    // map cluster ids in intensity to map with cluster id as key and pointvector as value
+    std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> clustersUsed;
+    // map cluster ids in label to map with cluster id as key and pointvector as value
     for (size_t i = 0; i < inputVoxels->points.size(); i++)
     {
-        if (clustersUsed.count(inputVoxels->points[i].intensity) > 0)
+        if (clustersUsed.count(inputVoxels->points[i].label) > 0)
         {
-            clustersUsed[inputVoxels->points[i].intensity]->push_back(inputVoxels->points[i]);
+            clustersUsed[inputVoxels->points[i].label]->push_back(inputVoxels->points[i]);
         }
         else
         {
-            std::vector<pcl::PointXYZI>* tmp = new std::vector<pcl::PointXYZI>();
+            std::vector<pcl::PointXYZRGBL>* tmp = new std::vector<pcl::PointXYZRGBL>();
             tmp->push_back(inputVoxels->points[i]);
-            clustersUsed.insert({ inputVoxels->points[i].intensity, tmp });
+            clustersUsed.insert({ inputVoxels->points[i].label, tmp });
         }
     }
 
@@ -68,10 +68,10 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZI>
         delete itr->second;
 }
 
-void WallDetection::publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZI>*> mapClusters,
+void WallDetection::publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapClusters,
                                      std::pair<int, int> wallIDs)
 {
-    pcl::PointCloud<pcl::PointXYZI>::Ptr msg(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
 
     msg->header.frame_id = frameID;
 
@@ -89,29 +89,36 @@ void WallDetection::publishObstacles(std::unordered_map<int, std::vector<pcl::Po
     m_obstacles_publisher.publish(msg);
 }
 
-void WallDetection::publishWall(std::vector<pcl::PointXYZI>* wallLeft, std::vector<pcl::PointXYZI>* wallRight)
+void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::vector<pcl::PointXYZRGBL>* wallRight)
 {
-    pcl::PointCloud<pcl::PointXYZI>::Ptr msg(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
     msg->header.frame_id = frameID;
 
     for (size_t i = 0; i < wallLeft->size(); i++)
     {
-        pcl::PointXYZI tmp;
+        pcl::PointXYZRGBL tmp;
         tmp.x = (*wallLeft)[i].x;
         tmp.y = (*wallLeft)[i].y;
         tmp.z = (*wallLeft)[i].z;
-        tmp.intensity = 1;
+        tmp.r = (*wallLeft)[i].r;
+        tmp.g = (*wallLeft)[i].g;
+        tmp.b = (*wallLeft)[i].b;
+
+        tmp.label = 1;
 
         msg->push_back(tmp);
     }
 
     for (size_t i = 0; i < wallRight->size(); i++)
     {
-        pcl::PointXYZI tmp;
+        pcl::PointXYZRGBL tmp;
         tmp.x = (*wallRight)[i].x;
         tmp.y = (*wallRight)[i].y;
         tmp.z = (*wallRight)[i].z;
-        tmp.intensity = 0;
+        tmp.r = (*wallRight)[i].r;
+        tmp.g = (*wallRight)[i].g;
+        tmp.b = (*wallRight)[i].b;
+        tmp.label = 0;
 
         msg->push_back(tmp);
     }
@@ -120,7 +127,7 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZI>* wallLeft, std::vect
     m_wall_publisher.publish(msg);
 }
 
-std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZI>*> mapToCheck,
+std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapToCheck,
                                                     float radius)
 {
     float maxLeft = 0;
@@ -134,13 +141,13 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
         {
             if ((itrVector->y > maxLeft) && (fabsf(itrVector->x) <= radius))
             {
-                maxLeft = itrVector->x;
-                maxLeftID = itrVector->intensity;
+                maxLeft = itrVector->y;
+                maxLeftID = itrVector->label;
             }
             if ((itrVector->y < maxRight) && fabsf((itrVector->x) <= radius))
             {
-                maxRight = itrVector->x;
-                maxRightID = itrVector->intensity;
+                maxRight = itrVector->y;
+                maxRightID = itrVector->label;
             }
         }
     }
