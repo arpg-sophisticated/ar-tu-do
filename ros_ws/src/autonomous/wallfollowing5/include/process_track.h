@@ -46,5 +46,5 @@ class ProcessTrack
 
     public:
     bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);
-    bool processTrack(ProcessedTrack* storage, const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& pointcloud);
+    bool processTrack(ProcessedTrack* storage, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& pointcloud);
 };

@@ -50,10 +50,10 @@ class Wallfollowing
     void followWalls(ProcessedTrack& processedTrack, double delta_time);
     void getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan);
     void handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time);
-    void handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& wall_pointcloud, double delta_time);
+    void handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud, double delta_time);
 
     void publishDriveParameters(double angle, double velocity);
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan);
-    void wallsCallback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& walls);
+    void wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls);
     void voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg);
 };

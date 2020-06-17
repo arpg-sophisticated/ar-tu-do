@@ -175,20 +175,21 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
 }
 
 bool ProcessTrack::processTrack(ProcessedTrack* storage,
-                                const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& wall_pointcloud)
+                                const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud)
 {
     for (auto& point : *wall_pointcloud)
     {
         Point p = Point{ -point.y, point.x };
-        if (point.intensity == 0 && p.is_valid())
+        if (point.label == 0 && p.is_valid())
         {
             storage->right_wall.push_back(p);
         }
-        else if (point.intensity == 1 && p.is_valid())
+        else if (point.label == 1 && p.is_valid())
         {
             storage->left_wall.push_back(p);
         }
     }
+    // add fake voxel to make sure that the circle fit algorithm always works
     if (!storage->right_wall.empty() && !storage->left_wall.empty())
     {
         storage->right_wall.insert(storage->right_wall.begin(),

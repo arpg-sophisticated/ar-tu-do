@@ -7,7 +7,8 @@ Wallfollowing::Wallfollowing()
     m_voxel_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(TOPIC_VOXEL, 1, &Wallfollowing::voxelCallback, this);
     m_walls_subscriber =
-        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZI>>(TOPIC_WALLS, 1, &Wallfollowing::wallsCallback, this);
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(TOPIC_WALLS, 1, &Wallfollowing::wallsCallback,
+                                                                    this);
     m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
 }
 
@@ -164,7 +165,7 @@ void Wallfollowing::handleLaserPointcloud(std::vector<Point>& pointcloud, double
     }
 }
 
-void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& wall_pointcloud,
+void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud,
                                           double delta_time)
 {
     ProcessedTrack processed_track;
@@ -227,7 +228,7 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
     // m_last_scan_time = scan_time;
 }
 
-void Wallfollowing::wallsCallback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& walls)
+void Wallfollowing::wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls)
 {
     double scan_time = ros::Time::now().toSec();
     double t_start = scan_time;
