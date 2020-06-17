@@ -5,6 +5,9 @@
 #include "geometric_math.h"
 #include "rviz_geometry.h"
 #include <functional>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 #include <vector>
 
 enum CurveType
@@ -43,4 +46,5 @@ class ProcessTrack
 
     public:
     bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);
+    bool processTrack(ProcessedTrack* storage, const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& pointcloud);
 };

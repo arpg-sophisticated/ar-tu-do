@@ -8,6 +8,11 @@ struct Point
 {
     float x;
     float y;
+
+    bool is_valid()
+    {
+        return !std::isnan(x) && !std::isinf(x) && !std::isnan(y) && !std::isinf(y);
+    }
 };
 
 namespace GeometricFunctions
