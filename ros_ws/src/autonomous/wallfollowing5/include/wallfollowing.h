@@ -1,5 +1,9 @@
 #pragma once
 
+// clang-format off
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 #include "car_config.h"
 #include "circle.h"
 #include "config.h"
@@ -12,12 +16,10 @@
 #include "speed_controller.h"
 #include "steering_controller.h"
 #include <cmath>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <vector>
+// clang-format on
 
 constexpr const char* TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous";
 constexpr const char* TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry";
