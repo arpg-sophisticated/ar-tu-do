@@ -29,7 +29,8 @@ class QLearningDrivingNode(ReinforcementLearningNode):
             rospy.signal_shutdown(message)
             exit(1)
 
-        ReinforcementLearningNode.__init__(self, ACTIONS, LASER_SAMPLE_COUNT)
+        ReinforcementLearningNode.__init__(
+            self, ACTIONS, LASER_SAMPLE_COUNT)
 
         rospy.Subscriber(
             TOPIC_DRIVE_PARAMETERS_WF2RL,
@@ -40,7 +41,8 @@ class QLearningDrivingNode(ReinforcementLearningNode):
             gazebo_state_telemetry,
             self.speed_callback)
 
-     # override implemented function of reinforcement_learning_node
+     # override implemented function of
+     # reinforcement_learning_node
     def on_receive_laser_scan(self, message):
         self.last_laser_scan_message = message
         return
@@ -63,10 +65,14 @@ class QLearningDrivingNode(ReinforcementLearningNode):
         self.current_speed = speed_message.wheel_speed
         #print("Speed: "+ str(self.current_speed))
 
-    # override implemented function of ReinforcementLearningNode
+    # override implemented function of
+    # ReinforcementLearningNode
     def perform_action(self, action_index, addWFMessage):
-        if action_index < 0 or action_index >= len(self.actions):
-            raise Exception("Invalid action: " + str(action_index))
+        if action_index < 0 or action_index >= len(
+                self.actions):
+            raise Exception(
+                "Invalid action: " +
+                str(action_index))
 
         angle, velocity = self.actions[action_index]
         print(str(angle) + ", " + str(velocity))
@@ -74,8 +80,8 @@ class QLearningDrivingNode(ReinforcementLearningNode):
         # add WFdrivemessages
         if(addWFMessage):
             message.angle = angle + self.lastWFmessage.angle
-            message.velocity = (velocity * SAFETY_REDUCTION) + \
-                self.lastWFmessage.velocity
+            message.velocity = (
+                velocity * SAFETY_REDUCTION) + self.lastWFmessage.velocity
         else:
             message.angle = angle
             message.velocity = velocity

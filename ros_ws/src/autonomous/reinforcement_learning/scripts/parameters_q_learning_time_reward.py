@@ -9,24 +9,85 @@ import rospy
 from rospkg import RosPack
 
 # General parameters
-ACTIONS = [(0.5, 1.0), (0.5, 0.0), (0, -1.0), (0, 0.0), (0, 1.0), (-0.5, 0.0), (-0.5, 1.0)]
+ACTIONS = [(0.5, 1.0), (0.5, 0.0), (0, -1.0), (0, 0.0),
+           (0, 1.0), (-0.5, 0.0), (-0.5, 1.0)]
 ACTION_COUNT = len(ACTIONS)
-NULL_ACTION_INDEX =3
+NULL_ACTION_INDEX = 3
 
-#(startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
-#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),
-#                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1)]
-#TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,2,0.2,0.5),
-#                   (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5)]
-TRAINING_PARTS = [(0,10,False,0,1,1),(10,20,False,0,1,1),(20,30,False,0,1,1),(30,40,False,0,1,1),(40,0,False,1,1,1),(40,0,False,2,0.2,0.5),(40,0,False,2,0.12,0.4),
-                    (0,10,True,0,1,1),(10,20,True,0,1,1),(20,30,True,0,1,1),(30,40,True,0,1,1),(40,0,True,1,1,1),(1,11,True,1,0.2,0.5),(1,11,True,2,0.12,0.4)]
+# (startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
+TRAINING_PARTS = [
+    (0,
+     10,
+     False,
+     0,
+     1,
+     1),
+    (10,
+     20,
+     False,
+     0,
+     1,
+     1),
+    (20,
+     30,
+     False,
+     0,
+     1,
+     1),
+    (30,
+     40,
+     False,
+     0,
+     1,
+     1),
+    (40,
+     0,
+     False,
+     1,
+     1,
+     1),
+    (0,
+     10,
+     True,
+     0,
+     1,
+     1),
+    (10,
+     20,
+     True,
+     0,
+     1,
+     1),
+    (20,
+     30,
+     True,
+     0,
+     1,
+     1),
+    (30,
+     40,
+     True,
+     0,
+     1,
+     1),
+    (40,
+     0,
+     True,
+     1,
+     1,
+     1)]
+# TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1), (40, 0, False, 2, 0.2, 0.5),
+#                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1), (1, 11, True, 1, 0.2, 0.5)]
+# TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1), (40, 0, False, 2, 0.2, 0.5), (40, 0, False, 2, 0.12, 0.4),
+#                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1), (1, 11, True, 1, 0.2, 0.5), (1, 11, True, 2, 0.12, 0.4)]
 
 
 # Only use some of the LIDAR measurements
-# When changing this value, also update laser_sample_count in q_learning_time_reward*.launch
+# When changing this value, also update laser_sample_count in
+# q_learning_time_reward*.launch
 LASER_SAMPLE_COUNT = 32
 
-#safety velocity reduction for driving node
+# safety velocity reduction for driving node
 SAFETY_REDUCTION = 1
 
 MODEL_FILENAME = os.path.join(RosPack().get_path(
@@ -64,7 +125,7 @@ EPS_DECAY = 100000
 class NeuralQEstimator(nn.Module):
     def __init__(self):
         super(NeuralQEstimator, self).__init__()
-        self.fc1 = nn.Linear(LASER_SAMPLE_COUNT+1, 64)
+        self.fc1 = nn.Linear(LASER_SAMPLE_COUNT + 1, 64)
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, ACTION_COUNT)
 

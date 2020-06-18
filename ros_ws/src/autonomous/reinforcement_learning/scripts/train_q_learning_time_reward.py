@@ -1,23 +1,26 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from training_node import TrainingNode, device
 import random
 import math
+import rospy
+import torch
+import simulation_tools.reset_car as reset_car
+from training_node import TrainingNode, device
 from collections import deque
 from parameters_q_learning_time_reward import *
-import rospy
 from drive_msgs.msg import drive_param
 from drive_msgs.msg import gazebo_state_telemetry
-
 from topics import TOPIC_GAZEBO_STATE_TELEMETRY, TOPIC_DRIVE_PARAMETERS, TOPIC_DRIVE_PARAMETERS_WF2RL
-
 from playsound import playsound
-import torch
-
-import simulation_tools.reset_car as reset_car
 from simulation_tools.track import track
-BATCH_INDICES = torch.arange(0, BATCH_SIZE, device=device, dtype=torch.long)
+
+
+BATCH_INDICES = torch.arange(
+    0,
+    BATCH_SIZE,
+    device=device,
+    dtype=torch.long)
 
 
 class QLearningTimeRewardTrainingNode(TrainingNode):
@@ -36,7 +39,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.memory = deque(maxlen=MEMORY_SIZE)
         self.optimization_step_count = 0
 
-        self.episode_memory = deque(maxlen=EPISODE_MEMORY_SIZE)
+        self.episode_memory = deque(
+            maxlen=EPISODE_MEMORY_SIZE)
         self.episode_starttime = rospy.get_time()
 
         self.last_WF_message = None
@@ -60,7 +64,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
         self.training_part_times_set = False
 
-        self.training_part_times = [None] * len(TRAINING_PARTS)
+        self.training_part_times = [
+            None] * len(TRAINING_PARTS)
 
         self.crash_training_part_index = None
 
@@ -91,14 +96,16 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
         if(not self.check_training_part_times_set()):
             if(self.sleeping()):
-                self.perform_action(NULL_ACTION_INDEX, False)
+                self.perform_action(
+                    NULL_ACTION_INDEX, False)
                 return
             self.set_sector_times()
             drive_param_message = drive_param()
             drive_param_message.angle = message.angle
             drive_param_message.velocity = message.velocity
             # do wallfollowing to get TrainingPartsTimes
-            self.drive_parameters_publisher.publish(drive_param_message)
+            self.drive_parameters_publisher.publish(
+                drive_param_message)
             return
 
         if(self.sleeping()):
@@ -124,7 +131,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             return
 
         if self.state is not None:
-            self.on_complete_step(self.state, self.action, new_state)
+            self.on_complete_step(
+                self.state, self.action, new_state)
         if self.reached_target_point():
             self.reached_target_time = rospy.get_time()
             playsound('/home/marvin/Downloads/power-up.mp3')
@@ -174,7 +182,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("Rounds: " +
                   str(TRAINING_PARTS[self.current_training_part_index][3]))
 
-            print("Starttime: " + str(self.episode_starttime))
+            print("Starttime: " +
+                  str(self.episode_starttime))
             print("Endtime: " + str(rospy.get_time()))
 
             episode_time = rospy.get_time() - self.episode_starttime
@@ -215,11 +224,13 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         if(self.drive_forward):
             if((self.current_closest_point == track.get_length() - 1) and track.get_closest_segment(self.car_position) == 0):
                 self.training_part_completet_rounds += 1
-                print("----------- ROUND COMPLETED ----------------")
+                print(
+                    "----------- ROUND COMPLETED ----------------")
         else:
             if((self.current_closest_point == 0) and track.get_closest_segment(self.car_position) == track.get_length() - 1):
                 self.training_part_completet_rounds += 1
-                print("----------- ROUND COMPLETED ----------------")
+                print(
+                    "----------- ROUND COMPLETED ----------------")
         self.current_closest_point = track.get_closest_segment(
             self.car_position)
 
@@ -233,7 +244,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         return False
 
     def assign_rewards_and_to_memory(self):
-        print("Episode length to memory: " + str(len(self.episode_memory)))
+        print("Episode length to memory: " +
+              str(len(self.episode_memory)))
         reward = self.get_reward()
         for (
             state,
@@ -245,7 +257,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             self.cumulative_reward += reward
         self.episode_memory.clear()
 
-    def reset_car_to_start_of_training_part(self, part_index):
+    def reset_car_to_start_of_training_part(
+            self, part_index):
         print("--RESET--")
         self.sleep_after_reset = 100
         self.drive_forward = TRAINING_PARTS[part_index][2]
@@ -272,15 +285,19 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.is_terminal_step = False
         self.state = None
         if self.episode_length != 0:
-            print("Episode Length: " + str(self.episode_length))
+            print("Episode Length: " +
+                  str(self.episode_length))
             self.on_complete_episode()
         self.episode_starttime = rospy.get_time()
         self.reached_target = False
         self.training_part_completet_rounds = 0
 
     def replay(self):  # TODO: this was done every step, now we are doing it after an episode, raise stepsize of update?
-        print("---- replay (memory size: " + str(len(self.memory)) + ")----")
-        if len(self.memory) < 500 or len(self.memory) < BATCH_SIZE:
+        print("---- replay (memory size: " +
+              str(len(self.memory)) + ")----")
+        if len(
+                self.memory) < 500 or len(
+                self.memory) < BATCH_SIZE:
             return
 
         if self.optimization_step_count == 0:
@@ -290,19 +307,23 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         states, actions, rewards, next_states, is_terminal = tuple(zip(*transitions))  # nopep8
 
         states = torch.stack(states)
-        actions = torch.tensor(actions, device=device, dtype=torch.long)
-        rewards = torch.tensor(rewards, device=device, dtype=torch.float)
+        actions = torch.tensor(
+            actions, device=device, dtype=torch.long)
+        rewards = torch.tensor(
+            rewards, device=device, dtype=torch.float)
         next_states = torch.stack(next_states)
         is_terminal = torch.tensor(
             is_terminal, device=device, dtype=torch.uint8)
 
-        next_state_values = self.policy.forward(next_states).max(1)[0].detach()
+        next_state_values = self.policy.forward(
+            next_states).max(1)[0].detach()
         q_updates = rewards + next_state_values * DISCOUNT_FACTOR
         q_updates[is_terminal] = rewards[is_terminal]
 
         self.optimizer.zero_grad()
         net_output = self.policy.forward(states)
-        loss = F.smooth_l1_loss(net_output[BATCH_INDICES, actions], q_updates)
+        loss = F.smooth_l1_loss(
+            net_output[BATCH_INDICES, actions], q_updates)
         loss.backward()
         for param in self.policy.parameters():
             param.grad.data.clamp_(-1, 1)
@@ -328,10 +349,14 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             #        ["{0:.1f}".format(v).rjust(5) for v in output.tolist()])
             return output.max(0)[1].item()
 
-    # override implemented function of ReinforcementLearningNode
+    # override implemented function of
+    # ReinforcementLearningNode
     def perform_action(self, action_index, addWFMessage):
-        if action_index < 0 or action_index >= len(self.actions):
-            raise Exception("Invalid action: " + str(action_index))
+        if action_index < 0 or action_index >= len(
+                self.actions):
+            raise Exception(
+                "Invalid action: " +
+                str(action_index))
 
         angle, velocity = self.actions[action_index]
         message = drive_param()
@@ -353,7 +378,9 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             print("wallfollowing training part time: " +
                   str(wallfollowing_training_part_time))
             episode_time = self.reached_target_time - self.episode_starttime
-            print("training part time: " + str(episode_time))
+            print(
+                "training part time: " +
+                str(episode_time))
 
             time_difference = wallfollowing_training_part_time - episode_time
             print(
@@ -377,7 +404,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
     def get_episode_summary(self):
         return
 
-    # add state,action, next_state to memory (no reward assigned yet)
+    # add state,action, next_state to memory (no reward
+    # assigned yet)
     def on_complete_step(self, state, action, next_state):
         self.episode_memory.append((state, action, next_state, self.is_terminal_step))  # nopep8
 
@@ -386,14 +414,18 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         if(not self.is_terminal_step):
             if(not self.reached_target_point()):
                 print("--CRASH--")
-                self.perform_action(NULL_ACTION_INDEX, False)
+                self.perform_action(
+                    NULL_ACTION_INDEX, False)
                 self.is_terminal_step = True
                 self.sleep_after_crash = 100
                 self.crash_training_part_index = self.current_training_part_index
-                playsound('/home/marvin/Downloads/bowser-falls.mp3')
-                episode_memory_list = list(self.episode_memory)[-300:]
+                playsound(
+                    '/home/marvin/Downloads/bowser-falls.mp3')
+                episode_memory_list = list(
+                    self.episode_memory)[-300:]
                 self.episode_memory.clear()
-                self.episode_memory.extendleft(episode_memory_list)
+                self.episode_memory.extendleft(
+                    episode_memory_list)
 
 
 rospy.init_node('q_learning_training', anonymous=True)
