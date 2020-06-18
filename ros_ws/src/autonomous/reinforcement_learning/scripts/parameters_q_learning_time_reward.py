@@ -15,6 +15,7 @@ ACTION_COUNT = len(ACTIONS)
 NULL_ACTION_INDEX = 3
 
 # (startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
+
 TRAINING_PARTS = [
     (0,
      10,
