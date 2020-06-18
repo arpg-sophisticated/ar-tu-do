@@ -24,7 +24,7 @@
         </gui>
         
         <model name="track">
-            <pose>0 0 0  0 0 0</pose>
+            <pose>0 1 0  0 0 0</pose>
             <static>true</static>
             <link name="track">
                 <visual name="visual">
