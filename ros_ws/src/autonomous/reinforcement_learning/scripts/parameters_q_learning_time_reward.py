@@ -16,71 +16,12 @@ NULL_ACTION_INDEX = 3
 
 # (startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
 
-TRAINING_PARTS = [
-    (0,
-     10,
-     False,
-     0,
-     1,
-     1),
-    (10,
-     20,
-     False,
-     0,
-     1,
-     1),
-    (20,
-     30,
-     False,
-     0,
-     1,
-     1),
-    (30,
-     40,
-     False,
-     0,
-     1,
-     1),
-    (40,
-     0,
-     False,
-     1,
-     1,
-     1),
-    (0,
-     10,
-     True,
-     0,
-     1,
-     1),
-    (10,
-     20,
-     True,
-     0,
-     1,
-     1),
-    (20,
-     30,
-     True,
-     0,
-     1,
-     1),
-    (30,
-     40,
-     True,
-     0,
-     1,
-     1),
-    (40,
-     0,
-     True,
-     1,
-     1,
-     1)]
-# TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1), (40, 0, False, 2, 0.2, 0.5),
-#                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1), (1, 11, True, 1, 0.2, 0.5)]
-# TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1), (40, 0, False, 2, 0.2, 0.5), (40, 0, False, 2, 0.12, 0.4),
-#                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1), (1, 11, True, 1, 0.2, 0.5), (1, 11, True, 2, 0.12, 0.4)]
+TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1),  # nopep8
+                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1)]  # nopep8
+# TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1), (40, 0, False, 2, 0.2, 0.5), # nopep8
+#                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1), (1, 11, True, 1, 0.2, 0.5)] # nopep8
+# TRAINING_PARTS = [(0, 10, False, 0, 1, 1), (10, 20, False, 0, 1, 1), (20, 30, False, 0, 1, 1), (30, 40, False, 0, 1, 1), (40, 0, False, 1, 1, 1), (40, 0, False, 2, 0.2, 0.5), (40, 0, False, 2, 0.12, 0.4), # nopep8
+#                  (0, 10, True, 0, 1, 1), (10, 20, True, 0, 1, 1), (20, 30, True, 0, 1, 1), (30, 40, True, 0, 1, 1), (40, 0, True, 1, 1, 1), (1, 11, True, 1, 0.2, 0.5), (1, 11, True, 2, 0.12, 0.4)] # nopep8
 
 
 # Only use some of the LIDAR measurements
