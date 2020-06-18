@@ -1,11 +1,16 @@
 #pragma once
 
+// clang-format off
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 #include "circle.h"
 #include "circle_fit.h"
 #include "geometric_math.h"
 #include "rviz_geometry.h"
 #include <functional>
 #include <vector>
+// clang-format on
 
 enum CurveType
 {
@@ -43,4 +48,5 @@ class ProcessTrack
 
     public:
     bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);
+    bool processTrack(ProcessedTrack* storage, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& pointcloud);
 };

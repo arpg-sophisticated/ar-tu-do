@@ -6,6 +6,9 @@ Wallfollowing::Wallfollowing()
         m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &Wallfollowing::laserScanCallback, this);
     m_voxel_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(TOPIC_VOXEL, 1, &Wallfollowing::voxelCallback, this);
+    m_walls_subscriber =
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(TOPIC_WALLS, 1, &Wallfollowing::wallsCallback,
+                                                                    this);
     m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
 }
 
@@ -162,6 +165,20 @@ void Wallfollowing::handleLaserPointcloud(std::vector<Point>& pointcloud, double
     }
 }
 
+void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud,
+                                          double delta_time)
+{
+    ProcessedTrack processed_track;
+    if (m_process_track.processTrack(&processed_track, wall_pointcloud))
+    {
+        followWalls(processed_track, delta_time);
+    }
+    else
+    {
+        std::cerr << "processed_track not valid" << std::endl;
+    }
+}
+
 void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
     int n = laserscan->ranges.size();
@@ -194,25 +211,38 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
-    double scan_time = laserscan->header.stamp.toSec();
-    double t_start = ros::Time::now().toSec();
+    // double scan_time = laserscan->header.stamp.toSec();
+    // double t_start = ros::Time::now().toSec();
+    // if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+    // {
+    //     double delta_time = scan_time - m_last_scan_time;
+    //     // std::cout << delta_time << std::endl;
+    //     std::vector<Point> pointcloud;
+    //     getScanAsCartesian(&pointcloud, laserscan);
+    //     handleLaserPointcloud(pointcloud, delta_time);
+    //     double t_end = ros::Time::now().toSec();
+    //     // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s"
+    //     <<
+    //     // std::endl;
+    // }
+    // m_last_scan_time = scan_time;
+}
+
+void Wallfollowing::wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls)
+{
+    double scan_time = ros::Time::now().toSec();
+    double t_start = scan_time;
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
     {
         double delta_time = scan_time - m_last_scan_time;
         // std::cout << delta_time << std::endl;
-        std::vector<Point> pointcloud;
-        getScanAsCartesian(&pointcloud, laserscan);
-        handleLaserPointcloud(pointcloud, delta_time);
+        handleWallsPointcloud(walls, delta_time);
         double t_end = ros::Time::now().toSec();
         // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s" <<
         // std::endl;
     }
     m_last_scan_time = scan_time;
 }
-
-// void Wallfollowing::clusterCallback(const sensor_msgs::PointCloud2::ConstPtr& cluster)
-// {
-// }
 
 void Wallfollowing::voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg)
 {
