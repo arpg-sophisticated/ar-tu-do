@@ -9,10 +9,10 @@ import rospy
 from rospkg import RosPack
 
 # General parameters
-ACTIONS = [(0.5, 1.0), (0.5, 0.0), (0, -1.0), (0, 0.0),
+ACTIONS = [(0.5, 1.0), (0.5, 0.0), (0, 0.0),
            (0, 1.0), (-0.5, 0.0), (-0.5, 1.0)]
 ACTION_COUNT = len(ACTIONS)
-NULL_ACTION_INDEX = 3
+NULL_ACTION_INDEX = 2
 
 # (startindex,endindex,forward,rounds,timedifference-multiplikator,greedy-factor)
 
@@ -39,7 +39,7 @@ MODEL_FILENAME = os.path.join(RosPack().get_path(
 
 # Start by loading previously trained parameters.
 # If this is False, training will start from scratch
-CONTINUE = True
+CONTINUE = False
 
 DISCOUNT_FACTOR = 0.99  # aka gamma
 
