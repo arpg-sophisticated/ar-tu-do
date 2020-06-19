@@ -34,6 +34,7 @@ def reset(progress=0, angle=0, offset_from_center=0, forward=True):
         angle += math.pi
     set_pose(position.point, angle)
 
+
 def reset_to_segment(segment=0, angle=0, offset_from_center=0, forward=True):
     position = track.get_position_from_segment(segment, offset_from_center)
     angle += position.angle
@@ -41,6 +42,7 @@ def reset_to_segment(segment=0, angle=0, offset_from_center=0, forward=True):
         angle += math.pi
     set_pose(position.point, angle)
     return position.point
+
 
 def reset_random(max_angle=0, max_offset_from_center=0, forward=True):
     reset(random.random(), (random.random() * 2 - 1) * max_angle,
