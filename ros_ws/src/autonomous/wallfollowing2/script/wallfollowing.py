@@ -16,7 +16,6 @@ import numpy as np
 from dynamic_reconfigure.server import Server
 from wallfollowing2.cfg import wallfollowing2Config
 
-TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous"
 TOPIC_LASER_SCAN = "/scan"
 
 last_speed = 0
@@ -216,6 +215,11 @@ def dynamic_configuration_callback(config, level):
 
 
 rospy.init_node('wallfollowing', anonymous=True)
+
+TOPIC_DRIVE_PARAMETERS = rospy.get_param(
+    "~topic_drive_param",
+    "/input/drive_param/autonomous")
+
 parameters = None
 pid = PIDController(1, 1, 1)
 

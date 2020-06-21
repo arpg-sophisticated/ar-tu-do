@@ -21,11 +21,18 @@ class ReinforcementLearningNode():
         self.actions = actions
         self.drive_parameters_publisher = rospy.Publisher(
             TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
-        rospy.Subscriber(TOPIC_SCAN, LaserScan, self.on_receive_laser_scan)
+        rospy.Subscriber(
+            TOPIC_SCAN,
+            LaserScan,
+            self.on_receive_laser_scan,
+            queue_size=1)
 
     def perform_action(self, action_index):
-        if action_index < 0 or action_index >= len(self.actions):
-            raise Exception("Invalid action: " + str(action_index))
+        if action_index < 0 or action_index >= len(
+                self.actions):
+            raise Exception(
+                "Invalid action: " +
+                str(action_index))
 
         angle, velocity = self.actions[action_index]
         message = drive_param()
@@ -33,12 +40,31 @@ class ReinforcementLearningNode():
         message.velocity = velocity
         self.drive_parameters_publisher.publish(message)
 
-    def convert_laser_message_to_tensor(self, message, use_device=True):
+    def convert_laser_message_to_tensor(
+            self, message, use_device=True):
         if self.scan_indices is None:
             self.scan_indices = [int(i * (len(message.ranges) - 1) / (self.laser_sample_count - 1)) for i in range(self.laser_sample_count)]  # nopep8
 
-        values = [message.ranges[i] for i in self.scan_indices]
-        values = [v if not math.isinf(v) else 100 for v in values]
+        values = [message.ranges[i]
+                  for i in self.scan_indices]
+        values = [v if not math.isinf(
+            v) else 100 for v in values]
+
+        return torch.tensor(
+            values,
+            device=device if use_device else None,
+            dtype=torch.float)
+
+    def convert_laser_and_speed_message_to_tensor(
+            self, message, speed, use_device=True):
+        if self.scan_indices is None:
+            self.scan_indices = [int(i * (len(message.ranges) - 1) / (self.laser_sample_count - 1)) for i in range(self.laser_sample_count)]  # nopep8
+
+        values = [message.ranges[i]
+                  for i in self.scan_indices]
+        values = [v if not math.isinf(
+            v) else 100 for v in values]
+        values.append(speed)
 
         return torch.tensor(
             values,
@@ -46,7 +72,9 @@ class ReinforcementLearningNode():
             dtype=torch.float)
 
     def on_receive_laser_scan(self, message):
-        raise Exception("on_receive_laser_scan is not implemented.")
+        raise Exception(
+            "on_receive_laser_scan is not implemented.")
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu")

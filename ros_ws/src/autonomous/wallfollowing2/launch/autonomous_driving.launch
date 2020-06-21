@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
 <!-- Launches all necessary nodes that let the car drive autonomously. -->    
+    <arg name="topic_drive_param" default="/input/drive_param/autonomous"/>
     <!-- wall_following node -->
     <node
       respawn="true"
@@ -8,5 +9,6 @@
       type="wallfollowing.py"
       name="wallfollowing"
       output="screen" >
+    <param name="topic_drive_param" value="$(arg topic_drive_param)"/>
     </node>
 </launch>

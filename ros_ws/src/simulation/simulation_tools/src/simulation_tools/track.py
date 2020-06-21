@@ -70,6 +70,12 @@ class Track():
         segment = np.argmin(distances)
         return TrackPosition(segment, x[segment], y[segment], point, self)
 
+    def get_closest_segment(self, point):
+        local = np.array([point.x, point.y]) - self.points
+        distances = np.sqrt(np.multiply(
+            local[:, 0], local[:, 0]) + np.multiply(local[:, 1], local[:, 1]))
+        return np.argmin(distances)
+
     def get_position(self, total_distance, distance_to_center=0):
         ''' Returns a TrackPosition object based on the on-track distance from the start
         line and the distance to the center of the track. '''
@@ -83,6 +89,18 @@ class Track():
             segment_distance + self.right[segment, 1] * distance_to_center
         return TrackPosition(segment, distance_to_center,  # nopep8
             segment_distance, Point(x, y), self)  # nopep8
+
+    def get_position_from_segment(self, segment, distance_to_center=0):
+        ''' Returns a TrackPosition object based on the on-track distance from the start
+        line and the distance to the center of the track. '''
+
+        x = self.points[segment, 0]
+        y = self.points[segment, 1]
+        return TrackPosition(segment, distance_to_center,  # nopep8
+            0, Point(x, y), self)  # nopep8
+
+    def get_length(self):
+        return len(PATH) - 1
 
 
 world_name = rospy.get_param("world_name")
