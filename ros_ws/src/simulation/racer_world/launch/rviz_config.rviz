@@ -621,12 +621,12 @@ Visualization Manager:
       Max Intensity: 1
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: Wall Voxels
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.20000000298023224
+      Size (m): 0.15000000596046448
       Style: Boxes
       Topic: /obstacles/walls
       Unreliable: false
