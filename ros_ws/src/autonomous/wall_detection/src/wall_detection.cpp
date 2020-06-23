@@ -127,6 +127,25 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
     m_wall_publisher.publish(msg);
 }
 
+int WallDetection::findLargestCluster(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> clusters, int ignoreID)
+{
+    int largestClusterID = -1;
+    int largestClusterSize = 0;
+    for (auto idCluster : clusters)
+    {
+        if (idCluster.first == ignoreID)
+            continue;
+
+        if (idCluster.second->size() > largestClusterSize)
+        {
+            largestClusterID = idCluster.first;
+            largestClusterSize = idCluster.second->size();
+        }
+    }
+
+    return largestClusterID;
+}
+
 std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapToCheck,
                                                     float radius)
 {
@@ -151,6 +170,18 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
             }
         }
     }
+
+    if (maxLeftID == -1 && maxRightID != -1)
+    {
+        // found a cluster for right but not for left. let's just choose the largest one for the left.
+        maxLeftID = findLargestCluster(mapToCheck, maxRightID);
+    }
+    else if (maxRightID == -1 && maxLeftID != -1)
+    {
+        // same but reverse
+        maxRightID = findLargestCluster(mapToCheck, maxLeftID);
+    }
+
     return std::pair<int, int>(maxLeftID, maxRightID);
 }
 
