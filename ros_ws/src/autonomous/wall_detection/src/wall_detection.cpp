@@ -1,4 +1,5 @@
 #include "wall_detection.h"
+#include "walls.h"
 #include <dynamic_reconfigure/server.h>
 #include <wall_detection/wall_detectionConfig.h>
 
@@ -104,7 +105,7 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
         tmp.g = (*wallLeft)[i].g;
         tmp.b = (*wallLeft)[i].b;
 
-        tmp.label = 1;
+        tmp.label = WALL_DETECTION_WALL_ID_LEFT;
 
         msg->push_back(tmp);
     }
@@ -118,7 +119,7 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
         tmp.r = (*wallRight)[i].r;
         tmp.g = (*wallRight)[i].g;
         tmp.b = (*wallRight)[i].b;
-        tmp.label = 0;
+        tmp.label = WALL_DETECTION_WALL_ID_RIGHT;
 
         msg->push_back(tmp);
     }
@@ -150,9 +151,9 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
                                                     float radius)
 {
     float maxLeft = 0;
-    float maxRight = 0;
+    float minRight = 0;
     int maxLeftID = -1;
-    int maxRightID = -1;
+    int minRightID = -1;
 
     for (auto itr = mapToCheck.begin(); itr != mapToCheck.end(); ++itr)
     {
@@ -163,26 +164,26 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
                 maxLeft = itrVector->y;
                 maxLeftID = itrVector->label;
             }
-            if ((itrVector->y < maxRight) && fabsf((itrVector->x) <= radius))
+            if ((itrVector->y < minRight) && (fabsf(itrVector->x) <= radius))
             {
-                maxRight = itrVector->y;
-                maxRightID = itrVector->label;
+                minRight = itrVector->y;
+                minRightID = itrVector->label;
             }
         }
     }
 
-    if (maxLeftID == -1 && maxRightID != -1)
+    if (maxLeftID == -1 && minRightID != -1)
     {
         // found a cluster for right but not for left. let's just choose the largest one for the left.
-        maxLeftID = findLargestCluster(mapToCheck, maxRightID);
+        maxLeftID = findLargestCluster(mapToCheck, minRightID);
     }
-    else if (maxRightID == -1 && maxLeftID != -1)
+    else if (minRightID == -1 && maxLeftID != -1)
     {
         // same but reverse
-        maxRightID = findLargestCluster(mapToCheck, maxLeftID);
+        minRightID = findLargestCluster(mapToCheck, maxLeftID);
     }
 
-    return std::pair<int, int>(maxLeftID, maxRightID);
+    return std::pair<int, int>(maxLeftID, minRightID);
 }
 
 int main(int argc, char** argv)
