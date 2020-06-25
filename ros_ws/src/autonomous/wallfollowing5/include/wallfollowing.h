@@ -43,12 +43,18 @@ class Wallfollowing
 
     double m_last_scan_time;
 
+    double m_view_dist_average = 0;
+
     public:
     Wallfollowing();
 
+    Point determineTrackCenter(ProcessedTrack& processed_track, Point& predicted_position);
+    bool lineTooCloseToPointcloud(ProcessedTrack& processed_track, Line& line, std::vector<Point>& pointcloud);
+    std::pair<Point, Point> determineTargetPathPoint(ProcessedTrack& processed_track, double min_distance,
+                                                     double max_distance, double epsilon);
+
     Point determinePredictedCarPosition(ProcessedTrack& processedTrack);
-    Point determineTargetCarPositionCircleTangents(ProcessedTrack& processedTrack, Point& predicted_position,
-                                                   Point& car_position);
+    Point determineTargetCarPosition(ProcessedTrack& processedTrack, Point& predicted_position);
     void followWalls(ProcessedTrack& processedTrack, double delta_time);
     void getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan);
     void handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time);

@@ -45,6 +45,7 @@ class ProcessTrack
     Point calcNearestPointToPoint(Point& point, std::vector<Point>& pointcloud);
     bool isCurveEntryInFront(Point& curve_entry_point, Point& lowest_point, double threshold);
     Point getCurveEntry(std::vector<Point>& wall);
+    bool processTrack(ProcessedTrack* storage);
 
     public:
     bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);

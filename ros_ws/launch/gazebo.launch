@@ -78,7 +78,7 @@
          if it turns out that this conversion is to computationally intensive, we have to find another way
          e.g. directly use the cameras pointcloud. we may have to do that in the future anyways...
         -->
-    <include file="$(find cam_lidar_fusion)/launch/cam_lidar_fusion.launch">
+    <!-- <include file="$(find cam_lidar_fusion)/launch/cam_lidar_fusion.launch">
         <arg name="topic_input_cam" value="/scan/cam/cartesian"/>
         <arg name="topic_input_lidar" value="/scan/lidar/cartesian"/>
         <arg name="topic_output_fused" value="/scan/fusion/cartesian"/>
@@ -99,7 +99,7 @@
         <arg name="topic_input_clusters" value="/scan/clusters" />
         <arg name="topic_output_walls" value="/obstacles/walls" />
         <arg name="topic_output_obstacles" value="/obstacles/obstacles" />
-    </include>
+    </include> -->
 
     <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
     <node pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" respawn="true" output="screen"/>
