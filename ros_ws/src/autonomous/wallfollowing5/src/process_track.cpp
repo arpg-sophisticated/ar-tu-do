@@ -1,4 +1,5 @@
 #include "process_track.h"
+#include <pcl/filters/crop_box.h>
 
 std::vector<Point> ProcessTrack::cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select)
 {
@@ -180,31 +181,77 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
     return processTrack(storage);
 }
 
-bool ProcessTrack::processTrack(ProcessedTrack* storage,
-                                const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud)
+bool ProcessTrack::wallIsStraight(std::vector<Point>& wall)
 {
+    if (wall.size() == 0)
+        return false;
+    double previous_x = wall[0].x;
+    for (auto point : wall)
+    {
+        if (point.x != previous_x)
+            return false;
+        previous_x = point.x;
+    }
+    return true;
+}
+
+bool ProcessTrack::processTrack(ProcessedTrack* storage,
+                                const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud,
+                                pcl::PointCloud<pcl::PointXYZ>::Ptr laser_pointcloud)
+{
+    double voxelSize = 0.15;
+    if (!laser_pointcloud)
+        return false;
     for (auto& point : *wall_pointcloud)
     {
         Point p = Point{ -point.y, point.x };
-        if (point.label == 0 && p.is_valid())
+
+        std::vector<Point>* target;
+        if (p.is_valid())
         {
-            storage->right_wall.push_back(p);
+            if (point.label == 0)
+                target = &storage->right_wall;
+            else if (point.label == 1)
+                target = &storage->left_wall;
         }
-        else if (point.label == 1 && p.is_valid())
+
+        if (!target)
+            continue;
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+        pcl::CropBox<pcl::PointXYZ> boxFilter;
+        boxFilter.setMin(
+            Eigen::Vector4f(point.x - voxelSize / 2, point.y - voxelSize / 2, point.z - voxelSize / 2, 1.0));
+        boxFilter.setMax(
+            Eigen::Vector4f(point.x + voxelSize / 2, point.y + voxelSize / 2, point.z + voxelSize / 2, 1.0));
+        boxFilter.setInputCloud(laser_pointcloud);
+        boxFilter.filter(*filteredCloud);
+
+        for (auto& fp : filteredCloud->points)
         {
-            storage->left_wall.push_back(p);
+            Point new_p = Point{ -fp.y, fp.x };
+            target->push_back(new_p);
         }
     }
     // add fake voxel to make sure that the circle fit algorithm always works
     if (!storage->right_wall.empty() && !storage->left_wall.empty())
     {
-        storage->right_wall.insert(storage->right_wall.begin(),
-                                   Point{ storage->right_wall.front().x + 0.1, storage->right_wall.front().y + 0.1 });
-        storage->left_wall.insert(storage->left_wall.begin(),
-                                  Point{ storage->left_wall.front().x + 0.1, storage->left_wall.front().y + 0.1 });
+        if (wallIsStraight(storage->right_wall))
+        {
+            storage->right_wall.insert(storage->right_wall.begin(),
+                                       Point{ storage->right_wall.front().x + 0.1,
+                                              storage->right_wall.front().y + 0.1 });
+            storage->right_wall.push_back(
+                Point{ storage->right_wall.back().x + 0.1, storage->right_wall.back().y + 0.1 });
+        }
+        if (wallIsStraight(storage->left_wall))
+        {
+            storage->left_wall.insert(storage->left_wall.begin(),
+                                      Point{ storage->left_wall.front().x + 0.1, storage->left_wall.front().y + 0.1 });
 
-        storage->right_wall.push_back(Point{ storage->right_wall.back().x + 0.1, storage->right_wall.back().y + 0.1 });
-        storage->left_wall.push_back(Point{ storage->left_wall.back().x + 0.1, storage->left_wall.back().y + 0.1 });
+            storage->left_wall.push_back(Point{ storage->left_wall.back().x + 0.1, storage->left_wall.back().y + 0.1 });
+        }
     }
 
     return processTrack(storage);

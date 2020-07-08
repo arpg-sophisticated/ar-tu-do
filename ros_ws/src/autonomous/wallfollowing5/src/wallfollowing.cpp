@@ -9,6 +9,11 @@ Wallfollowing::Wallfollowing()
     m_walls_subscriber =
         m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(TOPIC_WALLS, 1, &Wallfollowing::wallsCallback,
                                                                     this);
+
+    m_lidar_cartesian_subscriber =
+        m_node_handle.subscribe<sensor_msgs::PointCloud2>("/scan/lidar/cartesian", 1,
+                                                          &Wallfollowing::lidarCartesianCallback, this);
+
     m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
 }
 
@@ -247,13 +252,14 @@ void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGB
                                           double delta_time)
 {
     ProcessedTrack processed_track;
-    if (m_process_track.processTrack(&processed_track, wall_pointcloud))
+    if (m_lidar_pointcloud && m_process_track.processTrack(&processed_track, wall_pointcloud, m_lidar_pointcloud))
     {
         followWalls(processed_track, delta_time);
     }
     else
     {
-        std::cerr << "processed_track not valid" << std::endl;
+        std::cerr << "processed_track not valid, falling back to laser" << std::endl;
+        handleLaserPointcloud(m_laser_pointcloud, m_laser_delta_time);
     }
 }
 
@@ -293,11 +299,10 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
     double t_start = ros::Time::now().toSec();
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
     {
-        double delta_time = scan_time - m_last_scan_time;
+        m_laser_delta_time = scan_time - m_last_scan_time;
         // std::cout << delta_time << std::endl;
-        std::vector<Point> pointcloud;
-        getScanAsCartesian(&pointcloud, laserscan);
-        handleLaserPointcloud(pointcloud, delta_time);
+        m_laser_pointcloud.clear();
+        getScanAsCartesian(&m_laser_pointcloud, laserscan);
         double t_end = ros::Time::now().toSec();
         // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s"
         // <<
@@ -308,19 +313,25 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
 
 void Wallfollowing::wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls)
 {
-    //     double scan_time = ros::Time::now().toSec();
-    //     double t_start = scan_time;
-    //     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
-    //     {
-    //         double delta_time = scan_time - m_last_scan_time;
-    //         // std::cout << delta_time << std::endl;
-    //         handleWallsPointcloud(walls, delta_time);
-    //         double t_end = ros::Time::now().toSec();
-    //         // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start <<
-    //         "s" <<
-    //         // std::endl;
-    //     }
-    //     m_last_scan_time = scan_time;
+    double scan_time = ros::Time::now().toSec();
+    double t_start = scan_time;
+    if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+    {
+        double delta_time = scan_time - m_last_scan_time;
+        handleWallsPointcloud(walls, delta_time);
+        double t_end = ros::Time::now().toSec();
+    }
+    m_last_scan_time = scan_time;
+}
+void Wallfollowing::lidarCartesianCallback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
+{
+
+    // Container for original & filtered data
+    pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+    pcl::fromROSMsg(*pointCloud, *(inputCloud));
+
+    this->m_lidar_pointcloud = inputCloud;
 }
 
 void Wallfollowing::voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg)
