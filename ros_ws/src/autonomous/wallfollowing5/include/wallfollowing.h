@@ -39,16 +39,29 @@ class Wallfollowing
     ros::Subscriber m_laserscan_subscriber;
     ros::Subscriber m_voxel_subscriber;
     ros::Subscriber m_walls_subscriber;
+    ros::Subscriber m_lidar_cartesian_subscriber;
     ros::Publisher m_drive_parameters_publisher;
 
     double m_last_scan_time;
 
+    double m_view_dist_average = 0;
+
+    double m_laser_delta_time = 0;
+
+    std::vector<Point> m_laser_pointcloud;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr m_lidar_pointcloud;
+
     public:
     Wallfollowing();
 
+    Point determineTrackCenter(ProcessedTrack& processed_track, Point& predicted_position);
+    bool lineTooCloseToPointcloud(ProcessedTrack& processed_track, Line& line, std::vector<Point>& pointcloud);
+    std::pair<Point, Point> determineTargetPathPoint(ProcessedTrack& processed_track, double min_distance,
+                                                     double max_distance, double epsilon);
+
     Point determinePredictedCarPosition(ProcessedTrack& processedTrack);
-    Point determineTargetCarPositionCircleTangents(ProcessedTrack& processedTrack, Point& predicted_position,
-                                                   Point& car_position);
+    Point determineTargetCarPosition(ProcessedTrack& processedTrack, Point& predicted_position);
     void followWalls(ProcessedTrack& processedTrack, double delta_time);
     void getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan);
     void handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time);
@@ -58,4 +71,5 @@ class Wallfollowing
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan);
     void wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls);
     void voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg);
+    void lidarCartesianCallback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud);
 };

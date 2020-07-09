@@ -15,6 +15,17 @@ struct Point
     }
 };
 
+struct Line
+{
+    Point start;
+    Point end;
+
+    float length()
+    {
+        return std::sqrt(std::pow(end.x - start.x, 2) + std::pow(end.y - start.y, 2));
+    }
+};
+
 namespace GeometricFunctions
 {
     const double PI = std::acos(-1);
@@ -23,4 +34,6 @@ namespace GeometricFunctions
     double distance(Point* a, Point* b);
 
     double toRadians(double degrees);
+
+    double calcShortestDistanceToLine(Point& point, Line line);
 }; // namespace GeometricFunctions
