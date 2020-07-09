@@ -223,7 +223,7 @@ TOPIC_DRIVE_PARAMETERS = rospy.get_param(
 parameters = None
 pid = PIDController(1, 1, 1)
 
-rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback)
+rospy.Subscriber(TOPIC_LASER_SCAN, LaserScan, laser_callback, queue_size=1)
 drive_parameters_publisher = rospy.Publisher(
     TOPIC_DRIVE_PARAMETERS, drive_param, queue_size=1)
 
