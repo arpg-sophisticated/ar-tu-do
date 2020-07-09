@@ -19,16 +19,6 @@ void StaticObstacles::wall_callback(const pcl::PointCloud<pcl::PointXYZRGBL>::Co
 {
     m_frame = wallPointcloud->header.frame_id;
 
-    if (clustersUsed.size() > 0)
-    {
-        std::cout << "Es existieren Obstacles während eine Wand geupdatet wurde";
-    }
-
-    for (auto& iter : wallPointcloud->points)
-    {
-        std::cout << iter.label << "\n";
-    }
-
     int closestObstacleID = getFirstObstacle();
     if (closestObstacleID != -1)
     {
@@ -67,7 +57,7 @@ int StaticObstacles::getFirstObstacle()
     {
         for (auto innerIter : *(iter.second))
         {
-            if (innerIter.x < closestObstacleDistance)
+            if (innerIter.x < closestObstacleDistance && innerIter.x < 5)
             {
                 closestObstacleDistance = innerIter.x;
                 closestObstacleID = innerIter.label;
@@ -75,7 +65,6 @@ int StaticObstacles::getFirstObstacle()
         }
     }
 
-    std::cout << " Closest Obstacle ID ist: " << closestObstacleID << "\n";
     return closestObstacleID;
 }
 
@@ -138,6 +127,7 @@ pcl::PointXYZRGBL StaticObstacles::getClosestWallVoxel(int WallID,
         pcl::PointXYZRGBL origin;
         origin.x = 0.0;
         origin.y = 0.0;
+        origin.z = 1.0;
 
         if (iter.label == WallID && std::abs(iter.x) <= CLOSESTVOXELINTERVALL)
         {
@@ -163,6 +153,8 @@ void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL o
     float b;
 
     std::vector<pcl::PointXYZRGBL> listOfNewWall;
+
+    listOfNewWall.clear();
 
     m = (obstacleNode.y - wallNode.y) / (obstacleNode.x - wallNode.x);
     b = wallNode.y - m * wallNode.x;
