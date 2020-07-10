@@ -151,8 +151,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
     float largest_intensity = 0;
 
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr quantized_cloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
-    quantized_cloud->header.frame_id = output_cloud->header.frame_id;
+    std::map<uint128_t, pcl::PointXYZRGBL> quantized_cloud_voxel_map;
 
     this->m_maximum_x = 0;
     this->m_minimum_x = 0;
@@ -184,59 +183,49 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
             this->m_minimum_z = point.z;
 
         // search the point we want to increment
-        bool found = false;
-        for (size_t j = 0; j < quantized_cloud->points.size(); j++)
+        uint128_t voxel_id = get_voxel_id(x, y, z);
+        auto foundPair = quantized_cloud_voxel_map.find(voxel_id);
+        pcl::PointXYZRGBL* foundPoint = &(foundPair->second);
+        bool found = foundPair != quantized_cloud_voxel_map.end();
+        if (found)
         {
-            pcl::PointXYZRGBL& foundPoint = quantized_cloud->points[j];
-            if (floatCompare((double)foundPoint.x, (double)x) && floatCompare((double)foundPoint.y, (double)y) &&
-                floatCompare((double)foundPoint.z, (double)z))
-            {
-                found = true;
-                quantized_cloud->points[j].label++;
+            foundPoint->label++;
 
-                if (quantized_cloud->points[j].label > largest_intensity)
-                {
-                    largest_intensity = quantized_cloud->points[j].label;
-                }
-                break;
+            if (foundPoint->label > largest_intensity)
+            {
+                largest_intensity = foundPoint->label;
             }
         }
-
-        if (!found)
+        else
         {
-            quantized_cloud->points.resize(quantized_cloud->points.size() + 1);
-            quantized_cloud->points[quantized_cloud->points.size() - 1].x = x;
-            quantized_cloud->points[quantized_cloud->points.size() - 1].y = y;
-            quantized_cloud->points[quantized_cloud->points.size() - 1].z = z;
+            pcl::PointXYZRGBL point;
+            point.x = x;
+            point.y = y;
+            point.z = z;
             if (largest_intensity < 1)
             {
                 largest_intensity = 1;
             }
+            quantized_cloud_voxel_map[voxel_id] = point;
         }
     }
 
-    for (size_t i = 0; i < quantized_cloud->points.size(); i++)
-    {
-        quantized_cloud->points[i].label = (quantized_cloud->points[i].label / largest_intensity) *
-            static_cast<float>(std::numeric_limits<uint32_t>::max()); // uint32 max value
-    }
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr quantized_cloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
+    quantized_cloud->header.frame_id = output_cloud->header.frame_id;
+    quantized_cloud->points.resize(quantized_cloud_voxel_map.size());
 
-    if (m_filter_by_min_score_enabled)
+    for (auto it : quantized_cloud_voxel_map)
     {
-        pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-        pcl::ExtractIndices<pcl::PointXYZRGBL> extract;
-        for (size_t i = 0; i < quantized_cloud->points.size(); i++)
+        pcl::PointXYZRGBL point = it.second;
+        if (m_filter_by_min_score_enabled)
         {
-            if (quantized_cloud->points[i].label < m_filter_by_min_score *
-                    static_cast<float>(std::numeric_limits<uint32_t>::max())) // e.g. remove all pts below zAvg
-            {
-                inliers->indices.push_back(i);
-            }
+            if ((point.label / largest_intensity) < m_filter_by_min_score)
+                continue;
         }
-        extract.setInputCloud(quantized_cloud);
-        extract.setIndices(inliers);
-        extract.setNegative(true);
-        extract.filter(*quantized_cloud);
+        point.label = (point.label / largest_intensity) *
+            static_cast<float>(std::numeric_limits<uint32_t>::max()); // uint32 max value
+
+        quantized_cloud->points.push_back(point);
     }
 
     if (m_colored_cloud && m_colors_enabled)
