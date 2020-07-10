@@ -37,8 +37,9 @@ class Boxing
     RvizGeometryPublisher m_debug_geometry;
     dynamic_reconfigure::Server<boxing::boxingConfig> m_dyn_cfg_server;
 
-    unsigned long m_old_seq = -1;
+    long m_old_seq = -1;
     unsigned long m_skipped_messages = 0;
+    unsigned long m_max_skipped_messages = 0;
 
     float m_voxel_size;
 
