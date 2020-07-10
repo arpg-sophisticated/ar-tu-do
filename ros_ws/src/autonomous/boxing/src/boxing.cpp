@@ -128,6 +128,14 @@ uint128_t Boxing::get_voxel_id(float x, float y, float z)
 
 void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
 {
+    if (pointCloud->header.seq != m_old_seq + 1)
+    {
+        m_skipped_messages += pointCloud->header.seq - m_old_seq - 1;
+        std::cout << "Boxing: Laserscan: After seq=" << m_old_seq << " comes seq=" << pointCloud->header.seq
+                  << " all messages in between are skipped! total: " << m_skipped_messages << "/"
+                  << pointCloud->header.seq << std::endl;
+    }
+    m_old_seq = pointCloud->header.seq;
 
     // Container for original & filtered data
     pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZ>);
