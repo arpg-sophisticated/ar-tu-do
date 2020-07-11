@@ -214,7 +214,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr quantized_cloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
     quantized_cloud->header.frame_id = output_cloud->header.frame_id;
     quantized_cloud->points.resize(quantized_cloud_voxel_map.size());
-
+    size_t i = 0;
     for (auto it : quantized_cloud_voxel_map)
     {
         pcl::PointXYZRGBL point = it.second;
@@ -226,8 +226,9 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
         point.label = (point.label / largest_intensity) *
             static_cast<float>(std::numeric_limits<uint32_t>::max()); // uint32 max value
 
-        quantized_cloud->points.push_back(point);
+        quantized_cloud->points[i++] = point;
     }
+    quantized_cloud->points.resize(i);
 
     if (m_colored_cloud && m_colors_enabled)
     {
