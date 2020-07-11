@@ -1,5 +1,8 @@
 #include "process_track.h"
-#include <pcl/filters/crop_box.h>
+#include <cmath>
+#include <cstdlib>
+#include <map>
+#include <math.h>
 
 std::vector<Point> ProcessTrack::cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select)
 {
@@ -195,6 +198,23 @@ bool ProcessTrack::wallIsStraight(std::vector<Point>& wall)
     return true;
 }
 
+uint128_t ProcessTrack::getVoxelId(float x, float y, float z)
+{
+    uint128_t voxel_id = 0;
+    union {
+        float floaty;
+        uint32_t inty;
+    } float_uint;
+
+    float_uint.floaty = x;
+    voxel_id |= static_cast<uint128_t>(float_uint.inty) << 64;
+    float_uint.floaty = y;
+    voxel_id |= static_cast<uint128_t>(float_uint.inty) << 32;
+    float_uint.floaty = z;
+    voxel_id |= float_uint.inty;
+    return voxel_id;
+}
+
 bool ProcessTrack::processTrack(ProcessedTrack* storage,
                                 const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud,
                                 pcl::PointCloud<pcl::PointXYZ>::Ptr laser_pointcloud)
@@ -202,55 +222,49 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage,
     double voxelSize = 0.15;
     if (!laser_pointcloud)
         return false;
-    for (auto& point : *wall_pointcloud)
+
+    std::map<uint128_t, std::vector<Point>*> voxel_to_target_map;
+    for (auto& point : *laser_pointcloud)
     {
+        float x = point.x - remainderf(point.x, voxelSize);
+        float y = point.y - remainderf(point.y, voxelSize);
+        float z = point.z - remainderf(point.z, voxelSize);
+
+        uint128_t voxel_id = getVoxelId(x, y, z);
+
         Point p = Point{ -point.y, point.x };
-
-        std::vector<Point>* target;
-        if (p.is_valid())
-        {
-            if (point.label == 0)
-                target = &storage->right_wall;
-            else if (point.label == 1)
-                target = &storage->left_wall;
-        }
-
-        if (!target)
+        if (!p.is_valid())
             continue;
 
-        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>);
+        auto foundPair = voxel_to_target_map.find(voxel_id);
+        std::vector<Point>* foundVector = (foundPair->second);
 
-        pcl::CropBox<pcl::PointXYZ> boxFilter;
-        boxFilter.setMin(
-            Eigen::Vector4f(point.x - voxelSize / 2, point.y - voxelSize / 2, point.z - voxelSize / 2, 1.0));
-        boxFilter.setMax(
-            Eigen::Vector4f(point.x + voxelSize / 2, point.y + voxelSize / 2, point.z + voxelSize / 2, 1.0));
-        boxFilter.setInputCloud(laser_pointcloud);
-        boxFilter.filter(*filteredCloud);
+        bool found = foundPair != voxel_to_target_map.end();
 
-        for (auto& fp : filteredCloud->points)
+        if (found)
         {
-            Point new_p = Point{ -fp.y, fp.x };
-            target->push_back(new_p);
+            if (foundVector)
+                foundVector->push_back(p);
         }
-    }
-    // add fake voxel to make sure that the circle fit algorithm always works
-    if (!storage->right_wall.empty() && !storage->left_wall.empty())
-    {
-        if (wallIsStraight(storage->right_wall))
+        else
         {
-            storage->right_wall.insert(storage->right_wall.begin(),
-                                       Point{ storage->right_wall.front().x + 0.1,
-                                              storage->right_wall.front().y + 0.1 });
-            storage->right_wall.push_back(
-                Point{ storage->right_wall.back().x + 0.1, storage->right_wall.back().y + 0.1 });
-        }
-        if (wallIsStraight(storage->left_wall))
-        {
-            storage->left_wall.insert(storage->left_wall.begin(),
-                                      Point{ storage->left_wall.front().x + 0.1, storage->left_wall.front().y + 0.1 });
-
-            storage->left_wall.push_back(Point{ storage->left_wall.back().x + 0.1, storage->left_wall.back().y + 0.1 });
+            for (auto& voxel : *wall_pointcloud)
+            {
+                if (voxel.x == x && voxel.y == y && voxel.z == z)
+                {
+                    std::vector<Point>* target;
+                    if (voxel.label == 0)
+                        target = &storage->right_wall;
+                    else if (voxel.label == 1)
+                        target = &storage->left_wall;
+                    voxel_to_target_map[voxel_id] = target;
+                    if (target)
+                    {
+                        target->push_back(p);
+                    }
+                    break;
+                }
+            }
         }
     }
 
