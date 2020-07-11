@@ -20,6 +20,7 @@
   <depend>dynamic_reconfigure</depend>
   <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
+  <depend>debug_tools</depend>
   <build_depend>libpcl-all-dev</build_depend>
   <exec_depend>libpcl-all</exec_depend>
 </package>

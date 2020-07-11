@@ -11,6 +11,7 @@
 
 #include <boxing/boxingConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <messages_sanity_check.h>
 #include <pcl_ros/transforms.h>
 
 constexpr const char* TOPIC_INPUT_POINTCLOUD = "/scan/lidar/cartesian";
@@ -37,9 +38,7 @@ class Boxing
     RvizGeometryPublisher m_debug_geometry;
     dynamic_reconfigure::Server<boxing::boxingConfig> m_dyn_cfg_server;
 
-    long m_old_seq = -1;
-    unsigned long m_skipped_messages = 0;
-    unsigned long m_max_skipped_messages = 0;
+    MessageContinuityCheck message_continuity_check;
 
     float m_voxel_size;
 
