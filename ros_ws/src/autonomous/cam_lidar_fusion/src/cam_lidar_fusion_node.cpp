@@ -29,7 +29,7 @@ CamLidarFusion::CamLidarFusion()
 void CamLidarFusion::cam_input_callback(const sensor_msgs::PointCloud2::ConstPtr& cam)
 {
     pcl::fromROSMsg(*cam, this->last_camera_pointcloud);
-    fuse();
+    // fuse();
 };
 
 void CamLidarFusion::lidar_input_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar)
