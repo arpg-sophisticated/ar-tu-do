@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   pcl_conversions
   pcl_ros
+  geometric_math
 )
 
 ## Errors and Warnings

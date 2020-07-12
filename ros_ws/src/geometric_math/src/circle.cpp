@@ -87,3 +87,10 @@ std::vector<Point> Circle::calcTangents(Point& outside_point)
     std::sort(intersections.begin(), intersections.end(), [](Point& a, Point& b) { return a.y > b.y; });
     return intersections;
 }
+
+double Circle::getDistance(Point& outside_point)
+{
+    return fabs(sqrt(((outside_point.x - m_center.x) * (outside_point.x - m_center.x)) +
+                     ((outside_point.y - m_center.y) * (outside_point.y - m_center.y))) -
+                m_radius);
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "circle.h"
 #include <boost/foreach.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <pcl/point_types.h>
@@ -31,12 +32,19 @@ class WallDetection
     dynamic_reconfigure::Server<wall_detection::wall_detectionConfig> m_dyn_cfg_server;
     float m_wall_radius;
 
-    std::pair<int, int> determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*>, float radius);
-    int findLargestCluster(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> clusters, int ignoreID);
-    void publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::vector<pcl::PointXYZRGBL>* wallRight);
-    void publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapClusters,
-                          std::pair<int, int> wallIDs);
     std::string frameID;
+
+    std::pair<int64_t, int64_t> determineWallIDs(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*>,
+                                                 float radius);
+    int64_t findLargestCluster(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> clusters,
+                               uint32_t ignoreID);
+    void publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::vector<pcl::PointXYZRGBL>* wallRight);
+    void publishObstacles(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> mapClusters,
+                          std::vector<uint32_t> wallIDs);
+    std::pair<std::vector<uint32_t>, std::vector<uint32_t>> addClustersOnRegression(
+        std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> mapClusters, std::vector<uint32_t> inputIgnoreIDs,
+        std::vector<pcl::PointXYZRGBL>* leftWall, std::vector<pcl::PointXYZRGBL>* rightWall);
+    Circle fitWall(std::vector<pcl::PointXYZRGBL>* wall);
 
     public:
     WallDetection();

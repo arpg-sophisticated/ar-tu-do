@@ -1,5 +1,6 @@
 #include "wall_detection.h"
 #include "walls.h"
+#include <circle_fit.h>
 #include <dynamic_reconfigure/server.h>
 #include <wall_detection/wall_detectionConfig.h>
 
@@ -38,7 +39,7 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRG
 
     frameID = inputVoxels->header.frame_id;
 
-    std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> clustersUsed;
+    std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> clustersUsed;
     // map cluster ids in label to map with cluster id as key and pointvector as value
     for (size_t i = 0; i < inputVoxels->points.size(); i++)
     {
@@ -55,22 +56,108 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRG
     }
 
     // determine maximum left and right clusters in a radius
-    auto test = determineWallIDs(clustersUsed, m_wall_radius); // these ids are the walls
+    std::pair<int64_t, int64_t> wallIds = determineWallIDs(clustersUsed, m_wall_radius); // these ids are the walls
+
+    std::vector<pcl::PointXYZRGBL>* leftWall = clustersUsed[wallIds.first];
+    std::vector<pcl::PointXYZRGBL>* rightWall = clustersUsed[wallIds.second];
+
+    std::vector<uint32_t> ignoreIDs;
+    ignoreIDs.push_back(wallIds.first);
+    ignoreIDs.push_back(wallIds.second);
+
+    std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids =
+        addClustersOnRegression(clustersUsed, ignoreIDs, leftWall, rightWall);
+
+    for (auto id : additional_wall_ids.first)
+    {
+        leftWall->insert(leftWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+    }
+
+    for (auto id : additional_wall_ids.second)
+    {
+        rightWall->insert(rightWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+    }
+
+    ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.first.begin(), additional_wall_ids.first.end());
+    ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.second.begin(), additional_wall_ids.second.end());
 
     // publish only the clusters with ids equal to the walls, but only if the id is > 0
-    if (test.first >= 0 && test.second >= 0)
-        publishWall(clustersUsed[test.first], clustersUsed[test.second]);
+    if (wallIds.first >= 0 && wallIds.second >= 0)
+        publishWall(leftWall, rightWall);
 
     // publish all other clusters
-    publishObstacles(clustersUsed, test);
+    publishObstacles(clustersUsed, ignoreIDs);
 
     // clean up
     for (auto itr = clustersUsed.begin(); itr != clustersUsed.end(); ++itr)
         delete itr->second;
 }
 
-void WallDetection::publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapClusters,
-                                     std::pair<int, int> wallIDs)
+Circle WallDetection::fitWall(std::vector<pcl::PointXYZRGBL>* wall)
+{
+    std::vector<Point> wallPointCloud;
+    wallPointCloud.resize(wall->size());
+    for (size_t i = 0; i < wall->size(); i++)
+    {
+        wallPointCloud[i].x = (*wall)[i].x;
+        wallPointCloud[i].y = (*wall)[i].y;
+    }
+    return CircleFit::hyperFit(wallPointCloud);
+}
+
+std::pair<std::vector<uint32_t>, std::vector<uint32_t>> WallDetection::addClustersOnRegression(
+    std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> mapClusters, std::vector<uint32_t> inputIgnoreIDs,
+    std::vector<pcl::PointXYZRGBL>* leftWall, std::vector<pcl::PointXYZRGBL>* rightWall)
+{
+    Circle leftCircle = fitWall(leftWall);
+    Circle rightCircle = fitWall(rightWall);
+
+    std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids;
+
+    double distanceThreshold = 0.4;
+    uint32_t scoreThreshold = 3;
+
+    for (auto cluster_wall : mapClusters)
+    {
+        uint32_t clusterID = cluster_wall.first;
+        if (std::find(inputIgnoreIDs.begin(), inputIgnoreIDs.end(), clusterID) != inputIgnoreIDs.end())
+            continue;
+
+        std::vector<pcl::PointXYZRGBL>* cluster = cluster_wall.second;
+
+        uint32_t leftScore = 0, rightScore = 0;
+
+        for (size_t i = 0; i < cluster->size(); i++)
+        {
+            Point p = { (*cluster)[i].x, (*cluster)[i].y };
+
+            if (leftCircle.getDistance(p) < distanceThreshold)
+                leftScore++;
+
+            if (rightCircle.getDistance(p) < distanceThreshold)
+                rightScore++;
+        }
+
+        std::cout << "ID: " << clusterID << " Left: " << leftScore << " Right: " << rightScore << std::endl;
+
+        if (leftScore > scoreThreshold || rightScore > scoreThreshold)
+        {
+            if (leftScore > rightScore)
+            {
+                additional_wall_ids.first.push_back(clusterID);
+            }
+            else if (rightScore > leftScore)
+            {
+                additional_wall_ids.second.push_back(clusterID);
+            }
+        }
+    }
+
+    return additional_wall_ids;
+}
+
+void WallDetection::publishObstacles(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> mapClusters,
+                                     std::vector<uint32_t> ignoreIDs)
 {
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
 
@@ -78,7 +165,8 @@ void WallDetection::publishObstacles(std::unordered_map<int, std::vector<pcl::Po
 
     for (auto itr = mapClusters.begin(); itr != mapClusters.end(); ++itr)
     {
-        if (itr->first != wallIDs.first && itr->first != wallIDs.second)
+        if (std::find(ignoreIDs.begin(), ignoreIDs.end(), itr->first) ==
+            ignoreIDs.end()) // ignoreIDs does not contain this id
         {
             for (size_t i = 0; i < itr->second->size(); i++)
             {
@@ -128,10 +216,11 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
     m_wall_publisher.publish(msg);
 }
 
-int WallDetection::findLargestCluster(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> clusters, int ignoreID)
+int64_t WallDetection::findLargestCluster(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> clusters,
+                                          uint32_t ignoreID)
 {
-    int largestClusterID = -1;
-    int largestClusterSize = 0;
+    int64_t largestClusterID = -1;
+    uint32_t largestClusterSize = 0;
     for (auto idCluster : clusters)
     {
         if (idCluster.first == ignoreID)
@@ -147,13 +236,13 @@ int WallDetection::findLargestCluster(std::unordered_map<int, std::vector<pcl::P
     return largestClusterID;
 }
 
-std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapToCheck,
-                                                    float radius)
+std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
+    std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> mapToCheck, float radius)
 {
     float maxLeft = 0;
     float minRight = 0;
-    int maxLeftID = -1;
-    int minRightID = -1;
+    int64_t maxLeftID = -1;
+    int64_t minRightID = -1;
 
     for (auto itr = mapToCheck.begin(); itr != mapToCheck.end(); ++itr)
     {
@@ -183,7 +272,7 @@ std::pair<int, int> WallDetection::determineWallIDs(std::unordered_map<int, std:
         minRightID = findLargestCluster(mapToCheck, maxLeftID);
     }
 
-    return std::pair<int, int>(maxLeftID, minRightID);
+    return std::pair<int64_t, int64_t>(maxLeftID, minRightID);
 }
 
 int main(int argc, char** argv)
