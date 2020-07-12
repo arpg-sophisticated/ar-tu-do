@@ -49,7 +49,6 @@ class ProcessTrack
     Point getCurveEntry(std::vector<Point>& wall);
     bool processTrack(ProcessedTrack* storage);
     bool wallIsStraight(std::vector<Point>& wall);
-    uint128_t getVoxelId(float x, float y, float z);
 
     public:
     bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);

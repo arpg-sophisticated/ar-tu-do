@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   geometric_math
+  boxing
 )
 
 
@@ -29,7 +30,7 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wchar-subscripts -Wchkp
 ## Declare things to be passed to dependent projects
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim pcl_conversions pcl_ros geometric_math
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim pcl_conversions pcl_ros geometric_math boxing
 )
 
 

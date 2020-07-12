@@ -34,6 +34,7 @@ generate_dynamic_reconfigure_options(
 
 ## Declare things to be passed to dependent projects
 catkin_package(
+  INCLUDE_DIRS include
   CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs pcl_conversions pcl_ros debug_tools
 )
 

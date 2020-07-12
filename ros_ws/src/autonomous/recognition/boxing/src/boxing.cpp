@@ -110,23 +110,6 @@ void Boxing::preprocess_colored_cloud()
     this->m_colored_cloud_dirty = false;
 }
 
-uint128_t Boxing::get_voxel_id(float x, float y, float z)
-{
-    uint128_t voxel_id = 0;
-    union {
-        float floaty;
-        uint32_t inty;
-    } float_uint;
-
-    float_uint.floaty = x;
-    voxel_id |= static_cast<uint128_t>(float_uint.inty) << 64;
-    float_uint.floaty = y;
-    voxel_id |= static_cast<uint128_t>(float_uint.inty) << 32;
-    float_uint.floaty = z;
-    voxel_id |= float_uint.inty;
-    return voxel_id;
-}
-
 void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
 {
     message_continuity_check.handleMessageSeq("Boxing: Laserscan: ", pointCloud->header.seq);

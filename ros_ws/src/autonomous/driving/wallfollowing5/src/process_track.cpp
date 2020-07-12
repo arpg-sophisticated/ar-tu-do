@@ -1,4 +1,5 @@
 #include "process_track.h"
+#include <boxing.h>
 #include <cmath>
 #include <cstdlib>
 #include <map>
@@ -199,23 +200,6 @@ bool ProcessTrack::wallIsStraight(std::vector<Point>& wall)
     return true;
 }
 
-uint128_t ProcessTrack::getVoxelId(float x, float y, float z)
-{
-    uint128_t voxel_id = 0;
-    union {
-        float floaty;
-        uint32_t inty;
-    } float_uint;
-
-    float_uint.floaty = x;
-    voxel_id |= static_cast<uint128_t>(float_uint.inty) << 64;
-    float_uint.floaty = y;
-    voxel_id |= static_cast<uint128_t>(float_uint.inty) << 32;
-    float_uint.floaty = z;
-    voxel_id |= float_uint.inty;
-    return voxel_id;
-}
-
 bool ProcessTrack::processTrack(ProcessedTrack* storage,
                                 const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud,
                                 pcl::PointCloud<pcl::PointXYZ>::Ptr laser_pointcloud)
@@ -231,7 +215,7 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage,
         float y = point.y - remainderf(point.y, voxelSize);
         float z = point.z - remainderf(point.z, voxelSize);
 
-        uint128_t voxel_id = getVoxelId(x, y, z);
+        uint128_t voxel_id = Boxing::get_voxel_id(x, y, z);
 
         Point p = Point{ -point.y, point.x };
         if (!p.is_valid())
