@@ -43,8 +43,8 @@ class DBSCAN
     }
 
     int run();
-    vector<int> calculateCluster(Point_ point);
-    int expandCluster(Point_& point, int clusterID);
+    vector<uint32_t> calculateCluster(Point_ point);
+    int expandCluster(Point_& point, uint32_t clusterID);
     inline double calculateDistance(Point_ pointCore, Point_ pointTarget);
 
     int getTotalPointSize()

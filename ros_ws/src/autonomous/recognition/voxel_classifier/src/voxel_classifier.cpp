@@ -40,6 +40,18 @@ void VoxelClassifier::voxel_callback(pcl::PointCloud<pcl::PointXYZRGBL> inputClo
     DBSCAN ds(m_minimum_points, m_epsilon * m_epsilon, m_color_weight, &inputCloud);
     ds.run();
 
+    for (auto pointIterator = inputCloud.begin(); pointIterator != inputCloud.end();)
+    {
+        if (pointIterator->label == NOISE)
+        {
+            pointIterator = inputCloud.erase(pointIterator);
+        }
+        else
+        {
+            ++pointIterator;
+        }
+    }
+
     m_cluster_publisher.publish(inputCloud);
 }
 
