@@ -188,6 +188,7 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
     {
         double radius = std::min(processed_track.right_circle.getRadius(), processed_track.left_circle.getRadius());
         double max_view_dist = std::max(1.0, radius / 10 * 3);
+        max_view_dist = std::min(max_view_dist, 5.0);
         std::pair<Point, Point> predicted_target_position =
             determineTargetPathPoint(processed_track, 0.3, max_view_dist, 0.01);
         predicted_position = predicted_target_position.first;
