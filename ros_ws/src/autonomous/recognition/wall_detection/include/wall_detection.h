@@ -33,6 +33,8 @@ class WallDetection
     double m_distance_threshold = 0.4;
     uint32_t m_score_threshold = 3;
     double m_minimum_confidence = 0.3;
+    bool m_use_prediction_for_walls = true;
+    bool m_use_prediction_for_obstacles = true;
 
     std::pair<int64_t, int64_t> determineWallIDs(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*>,
                                                  float radius);

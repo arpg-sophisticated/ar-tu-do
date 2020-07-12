@@ -32,6 +32,8 @@ WallDetection::WallDetection()
 
     m_dyn_cfg_server.setCallback([&](wall_detection::wall_detectionConfig& cfg, uint32_t) {
         m_wall_radius = cfg.wall_search_radius;
+        m_use_prediction_for_walls = cfg.use_prediction_for_walls;
+        m_use_prediction_for_obstacles = cfg.use_prediction_for_obstacles;
         m_distance_threshold = cfg.distance_from_circle_threshold;
         m_score_threshold = cfg.regression_minimum_score;
         m_minimum_confidence = cfg.minimum_confidence;
@@ -71,22 +73,29 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRG
         ignoreIDs.push_back(wallIds.first);
         ignoreIDs.push_back(wallIds.second);
 
-        std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids =
-            addClustersOnRegression(clustersUsed, ignoreIDs, leftWall, rightWall);
-
-        for (auto id : additional_wall_ids.first)
+        if (m_use_prediction_for_walls || m_use_prediction_for_obstacles)
         {
-            leftWall->insert(leftWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+            std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids =
+                addClustersOnRegression(clustersUsed, ignoreIDs, leftWall, rightWall);
+
+            if (m_use_prediction_for_walls)
+            {
+                for (auto id : additional_wall_ids.first)
+                {
+                    leftWall->insert(leftWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+                }
+
+                for (auto id : additional_wall_ids.second)
+                {
+                    rightWall->insert(rightWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+                }
+            }
+            if (m_use_prediction_for_obstacles)
+            {
+                ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.first.begin(), additional_wall_ids.first.end());
+                ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.second.begin(), additional_wall_ids.second.end());
+            }
         }
-
-        for (auto id : additional_wall_ids.second)
-        {
-            rightWall->insert(rightWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
-        }
-
-        ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.first.begin(), additional_wall_ids.first.end());
-        ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.second.begin(), additional_wall_ids.second.end());
-
         // publish only the clusters with ids equal to the walls, but only if the id is > 0
         publishWall(leftWall, rightWall);
     }
