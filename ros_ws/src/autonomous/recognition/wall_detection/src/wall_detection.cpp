@@ -30,8 +30,12 @@ WallDetection::WallDetection()
 
     m_wall_radius = 3;
 
-    m_dyn_cfg_server.setCallback(
-        [&](wall_detection::wall_detectionConfig& cfg, uint32_t) { m_wall_radius = cfg.wall_search_radius; });
+    m_dyn_cfg_server.setCallback([&](wall_detection::wall_detectionConfig& cfg, uint32_t) {
+        m_wall_radius = cfg.wall_search_radius;
+        m_distance_threshold = cfg.distance_from_circle_threshold;
+        m_score_threshold = cfg.regression_minimum_score;
+        m_minimum_confidence = cfg.minimum_confidence;
+    });
 }
 
 void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& inputVoxels)
@@ -114,9 +118,6 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> WallDetection::addCluste
 
     std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids;
 
-    double distanceThreshold = 0.4;
-    uint32_t scoreThreshold = 3;
-
     for (auto cluster_wall : mapClusters)
     {
         uint32_t clusterID = cluster_wall.first;
@@ -131,16 +132,16 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> WallDetection::addCluste
         {
             Point p = { (*cluster)[i].x, (*cluster)[i].y };
 
-            if (leftCircle.getDistance(p) < distanceThreshold)
+            if (leftCircle.getDistance(p) < m_distance_threshold)
                 leftScore++;
 
-            if (rightCircle.getDistance(p) < distanceThreshold)
+            if (rightCircle.getDistance(p) < m_distance_threshold)
                 rightScore++;
         }
 
-        std::cout << "ID: " << clusterID << " Left: " << leftScore << " Right: " << rightScore << std::endl;
+        double confidence = fabsf(1 - (static_cast<double>(leftScore + 1) / static_cast<double>(rightScore + 1)));
 
-        if (leftScore > scoreThreshold || rightScore > scoreThreshold)
+        if (confidence > m_minimum_confidence && (leftScore > m_score_threshold || rightScore > m_score_threshold))
         {
             if (leftScore > rightScore)
             {
