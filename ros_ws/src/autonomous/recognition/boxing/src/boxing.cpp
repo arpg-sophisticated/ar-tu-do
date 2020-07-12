@@ -50,6 +50,7 @@ Boxing::Boxing()
 
     m_dyn_cfg_server.setCallback([&](boxing::boxingConfig& cfg, uint32_t) {
         m_voxel_size = cfg.voxel_size;
+        m_lidar_percentage = cfg.lidar_point_percentage;
         m_filter_by_min_score_enabled = cfg.m_filter_by_min_score_enabled;
         m_filter_by_min_score = cfg.filter_by_min_score;
         m_sor_enabled = cfg.sor_enabled;
@@ -161,7 +162,9 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
     this->m_maximum_z = 0;
     this->m_minimum_z = 0;
 
-    for (size_t i = 0; i < output_cloud->points.size(); i++)
+    size_t step_size = 1.0f / m_lidar_percentage;
+
+    for (size_t i = 0; i < output_cloud->points.size(); i += step_size)
     {
         pcl::PointXYZ& point = output_cloud->at(i);
         float x = point.x - remainderf(point.x, m_voxel_size);

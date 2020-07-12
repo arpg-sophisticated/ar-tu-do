@@ -41,6 +41,7 @@ class Boxing
     MessageContinuityCheck message_continuity_check;
 
     float m_voxel_size;
+    float m_lidar_percentage;
 
     bool m_filter_by_min_score_enabled;
     float m_filter_by_min_score;
