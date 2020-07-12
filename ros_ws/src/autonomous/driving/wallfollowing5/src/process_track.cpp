@@ -79,8 +79,14 @@ Point ProcessTrack::getCurveEntry(std::vector<Point>& wall)
 
 bool ProcessTrack::processTrack(ProcessedTrack* storage)
 {
-    if (!CircleFit::pointcloudIsValid(storage->left_wall) || !CircleFit::pointcloudIsValid(storage->right_wall))
+    if (!CircleFit::pointcloudIsValid(storage->left_wall))
     {
+        std::cerr << "Left Wall invalid" << std::endl;
+        return false;
+    }
+    if (!CircleFit::pointcloudIsValid(storage->right_wall))
+    {
+        std::cerr << "Right Wall invalid" << std::endl;
         return false;
     }
     storage->left_circle = CircleFit::hyperFit(storage->left_wall);
@@ -132,11 +138,6 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
     else
     {
         storage->curve_type = CURVE_TYPE_STRAIGHT;
-    }
-
-    if (!CircleFit::pointcloudIsValid(storage->left_wall) || !CircleFit::pointcloudIsValid(storage->right_wall))
-    {
-        return false;
     }
 
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)

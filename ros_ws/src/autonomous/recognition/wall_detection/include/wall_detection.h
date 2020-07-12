@@ -26,16 +26,13 @@ class WallDetection
     ros::Subscriber m_voxel_subscriber;
     ros::Publisher m_wall_publisher;
     ros::Publisher m_obstacles_publisher;
-    const std::string m_frame;
-    std::vector<PointCloud> listOfClusters;
+    std::string m_frame;
 
     dynamic_reconfigure::Server<wall_detection::wall_detectionConfig> m_dyn_cfg_server;
     float m_wall_radius;
     double m_distance_threshold = 0.4;
     uint32_t m_score_threshold = 3;
     double m_minimum_confidence = 0.3;
-
-    std::string frameID;
 
     std::pair<int64_t, int64_t> determineWallIDs(std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*>,
                                                  float radius);

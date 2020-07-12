@@ -40,8 +40,7 @@ WallDetection::WallDetection()
 
 void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& inputVoxels)
 {
-
-    frameID = inputVoxels->header.frame_id;
+    m_frame = inputVoxels->header.frame_id;
 
     std::unordered_map<uint32_t, std::vector<pcl::PointXYZRGBL>*> clustersUsed;
     // map cluster ids in label to map with cluster id as key and pointvector as value
@@ -62,33 +61,39 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRG
     // determine maximum left and right clusters in a radius
     std::pair<int64_t, int64_t> wallIds = determineWallIDs(clustersUsed, m_wall_radius); // these ids are the walls
 
-    std::vector<pcl::PointXYZRGBL>* leftWall = clustersUsed[wallIds.first];
-    std::vector<pcl::PointXYZRGBL>* rightWall = clustersUsed[wallIds.second];
-
     std::vector<uint32_t> ignoreIDs;
-    ignoreIDs.push_back(wallIds.first);
-    ignoreIDs.push_back(wallIds.second);
 
-    std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids =
-        addClustersOnRegression(clustersUsed, ignoreIDs, leftWall, rightWall);
-
-    for (auto id : additional_wall_ids.first)
-    {
-        leftWall->insert(leftWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
-    }
-
-    for (auto id : additional_wall_ids.second)
-    {
-        rightWall->insert(rightWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
-    }
-
-    ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.first.begin(), additional_wall_ids.first.end());
-    ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.second.begin(), additional_wall_ids.second.end());
-
-    // publish only the clusters with ids equal to the walls, but only if the id is > 0
     if (wallIds.first >= 0 && wallIds.second >= 0)
-        publishWall(leftWall, rightWall);
+    {
+        std::vector<pcl::PointXYZRGBL>* leftWall = clustersUsed[wallIds.first];
+        std::vector<pcl::PointXYZRGBL>* rightWall = clustersUsed[wallIds.second];
 
+        ignoreIDs.push_back(wallIds.first);
+        ignoreIDs.push_back(wallIds.second);
+
+        std::pair<std::vector<uint32_t>, std::vector<uint32_t>> additional_wall_ids =
+            addClustersOnRegression(clustersUsed, ignoreIDs, leftWall, rightWall);
+
+        for (auto id : additional_wall_ids.first)
+        {
+            leftWall->insert(leftWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+        }
+
+        for (auto id : additional_wall_ids.second)
+        {
+            rightWall->insert(rightWall->end(), clustersUsed[id]->begin(), clustersUsed[id]->end());
+        }
+
+        ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.first.begin(), additional_wall_ids.first.end());
+        ignoreIDs.insert(ignoreIDs.end(), additional_wall_ids.second.begin(), additional_wall_ids.second.end());
+
+        // publish only the clusters with ids equal to the walls, but only if the id is > 0
+        publishWall(leftWall, rightWall);
+    }
+    else
+    {
+        std::cerr << "Did not find walls!" << std::endl;
+    }
     // publish all other clusters
     publishObstacles(clustersUsed, ignoreIDs);
 
@@ -162,7 +167,7 @@ void WallDetection::publishObstacles(std::unordered_map<uint32_t, std::vector<pc
 {
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
 
-    msg->header.frame_id = frameID;
+    msg->header.frame_id = m_frame;
 
     for (auto itr = mapClusters.begin(); itr != mapClusters.end(); ++itr)
     {
@@ -182,7 +187,9 @@ void WallDetection::publishObstacles(std::unordered_map<uint32_t, std::vector<pc
 void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::vector<pcl::PointXYZRGBL>* wallRight)
 {
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
-    msg->header.frame_id = frameID;
+    msg->header.frame_id = m_frame;
+
+    msg->resize(wallLeft->size() + wallRight->size());
 
     for (size_t i = 0; i < wallLeft->size(); i++)
     {
@@ -196,7 +203,7 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
 
         tmp.label = WALL_DETECTION_WALL_ID_LEFT;
 
-        msg->push_back(tmp);
+        (*msg)[i] = (tmp);
     }
 
     for (size_t i = 0; i < wallRight->size(); i++)
@@ -210,7 +217,7 @@ void WallDetection::publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::v
         tmp.b = (*wallRight)[i].b;
         tmp.label = WALL_DETECTION_WALL_ID_RIGHT;
 
-        msg->push_back(tmp);
+        (*msg)[wallLeft->size() + i] = (tmp);
     }
 
     pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
