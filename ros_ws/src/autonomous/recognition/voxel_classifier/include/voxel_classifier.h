@@ -32,6 +32,5 @@ class VoxelClassifier
 
     public:
     VoxelClassifier();
-    void voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar);
-    void cluster_publish(std::vector<Point_>* clusters);
+    void voxel_callback(pcl::PointCloud<pcl::PointXYZRGBL> lidar);
 };

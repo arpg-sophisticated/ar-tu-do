@@ -18,7 +18,8 @@ VoxelClassifier::VoxelClassifier()
         topicClusters = TOPIC_CLUSTER_;
 
     this->m_voxel_subscriber =
-        m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicVoxels, 1, &VoxelClassifier::voxel_callback, this);
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(topicVoxels, 1, &VoxelClassifier::voxel_callback,
+                                                                    this);
 
     this->m_cluster_publisher = m_node_handle.advertise<pcl::PointCloud<pcl::PointXYZRGBL>>(topicClusters, 1);
 
@@ -31,54 +32,15 @@ VoxelClassifier::VoxelClassifier()
     });
 }
 
-void VoxelClassifier::voxel_callback(const sensor_msgs::PointCloud2::ConstPtr& voxelPointcloud)
+void VoxelClassifier::voxel_callback(pcl::PointCloud<pcl::PointXYZRGBL> inputCloud)
 {
+    for (size_t i = 0; i < inputCloud.size(); i++)
+        inputCloud.at(i).label = UNCLASSIFIED;
 
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZRGBL>);
-    pcl::fromROSMsg(*voxelPointcloud, *inputCloud);
-
-    m_frame = voxelPointcloud->header.frame_id;
-
-    std::vector<Point_> dbScanPoints;
-    for (size_t i = 0; i < inputCloud->size(); i++)
-    {
-        Point_ tmp;
-        tmp.x = (*inputCloud)[i].x;
-        tmp.y = (*inputCloud)[i].y;
-        tmp.z = (*inputCloud)[i].z;
-        tmp.r = (*inputCloud)[i].r;
-        tmp.g = (*inputCloud)[i].g;
-        tmp.b = (*inputCloud)[i].b;
-        tmp.clusterID = -1;
-        dbScanPoints.push_back(tmp);
-    }
-
-    DBSCAN ds(m_minimum_points, m_epsilon * m_epsilon, m_color_weight, &dbScanPoints);
+    DBSCAN ds(m_minimum_points, m_epsilon * m_epsilon, m_color_weight, &inputCloud);
     ds.run();
 
-    cluster_publish(&dbScanPoints);
-}
-
-void VoxelClassifier::cluster_publish(std::vector<Point_>* clusters)
-{
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr msg(new pcl::PointCloud<pcl::PointXYZRGBL>);
-    msg->header.frame_id = m_frame;
-
-    for (size_t i = 0; i < clusters->size(); i++)
-    {
-        pcl::PointXYZRGBL tmp;
-        tmp.x = (*clusters)[i].x;
-        tmp.y = (*clusters)[i].y;
-        tmp.z = (*clusters)[i].z;
-        tmp.r = (*clusters)[i].r;
-        tmp.g = (*clusters)[i].g;
-        tmp.b = (*clusters)[i].b;
-        tmp.label = (*clusters)[i].clusterID;
-        msg->push_back(tmp);
-    }
-
-    pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
-    m_cluster_publisher.publish(msg);
+    m_cluster_publisher.publish(inputCloud);
 }
 
 int main(int argc, char** argv)
