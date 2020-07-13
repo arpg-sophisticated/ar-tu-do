@@ -31,7 +31,7 @@
         <arg name="visualize_lidar" value="$(arg visualize_lidar)"/>
     </include>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find wall_separation)/launch/rviz_config.rviz"/>
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find wall_separation)/launch/rviz_config.rviz"/>-->
 
     <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
     <include file="$(find car_control)/launch/car_control.launch">
