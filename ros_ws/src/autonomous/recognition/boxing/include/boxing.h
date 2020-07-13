@@ -71,20 +71,20 @@ class Boxing
     Boxing();
     void input_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar);
     void colored_input_callback(const sensor_msgs::PointCloud2::ConstPtr& lidar);
-    static uint128_t get_voxel_id(float x, float y, float z)
+    static uint64_t get_voxel_id(float x, float y, float z)
     {
-        uint128_t voxel_id = 0;
+        uint64_t voxel_id = 0;
         union {
             float floaty;
             uint32_t inty;
         } float_uint;
 
         float_uint.floaty = x;
-        voxel_id |= static_cast<uint128_t>(float_uint.inty) << 64;
-        float_uint.floaty = y;
         voxel_id |= static_cast<uint128_t>(float_uint.inty) << 32;
-        float_uint.floaty = z;
-        voxel_id |= float_uint.inty;
+        float_uint.floaty = y;
+        voxel_id |= static_cast<uint128_t>(float_uint.inty) << 0;
+        // float_uint.floaty = z;
+        // voxel_id |= float_uint.inty;
         return voxel_id;
     }
 };

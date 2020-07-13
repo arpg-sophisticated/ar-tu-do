@@ -136,7 +136,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
     float largest_intensity = 0;
 
-    std::map<uint128_t, pcl::PointXYZRGBL> quantized_cloud_voxel_map;
+    std::map<uint64_t, pcl::PointXYZRGBL> quantized_cloud_voxel_map;
 
     this->m_maximum_x = 0;
     this->m_minimum_x = 0;
@@ -170,7 +170,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
             this->m_minimum_z = point.z;
 
         // search the point we want to increment
-        uint128_t voxel_id = get_voxel_id(x, y, z);
+        uint64_t voxel_id = get_voxel_id(x, y, z);
         auto foundPair = quantized_cloud_voxel_map.find(voxel_id);
         pcl::PointXYZRGBL* foundPoint = &(foundPair->second);
         bool found = foundPair != quantized_cloud_voxel_map.end();
@@ -223,7 +223,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
         // now we iterate over every point in the colored pointcloud and build a color histogram for
         // every voxel
-        std::map<uint128_t, std::map<uint32_t, uint32_t>> histograms;
+        std::map<uint64_t, std::map<uint32_t, uint32_t>> histograms;
 
         std::map<uint32_t, uint32_t> global_histogram; // to determine the most used color for uncolored voxels
 
@@ -231,7 +231,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
         {
             pcl::PointXYZRGB& cp = m_colored_cloud->points[i];
 
-            uint128_t voxel_id =
+            uint64_t voxel_id =
                 get_voxel_id(cp.x - remainderf(cp.x, m_voxel_size), cp.y - remainderf(cp.y, m_voxel_size),
                              cp.z - remainderf(cp.z, m_voxel_size));
 
