@@ -2,8 +2,8 @@
 #include <boxing.h>
 #include <cmath>
 #include <cstdlib>
-#include <map>
 #include <math.h>
+#include <unordered_map>
 
 std::vector<Point> ProcessTrack::cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select)
 {
@@ -208,28 +208,26 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage,
     if (!laser_pointcloud)
         return false;
 
-    std::map<uint128_t, std::vector<Point>*> voxel_to_target_map;
+    std::unordered_map<uint64_t, std::vector<Point>*> voxel_to_target_map;
     for (auto& point : *laser_pointcloud)
     {
         float x = point.x - remainderf(point.x, voxelSize);
         float y = point.y - remainderf(point.y, voxelSize);
-        float z = point.z - remainderf(point.z, voxelSize);
+        float z = point.z; // - remainderf(point.z, voxelSize);
 
-        uint128_t voxel_id = Boxing::get_voxel_id(x, y, z);
+        uint64_t voxel_id = Boxing::get_voxel_id(x, y, z);
 
         Point p = Point{ -point.y, point.x };
         if (!p.is_valid())
             continue;
 
         auto foundPair = voxel_to_target_map.find(voxel_id);
-        std::vector<Point>* foundVector = (foundPair->second);
-
         bool found = foundPair != voxel_to_target_map.end();
 
         if (found)
         {
-            if (foundVector)
-                foundVector->push_back(p);
+            std::vector<Point>* foundVector = (foundPair->second);
+            foundVector->push_back(p);
         }
         else
         {

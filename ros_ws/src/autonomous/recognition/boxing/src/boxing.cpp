@@ -14,6 +14,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/transforms.h>
 #include <ros/console.h>
+#include <unordered_map>
 
 // mysterious code stolen from https://stackoverflow.com/a/15012792
 bool floatCompare(double x, double y)
@@ -136,7 +137,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
 
     float largest_intensity = 0;
 
-    std::map<uint64_t, pcl::PointXYZRGBL> quantized_cloud_voxel_map;
+    std::unordered_map<uint64_t, pcl::PointXYZRGBL> quantized_cloud_voxel_map;
 
     this->m_maximum_x = 0;
     this->m_minimum_x = 0;
@@ -152,7 +153,7 @@ void Boxing::input_callback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud
         pcl::PointXYZ& point = output_cloud->at(i);
         float x = point.x - remainderf(point.x, m_voxel_size);
         float y = point.y - remainderf(point.y, m_voxel_size);
-        float z = point.z - remainderf(point.z, m_voxel_size);
+        float z = point.z; // - remainderf(point.z, m_voxel_size);
 
         if (point.x > this->m_maximum_x)
             this->m_maximum_x = point.x;
