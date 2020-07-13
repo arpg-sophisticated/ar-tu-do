@@ -42,10 +42,10 @@ Boxing::Boxing()
 
     this->m_input_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicLaserScan, 1, &Boxing::input_callback, this);
-    this->m_colored_point_cloud_subscriber =
+    /*this->m_colored_point_cloud_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>(topicColoredPointCloud, 1, &Boxing::colored_input_callback,
                                                           this);
-
+*/
     this->m_voxel_publisher = m_node_handle.advertise<sensor_msgs::PointCloud2>(topicVoxel, 1, true);
 
     m_dyn_cfg_server.setCallback([&](boxing::boxingConfig& cfg, uint32_t) {
