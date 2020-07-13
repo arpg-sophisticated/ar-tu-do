@@ -265,14 +265,16 @@ std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
     {
         for (auto itrVector = itr->second->begin(); itrVector != itr->second->end(); ++itrVector)
         {
-            if ((itrVector->y > maxLeft) && (fabsf(itrVector->x) <= radius))
+	    double y = itrVector->y;
+	    if(y < 0) continue;
+            if ((itrVector->x > maxLeft) && (y <= radius))
             {
-                maxLeft = itrVector->y;
+                maxLeft = itrVector->x;
                 maxLeftID = itrVector->label;
             }
-            if ((itrVector->y < minRight) && (fabsf(itrVector->x) <= radius))
+            if ((itrVector->x < minRight) && (y <= radius))
             {
-                minRight = itrVector->y;
+                minRight = itrVector->x;
                 minRightID = itrVector->label;
             }
         }
@@ -289,7 +291,7 @@ std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
         minRightID = findLargestCluster(mapToCheck, maxLeftID);
     }
 
-    return std::pair<int64_t, int64_t>(maxLeftID, minRightID);
+    return std::pair<int64_t, int64_t>(minRightID, maxLeftID);
 }
 
 int main(int argc, char** argv)
