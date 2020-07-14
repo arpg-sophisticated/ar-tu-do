@@ -14,7 +14,7 @@ picture_size = 71
 batch_size=32
 epochs=100
 
-voxel = True
+voxel = False
 
 laser_sample_count = 128
 
@@ -79,7 +79,7 @@ def build_model_old():
     return model
 
 def build_model_voxel():
-    inputPNG = Input(shape=(picture_size, picture_size, 1))
+    inputPNG = Input(shape=(picture_size, picture_size, 1), dtype=np.float16)
     inputNumeric = Input(shape=(1,))
 
     png_branch = layers.Conv2D(16, (32, 32), activation='relu')(inputPNG)
@@ -100,7 +100,7 @@ def build_model_voxel():
 
     combined_branch = layers.concatenate([png_branch.output,numeric_branch.output])
     combined_branch = layers.Dense(32, activation='relu')(combined_branch)
-    combined_branch = layers.Dense(1, activation='tanh')(combined_branch)
+    combined_branch = layers.Dense(2, activation='tanh')(combined_branch)
 
     model = Model(inputs=[png_branch.input,numeric_branch.input],outputs=combined_branch)
 
@@ -115,7 +115,8 @@ def build_model_voxel():
 
 
 def build_model_laser_scan():
-    inputNumeric = Input(shape=(129,))
+    #inputNumeric = Input(shape=(laser_sample_count+1,))
+    inputNumeric = Input(shape=(laser_sample_count,))
 
     numeric_branch = layers.Dense(64, activation='tanh')(inputNumeric)
     numeric_branch = layers.Dense(32, activation='tanh')(numeric_branch)
@@ -142,9 +143,8 @@ def get_training_data_voxel():
     training_data_from_png = get_training_data_from_png()
 
     training_data_numeric = training_data_from_db[:,0]
-    training_data_label = training_data_from_db[:,2]
+    training_data_label = training_data_from_db[:,1:]
 
-    #boost difficult curve 265 - 375
     print ('png'+str(training_data_from_png.shape))
     print ('numeric'+str(training_data_numeric.shape))
     print ('label'+str(training_data_label.shape))
@@ -183,7 +183,13 @@ def train_model():
         print(trainXNumeric.shape)
         print("Shape of Training-Data-y:")
         print(training_data_label.shape)
-        print("train model")
+
+        print("first entry:")
+        print(trainXPNG[0])
+        print(trainXNumeric[0])
+        print(training_data_label[0])
+
+        print("train model")    
         model.fit([trainXPNG,trainXNumeric], training_data_label, batch_size=batch_size, epochs=epochs)
     else:
         model = build_model_laser_scan()
@@ -232,7 +238,8 @@ def save_model(model):
 def get_training_data_laser():
     connect_to_database()
     print("executing db-query")
-    query = '''select td.speed || lv.values as values from training_data as td 
+    #query = '''select td.speed || lv.values as values from training_data as td 
+    query = '''select lv.values as values from training_data as td 
                 join (
                     select ts, array_agg(value order by value_id asc) as values
                         from (
@@ -272,17 +279,20 @@ def get_training_data_label():
 
 def get_training_data_from_db_voxel():
     print("executing db-query")
+    #query = "select speed,calc_angle from training_data_new order by ts asc"
     query = "select speed,calc_velocity,calc_angle from training_data_new order by ts asc"
     #query = "select calc_velocity,calc_angle from training_data"
 
     cursor.execute(query)
-    print("Selecting rows from training_data_new table")
+
     records = np.asarray(cursor.fetchall(), dtype=np.float32)
 
-    #normalization
-    #stdev =np.asarray([1.547,1.446,0.262])
-    #avg =np.asarray([4.853,4.603,-0.094])
-    #records = (records - avg) /stdev
+    #normalization 
+    # SELECT avg(speed) as avg_speed,avg(calc_velocity) as avg_velocity, avg(calc_angle) as avg_angle,  stddev(speed) as stddev_speed, stddev(calc_velocity) as stddev_velocity,stddev(calc_angle) as stddev_angle
+	# FROM public.training_data_new; 
+    stdev =np.asarray([1.773,1.552,0.681])
+    avg =np.asarray([4.330,4.136,-0.342])
+    records = (records - avg) /stdev
     #np.save("/home/marvin/db_data.npy",records)
     return records
 
@@ -301,14 +311,9 @@ def get_training_data_from_png():
         #print(im_path)
         #print(plt.imread(im_path)[:,:,0])
         #print(im_path)
-    np_array= np.asarray(list_of_np_array)
+    np_array= np.asarray(list_of_np_array, dtype=bool)
+    print(np_array.shape)
     #np.save("/home/marvin/pictures.npy",np_array)
     return np_array
 
 train_model()
-#TODO: 
-# 
-# nn optimieren
-#   angle und velocity normalisieren
-# mehr daten aufzeichnen
-# zuordnung von drive-param zu voxel bei store

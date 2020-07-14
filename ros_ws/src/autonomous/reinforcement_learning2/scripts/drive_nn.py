@@ -93,7 +93,7 @@ def laser_callback(scan_message):
     else:
         wheel_speed =0
     
-    values = [wheel_speed] + values
+    #values = [wheel_speed] + values
     np_values = np.asarray(values, dtype=np.float32)
 
     np_values = np.expand_dims(np_values ,0)
@@ -123,7 +123,7 @@ def load_model():
         print("---------------------Start Loading model from disk-------------------------")
         model_folder =os.path.join(rospack.get_path("reinforcement_learning2"), "model")
 
-        json_file = open(os.path.join(model_folder,'model30-06-2020_20:00.json'), 'r')
+        json_file = open(os.path.join(model_folder,'net6.json'), 'r')
         print("---------------------Start reading json-------------------------")
         loaded_model_json = json_file.read()
         json_file.close()
@@ -134,7 +134,7 @@ def load_model():
 
         # load weights into new model
         print("----------------------Load model.h5-file------------------------")
-        model.load_weights(os.path.join(model_folder,'model30-06-2020_20:00.h5'))
+        model.load_weights(os.path.join(model_folder,'net6.h5'))
         print("---------------------------Loaded model from disk------------------------")
         tf.keras.backend.set_learning_phase(0)
     print(model.summary())
@@ -169,29 +169,6 @@ def test():
 
     except (Exception, psycopg2.Error) as error :
         print ("Error while connecting to PostgreSQL", error)
-    print("executing db-query")
-    query = '''select td.speed || lv.values as values from training_data as td 
-                join (
-                    select ts, array_agg(value order by value_id asc) as values
-                        from (
-                        select ts, value, value_id
-                        from training_data_laser_values
-                        ) t
-                        group by ts
-                        order by ts) as lv 
-                on td.ts = lv.ts 
-                order by td.ts desc'''
-
-    cursor.execute(query)
-    records = np.asarray(cursor.fetchall(), dtype=np.float32) 
-
-    records = np.squeeze(records, axis=1)
-    np_values = np.asarray(records, dtype=np.float32)
-
-    with tf.device('/gpu:0'):
-        prediction = model.predict(np_values)
-    
-    print(prediction)
 
 set_keras_conf()
 
