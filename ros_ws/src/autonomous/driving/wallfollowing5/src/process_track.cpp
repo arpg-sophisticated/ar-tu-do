@@ -40,7 +40,9 @@ bool ProcessTrack::isCurveEntryInFront(Point& curve_entry_point, Point& lowest_p
     {
         return true;
     }
-    return std::abs((lowest_point.y - curve_entry_point.y) / (lowest_point.x - curve_entry_point.x)) > threshold;
+    double val = (lowest_point.y - curve_entry_point.y) / (lowest_point.x - curve_entry_point.x);
+    std::cout << "Value: " << val << " abs(val): " << fabsf(val) << std::endl;
+    return fabsf(val) > threshold;
 }
 
 unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud)
