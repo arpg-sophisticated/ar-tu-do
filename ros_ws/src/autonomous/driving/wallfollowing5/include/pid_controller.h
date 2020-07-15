@@ -1,7 +1,6 @@
 #pragma once
 
-#include <dynamic_reconfigure/server.h>
-#include <wallfollowing5/pidConfig.h>
+#include "config.h"
 
 class PIDController
 {
@@ -14,8 +13,6 @@ class PIDController
     double m_previous_error = 0;
     double m_integral = 0;
 
-    dynamic_reconfigure::Server<wallfollowing5::pidConfig> m_dyn_cfg_server;
-
     public:
     PIDController(double p, double i, double d, double anti_windup = 0.2)
     {
@@ -25,7 +22,10 @@ class PIDController
         m_anti_windup = anti_windup;
     }
 
-    PIDController();
+    PIDController()
+    {
+    }
 
     double updateAndGetCorrection(double error, double delta_time);
+    double updateAndGetCorrection(double error, double delta_time, Config::PIDParams& pid_params);
 };

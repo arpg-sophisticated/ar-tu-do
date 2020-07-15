@@ -17,6 +17,8 @@
 #include "steering_controller.h"
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
+#include <dynamic_reconfigure/server.h>
+#include <wallfollowing5/wallfollowing5Config.h>
 #include <vector>
 #include <cmath>
 // clang-format on
@@ -51,6 +53,11 @@ class Wallfollowing
     std::vector<Point> m_laser_pointcloud;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr m_lidar_pointcloud;
+
+    dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
+    Config::WallfollowingParams wallfollowing_params;
+    Config::SteeringParams steering_params;
+    Config::PIDParams pid_params;
 
     public:
     Wallfollowing();
