@@ -151,6 +151,7 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
         else
         {
             storage->curve_type = CURVE_TYPE_STRAIGHT;
+            std::cout << "upper wall ist not valid" << std::endl;
         }
 
         std::vector<Point> curve_entry_line = { Point{ -2, remaining_distance }, Point{ 2, remaining_distance } };
