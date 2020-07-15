@@ -104,8 +104,10 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->left_wall);
         if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         {
-            storage->upper_wall = cropPointcloud(storage->right_wall,
-                                                 [storage](Point& p) { return p.y >= storage->curve_entry.y - 1.5; });
+            storage->upper_wall = cropPointcloud(storage->right_wall, [storage](Point& p) {
+                printf("curve_entry.y: %lf\n", storage->curve_entry.y);
+                return p.y >= storage->curve_entry.y - 1.5;
+            });
             // storage->right_wall =
             //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
             // if len(right_wall) == 0:
@@ -123,8 +125,10 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->right_wall);
         if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         {
-            storage->upper_wall =
-                cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y >= storage->curve_entry.y - 1.5; });
+            storage->upper_wall = cropPointcloud(storage->left_wall, [storage](Point& p) {
+                printf("curve_entry.y: %lf\n", storage->curve_entry.y);
+                return p.y >= storage->curve_entry.y - 1.5;
+            });
             // storage->left_wall =
             //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
             // if len(left_wall) == 0:
