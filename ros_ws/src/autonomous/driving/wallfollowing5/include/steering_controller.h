@@ -13,6 +13,7 @@ class SteeringController
     private:
     double m_current_speed = 0;
     double m_min_possible_steering_angle;
+    double m_max_steering_angle;
 
     dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
 

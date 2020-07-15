@@ -8,6 +8,7 @@ SteeringController::SteeringController()
 
     m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
         m_min_possible_steering_angle = cfg.min_possible_steering_angle;
+        m_max_steering_angle = cfg.max_steering_angle;
     });
 }
 
@@ -19,12 +20,12 @@ double SteeringController::determineSteeringAngle(ProcessedTrack& processed_trac
     double steering_angle = m_pid_controller.updateAndGetCorrection(error, delta_time);
     double min_turning_radius = std::pow(m_current_speed + 0.01, 2) / PhysicalProperties::ACCELERATION;
     min_turning_radius = std::max(car_config::WHEELBASE + 0.01, min_turning_radius);
-    double average_center_x =
-        (processed_track.right_circle.getCenter().x + processed_track.left_circle.getCenter().x) / 2;
+    // double average_center_x =
+    //     (processed_track.right_circle.getCenter().x + processed_track.left_circle.getCenter().x) / 2;
     double predicted_steering_angle =
         std::atan(car_config::WHEELBASE /
                   std::sqrt((std::pow(min_turning_radius, 2) - std::pow(car_config::WHEELBASE / 2, 2)))) /
-        car_config::MAX_STEERING_ANGLE;
+        m_max_steering_angle;
     // predicted_steering_angle = average_center_x > 0 ? predicted_steering_angle : -predicted_steering_angle;
     // printf("predicted_steering_angle: %lf, steering_angle: %lf, min_turning_radius: %lf\n", predicted_steering_angle,
     // steering_angle, min_turning_radius); double min_steering_angle = predicted_steering_angle > 0 ?
