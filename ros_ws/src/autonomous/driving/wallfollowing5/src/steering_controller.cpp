@@ -30,9 +30,13 @@ double SteeringController::determineSteeringAngle(ProcessedTrack& processed_trac
     min_steering_angle = std::min(min_steering_angle, -Config::MIN_POSSIBLE_STEERING_ANGLE);
     double max_steering_angle = std::min(predicted_steering_angle * 1.2, 0.99);
     max_steering_angle = std::max(Config::MIN_POSSIBLE_STEERING_ANGLE, max_steering_angle);
+    double old_steering_angle = steering_angle;
     steering_angle = std::max(min_steering_angle, steering_angle);
     steering_angle = std::min(steering_angle, max_steering_angle);
-    printf("steering_angle: %lf\n", steering_angle);
+    printf("steering_angle: %lf, steering_angle before cropping: %lf, MIN_POSSIBLE_STEERING_ANGLE: %lf, min_angle: "
+           "%lf, max_angle: %lf\n",
+           steering_angle, old_steering_angle, Config::MIN_POSSIBLE_STEERING_ANGLE, min_steering_angle,
+           max_steering_angle);
     return steering_angle;
 }
 
