@@ -28,7 +28,7 @@ void CarController::driveParametersCallback(const drive_msgs::drive_param::Const
 
 void CarController::publishDriveParameters(float speed, float relative_angle)
 {
-    float rpm = convertSpeedToRpm(speed);
+    float rpm = convertSpeedToRpm(speed) * 2.0;
     float angle = (relative_angle * car_config::MAX_SERVO_POSITION + car_config::MAX_SERVO_POSITION) / 2;
 
     this->publishSpeed(rpm);
