@@ -98,6 +98,9 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
     storage->car_position = { 0, 0 };
     // With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the
     // track.
+
+    storage->curve_type = CURVE_TYPE_STRAIGHT;
+
     double radius_proportions_left = storage->left_circle.getRadius() / storage->right_circle.getRadius();
     double radius_proportions_right = storage->right_circle.getRadius() / storage->left_circle.getRadius();
     if (radius_proportions_left > 1.2 && storage->right_circle.getCenter().x < 0)
@@ -141,10 +144,6 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
             //     print left_wall, upper_wall
             storage->curve_type = CURVE_TYPE_RIGHT;
         }
-    }
-    else
-    {
-        storage->curve_type = CURVE_TYPE_STRAIGHT;
     }
 
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)
