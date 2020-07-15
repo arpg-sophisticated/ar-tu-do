@@ -208,8 +208,8 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
         target_position = determineTrackCenter(processed_track, predicted_position);
     }
 
-    double angle = m_steering_controller.determineSteeringAngle(processed_track.car_position, predicted_position,
-                                                                target_position, delta_time);
+    double angle =
+        m_steering_controller.determineSteeringAngle(processed_track, predicted_position, target_position, delta_time);
     angle = std::min(angle, 0.2);
     angle = std::max(-0.2, angle);
 
@@ -306,6 +306,10 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
         // std::cout << delta_time << std::endl;
         m_laser_pointcloud.clear();
         getScanAsCartesian(&m_laser_pointcloud, laserscan);
+        if (!Config::USE_VOXEL)
+        {
+            handleLaserPointcloud(m_laser_pointcloud, m_laser_delta_time);
+        }
         double t_end = ros::Time::now().toSec();
         // std::cout << "time since last scan: " << delta_time << "s scan execution time: " << t_end - t_start << "s"
         // <<
@@ -316,25 +320,30 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
 
 void Wallfollowing::wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls)
 {
-    double scan_time = ros::Time::now().toSec();
-    double t_start = scan_time;
-    if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+    if (Config::USE_VOXEL)
     {
-        double delta_time = scan_time - m_last_scan_time;
-        handleWallsPointcloud(walls, delta_time);
-        double t_end = ros::Time::now().toSec();
+        double scan_time = ros::Time::now().toSec();
+        double t_start = scan_time;
+        if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
+        {
+            double delta_time = scan_time - m_last_scan_time;
+            handleWallsPointcloud(walls, delta_time);
+            double t_end = ros::Time::now().toSec();
+        }
+        m_last_scan_time = scan_time;
     }
-    m_last_scan_time = scan_time;
 }
 void Wallfollowing::lidarCartesianCallback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud)
 {
+    if (Config::USE_VOXEL)
+    {
+        // Container for original & filtered data
+        pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-    // Container for original & filtered data
-    pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*pointCloud, *(inputCloud));
 
-    pcl::fromROSMsg(*pointCloud, *(inputCloud));
-
-    this->m_lidar_pointcloud = inputCloud;
+        this->m_lidar_pointcloud = inputCloud;
+    }
 }
 
 void Wallfollowing::voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg)

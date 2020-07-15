@@ -8,8 +8,6 @@
 #include <drive_msgs/drive_param.h>
 #include <ros/ros.h>
 
-constexpr const char* TOPIC_CONTROLLED_DRIVE_PARAM = "/commands/controlled_drive_param";
-
 class SpeedController
 {
     private:

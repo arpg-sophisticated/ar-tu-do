@@ -2,6 +2,8 @@
 
 #include "car_config.h"
 
+constexpr const char* TOPIC_CONTROLLED_DRIVE_PARAM = "/commands/controlled_drive_param";
+
 namespace Config
 {
     enum TargetMethod
@@ -17,6 +19,8 @@ namespace Config
     static const float USABLE_LASER_RANGE = 240;
 
     static const TargetMethod target_method = TRACK_CENTER;
+
+    static const bool USE_VOXEL = false;
 
     static const float SAFETY_WALL_DISTANCE = 1.2 * car_config::REAR_WHEEL_DISTANCE;
 
