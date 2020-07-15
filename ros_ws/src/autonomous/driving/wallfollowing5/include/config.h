@@ -15,48 +15,38 @@ namespace Config
         CENTER_PATH
     };
 
-    // safety margin in m the car brakes before a curve entry
-    static float SAFETY_MARGIN = 0.25;
-    // The size of the part of the laser scan that should be used by the algorithm, in degrees.
-    static float USABLE_LASER_RANGE = 240;
-
-    static TargetMethod TARGET_METHOD = TRACK_CENTER;
-
-    static bool USE_VOXEL = false;
-
-    static float SAFETY_WALL_DISTANCE = 1.2 * car_config::REAR_WHEEL_DISTANCE;
-
-    static double MAX_PREDICTED_DISTANCE = 1.0;
-
-    static bool EMERGENCY_SLOWDOWN = true;
-
-    static double MAX_SPEED = 2.5;
-} // namespace Config
-
-// namespace PID
-// {
-//     static double P = 4;
-//     static double I = 0.2;
-//     static double D = 0.02;
-//     static double ANTI_WINDUP = 0.2;
-// } // namespace PID
-
-class DynamicConfig
-{
-    private:
-    dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
-
-    public:
-    DynamicConfig()
+    // wallfollowing-parameters
+    struct WallfollowingParams
     {
-        m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
-            Config::USABLE_LASER_RANGE = cfg.usable_laser_range;
-            Config::TARGET_METHOD = (Config::TargetMethod)cfg.target_method;
-            Config::USE_VOXEL = cfg.use_voxel;
-            Config::SAFETY_WALL_DISTANCE = cfg.safety_wall_distance;
-            Config::MAX_PREDICTED_DISTANCE = cfg.max_predicted_distance;
-            Config::EMERGENCY_SLOWDOWN = cfg.emergency_slowdown;
-            Config::MAX_SPEED = cfg.max_speed;
-        });
-    }
-};
+        // The size of the part of the laser scan that should be used by the algorithm, in degrees.
+        float usable_laser_range = 240;
+
+        TargetMethod target_method = TRACK_CENTER;
+
+        bool use_voxel = false;
+
+        float safety_wall_distance = 1.2 * car_config::REAR_WHEEL_DISTANCE;
+
+        double max_predicted_distance = 1.0;
+
+        bool emergency_slowdown = true;
+
+        double max_speed = 2.5;
+    };
+
+    // steering-parameters
+    struct SteeringParams
+    {
+        double min_possible_steering_angle;
+        double max_steering_angle;
+    };
+
+    // pid-parameters
+    struct PIDParams
+    {
+        double p;
+        double i;
+        double d;
+        double anti_windup;
+    };
+}; // namespace Config
