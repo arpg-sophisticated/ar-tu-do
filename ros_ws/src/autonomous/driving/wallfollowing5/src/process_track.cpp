@@ -102,9 +102,12 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
     {
         storage->curve_entry = getCurveEntry(storage->left_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->left_wall);
+        std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
+                  << std::endl;
         if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         {
             storage->upper_wall = cropPointcloud(storage->right_wall, storage->curve_entry.y - 1.5);
+            std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
             // storage->right_wall =
             //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
             // if len(right_wall) == 0:
@@ -120,9 +123,12 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
     {
         storage->curve_entry = getCurveEntry(storage->right_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->right_wall);
+        std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
+                  << std::endl;
         if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         {
             storage->upper_wall = cropPointcloud(storage->left_wall, storage->curve_entry.y - 1.5);
+            std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
             // storage->left_wall =
             //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
             // if len(left_wall) == 0:
