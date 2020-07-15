@@ -2,7 +2,7 @@
 
 PIDController::PIDController()
 {
-    m_dyn_cfg_server.setCallback([&](pid::pidConfig& cfg, uint32_t) {
+    m_dyn_cfg_server.setCallback([&](wallfollowing5::pidConfig& cfg, uint32_t) {
         m_p = cfg.pid_p;
         m_i = cfg.pid_i;
         m_d = cfg.pid_d;
