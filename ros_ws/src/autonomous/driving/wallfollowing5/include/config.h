@@ -31,17 +31,15 @@ namespace Config
     static bool EMERGENCY_SLOWDOWN = true;
 
     static double MAX_SPEED = 2.5;
-
-    static double MIN_POSSIBLE_STEERING_ANGLE = 0.3;
 } // namespace Config
 
-namespace PID
-{
-    static double P = 4;
-    static double I = 0.2;
-    static double D = 0.02;
-    static double ANTI_WINDUP = 0.2;
-} // namespace PID
+// namespace PID
+// {
+//     static double P = 4;
+//     static double I = 0.2;
+//     static double D = 0.02;
+//     static double ANTI_WINDUP = 0.2;
+// } // namespace PID
 
 class DynamicConfig
 {
@@ -59,12 +57,6 @@ class DynamicConfig
             Config::MAX_PREDICTED_DISTANCE = cfg.max_predicted_distance;
             Config::EMERGENCY_SLOWDOWN = cfg.emergency_slowdown;
             Config::MAX_SPEED = cfg.max_speed;
-            Config::MIN_POSSIBLE_STEERING_ANGLE = cfg.min_possible_steering_angle;
-
-            PID::P = cfg.pid_p;
-            PID::I = cfg.pid_i;
-            PID::D = cfg.pid_d;
-            PID::ANTI_WINDUP = cfg.anti_windup;
         });
     }
 };

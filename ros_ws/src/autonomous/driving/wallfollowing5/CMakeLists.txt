@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   geometric_math
+  dynamic_reconfigure
   boxing
 )
 
@@ -38,7 +39,7 @@ generate_dynamic_reconfigure_options(
 ## Declare things to be passed to dependent projects
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim pcl_conversions pcl_ros geometric_math boxing
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim pcl_conversions pcl_ros geometric_math boxing dynamic_reconfigure
 )
 
 
@@ -52,7 +53,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-
 add_executable(wallfollowing   
   src/wallfollowing.cpp
   src/speed_controller.cpp
@@ -63,4 +63,5 @@ add_executable(wallfollowing
 )
 
 target_link_libraries(wallfollowing ${catkin_LIBRARIES})
+add_dependencies(wallfollowing ${PROJECT_NAME}_gencfg)
 add_dependencies(wallfollowing ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

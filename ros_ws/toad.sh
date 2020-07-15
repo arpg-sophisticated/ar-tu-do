@@ -24,7 +24,7 @@ fi
 . ./toad.settings
 
 # exit when no config exists
-if [[ $CONFIGURED != "0" ]]; then
+if [[ $CONFIGURED != "1" ]]; then
     echo "settings not configured, exiting"
     echo
     exit 1

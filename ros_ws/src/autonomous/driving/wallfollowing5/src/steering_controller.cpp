@@ -5,6 +5,10 @@ SteeringController::SteeringController()
     m_controlled_drive_parameters_subscriber =
         m_node_handle.subscribe<drive_msgs::drive_param>(TOPIC_CONTROLLED_DRIVE_PARAM, 1,
                                                          &SteeringController::controlledDriveParametersCallback, this);
+
+    m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
+        m_min_possible_steering_angle = cfg.min_possible_steering_angle;
+    });
 }
 
 double SteeringController::determineSteeringAngle(ProcessedTrack& processed_track, Point& predicted_position,
@@ -27,16 +31,15 @@ double SteeringController::determineSteeringAngle(ProcessedTrack& processed_trac
     // predicted_steering_angle * 0.8 : predicted_steering_angle * 1.2; double max_steering_angle =
     // predicted_steering_angle > 0 ? predicted_steering_angle * 1.2 : predicted_steering_angle * 0.8;
     double min_steering_angle = std::max(-0.99, -predicted_steering_angle * 1.2);
-    min_steering_angle = std::min(min_steering_angle, -Config::MIN_POSSIBLE_STEERING_ANGLE);
+    min_steering_angle = std::min(min_steering_angle, -m_min_possible_steering_angle);
     double max_steering_angle = std::min(predicted_steering_angle * 1.2, 0.99);
-    max_steering_angle = std::max(Config::MIN_POSSIBLE_STEERING_ANGLE, max_steering_angle);
+    max_steering_angle = std::max(m_min_possible_steering_angle, max_steering_angle);
     double old_steering_angle = steering_angle;
     steering_angle = std::max(min_steering_angle, steering_angle);
     steering_angle = std::min(steering_angle, max_steering_angle);
     printf("steering_angle: %lf, steering_angle before cropping: %lf, MIN_POSSIBLE_STEERING_ANGLE: %lf, min_angle: "
            "%lf, max_angle: %lf\n",
-           steering_angle, old_steering_angle, Config::MIN_POSSIBLE_STEERING_ANGLE, min_steering_angle,
-           max_steering_angle);
+           steering_angle, old_steering_angle, m_min_possible_steering_angle, min_steering_angle, max_steering_angle);
     return steering_angle;
 }
 

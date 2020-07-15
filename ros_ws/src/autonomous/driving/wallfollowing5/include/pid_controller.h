@@ -4,6 +4,7 @@
 
 class PIDController
 {
+    private:
     double m_p;
     double m_i;
     double m_d;
@@ -11,6 +12,8 @@ class PIDController
 
     double m_previous_error = 0;
     double m_integral = 0;
+
+    dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
 
     public:
     PIDController(double p, double i, double d, double anti_windup = 0.2)
@@ -21,13 +24,7 @@ class PIDController
         m_anti_windup = anti_windup;
     }
 
-    PIDController()
-    {
-        m_p = PID::P;
-        m_i = PID::I;
-        m_d = PID::D;
-        m_anti_windup = PID::ANTI_WINDUP;
-    }
+    PIDController();
 
     double updateAndGetCorrection(double error, double delta_time);
 };
