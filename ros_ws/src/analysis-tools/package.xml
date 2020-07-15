@@ -2,7 +2,7 @@
 <package format="2">
   <name>analysis-tools</name>
   <version>0.0.0</version>
-  <description>Tools for analysing the driving behaviour</description>
+  <description>Tools for analysing the driving behaviour.</description>
 
   <!-- Maintainer -->
   <maintainer email="f110@ls12.cs.uni-dortmund.de">PG F1/10</maintainer>
