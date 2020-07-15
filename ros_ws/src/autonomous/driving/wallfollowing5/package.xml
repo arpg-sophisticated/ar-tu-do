@@ -26,5 +26,6 @@
   <depend>geometric_math</depend>
   <exec_depend>libpcl-all</exec_depend>
   <depend>boxing</depend>
+  <depend>dynamic_reconfigure</depend>
 
 </package>

@@ -15,10 +15,10 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "speed_controller.h"
 #include "steering_controller.h"
-#include <cmath>
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <vector>
+#include <cmath>
 // clang-format on
 
 constexpr const char* TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous";

@@ -113,7 +113,7 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     std::vector<Point> rviz_closest_points = { left_point, right_point };
     m_rviz_geometry.showLineInRviz(2, rviz_closest_points, ColorRGBA{ 1, 1, 1, 0.3 }, 0.005);
 
-    if (Config::target_method == Config::CIRCLE_TANGENTS)
+    if (Config::TARGET_METHOD == Config::CIRCLE_TANGENTS)
     {
         std::vector<Point> left_tangent_points;
         std::vector<Point> right_tangent_points;
@@ -179,12 +179,12 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
 
     Point predicted_position;
     Point target_position;
-    if (Config::target_method == Config::CIRCLE_TANGENTS || Config::target_method == Config::TRACK_CENTER)
+    if (Config::TARGET_METHOD == Config::CIRCLE_TANGENTS || Config::TARGET_METHOD == Config::TRACK_CENTER)
     {
         predicted_position = determinePredictedCarPosition(processed_track);
         target_position = determineTargetCarPosition(processed_track, predicted_position);
     }
-    else if (Config::target_method == Config::CENTER_PATH)
+    else if (Config::TARGET_METHOD == Config::CENTER_PATH)
     {
         double radius = std::min(processed_track.right_circle.getRadius(), processed_track.left_circle.getRadius());
         double max_view_dist = std::max(1.0, radius / 10 * 3);
@@ -233,7 +233,7 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
         speed *= emergency_slowdown;
     }
     speed = std::max(1.5, speed);
-    speed = std::min(speed, 5.0);
+    speed = std::min(speed, Config::MAX_SPEED);
 
     publishDriveParameters(angle, speed);
 }
@@ -383,6 +383,7 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "wallfollowing");
     Wallfollowing wallfollowing;
+    DynamicConfig dynamic_config;
     ros::spin();
     return EXIT_SUCCESS;
 }
