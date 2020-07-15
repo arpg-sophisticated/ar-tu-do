@@ -6,7 +6,7 @@ SteeringController::SteeringController()
         m_node_handle.subscribe<drive_msgs::drive_param>(TOPIC_CONTROLLED_DRIVE_PARAM, 1,
                                                          &SteeringController::controlledDriveParametersCallback, this);
 
-    m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
+    m_dyn_cfg_server.setCallback([&](steering::steeringConfig& cfg, uint32_t) {
         m_min_possible_steering_angle = cfg.min_possible_steering_angle;
         m_max_steering_angle = cfg.max_steering_angle;
     });

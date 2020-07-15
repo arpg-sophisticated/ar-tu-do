@@ -15,7 +15,7 @@ class SteeringController
     double m_min_possible_steering_angle;
     double m_max_steering_angle;
 
-    dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
+    dynamic_reconfigure::Server<steering::steeringConfig> m_dyn_cfg_server;
 
     PIDController m_pid_controller;
     RvizGeometry m_rviz_geometry;
