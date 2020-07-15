@@ -395,9 +395,10 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             difference_multiplikator = TRAINING_PARTS[self.current_training_part_index][4]
             reward = (
                 ((1 + (time_difference * difference_multiplikator) - 0.05)**3) - 1) / 5.0
+
+            reward = reward + 0.3  # add no-crash reward
             if(reward <= 0):
                 reward = 0
-            reward = reward + 0.1  # add no-crash reward
             print("reward " + str(reward))
             return reward
         else:
