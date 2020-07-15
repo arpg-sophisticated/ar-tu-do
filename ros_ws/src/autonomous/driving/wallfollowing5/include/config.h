@@ -32,7 +32,7 @@ namespace Config
 
     static double MAX_SPEED = 2.5;
 
-    static double MIN_POSSIBLE_STEERING_ANGLE = 0.2;
+    static double MIN_POSSIBLE_STEERING_ANGLE = 0.3;
 } // namespace Config
 
 namespace PID
