@@ -20,6 +20,7 @@
       greater the error becomes. Don't make the resolution too small, even if you only need a few samples. -->
       <arg name="laser_sample_count" value="128"/>
   </include>
+    <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
 
   <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
 
