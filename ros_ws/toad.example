@@ -42,8 +42,6 @@ LAUNCHCARINSANE="0"
 # - track_levine
 # - track_porto
 # - walker_racecourse
-# - testTrack
-# - testTrack_decimated
 LAUNCHTRACK="racetrack_decorated_2"
 
 # path for ros to source
