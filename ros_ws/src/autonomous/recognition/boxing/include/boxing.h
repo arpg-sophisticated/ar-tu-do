@@ -74,7 +74,8 @@ class Boxing
     static uint64_t get_voxel_id(float x, float y, float z)
     {
         uint64_t voxel_id = 0;
-        union {
+        union
+        {
             float floaty;
             uint32_t inty;
         } float_uint;

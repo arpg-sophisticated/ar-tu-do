@@ -265,8 +265,9 @@ std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
     {
         for (auto itrVector = itr->second->begin(); itrVector != itr->second->end(); ++itrVector)
         {
-	    double y = itrVector->y;
-	    if(y < 0) continue;
+            double y = itrVector->y;
+            if (y < 0)
+                continue;
             if ((itrVector->x > maxLeft) && (y <= radius))
             {
                 maxLeft = itrVector->x;
