@@ -61,6 +61,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         self.reached_target_time = None
 
         self.car_crashed = False
+        self.crash_count = 0
 
         self.training_part_times_set = False
 
@@ -138,6 +139,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             playsound('/home/marvin/Downloads/power-up.mp3')
             print("-- REACHED TARGET --")
             self.crash_training_part_index = None
+            self.crash_count = 0
             self.perform_action(NULL_ACTION_INDEX, False)
             self.sleep_after_reached_target = 150
             self.reached_target = True
@@ -335,6 +337,8 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
             math.exp(-1. * self.total_step_count / EPS_DECAY)
 
     def select_action(self, state):
+        if(self.crash_count > 100):
+            return NULL_ACTION_INDEX
         use_epsilon_greedy = self.episode_count % 2 > 0
         use_epsilon_greedy_with_part_factor = use_epsilon_greedy and random.random(
         ) <= TRAINING_PARTS[self.current_training_part_index][5]
@@ -390,10 +394,11 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
 
             difference_multiplikator = TRAINING_PARTS[self.current_training_part_index][4]
             reward = (
-                ((1 + (time_difference * difference_multiplikator) - 0.05)**3) - 1) / 3.0
+                ((1 + (time_difference * difference_multiplikator) - 0.05)**3) - 1) / 5.0
+
+            reward = reward + 0.3  # add no-crash reward
             if(reward <= 0):
                 reward = 0
-            reward = reward + 0.01
             print("reward " + str(reward))
             return reward
         else:
@@ -414,6 +419,7 @@ class QLearningTimeRewardTrainingNode(TrainingNode):
         if(not self.is_terminal_step):
             if(not self.reached_target_point()):
                 print("--CRASH--")
+                self.crash_count += 1
                 self.perform_action(
                     NULL_ACTION_INDEX, False)
                 self.is_terminal_step = True
