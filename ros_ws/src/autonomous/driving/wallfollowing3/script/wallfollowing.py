@@ -86,10 +86,10 @@ def map(in_lower, in_upper, out_lower, out_upper, value):
 
 
 def convertRpmToSpeed(rpm):
-    # 1299.224 is the conversion factor from electrical revolutions per minute to m/s
+    # 3118.138 is the conversion factor from electrical revolutions per minute to m/s
     # and is derived from the transmission and the rotational speed of the motor.
     # More values describing the car properties can be found in car_config.h.
-    return rpm / 1299.224
+    return rpm / 3118.138
 
 
 def drive(angle, velocity):
