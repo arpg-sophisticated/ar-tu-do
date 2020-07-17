@@ -60,7 +60,7 @@
     <!--<include file="./launch/zed_720.launch"/>-->
 
     <!-- laserscan from kinect -->
-    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" respawn="true">
+    <!--<node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" respawn="true">
         <param name="scan_height" value="5"/> 
         <param name="scan_time" value="0.0333"/>  
         <param name="range_min" value="0.3"/>  
@@ -68,7 +68,7 @@
         <remap from="scan" to="scan_camera"/>
         <param name="output_frame_id" value="laser"/>
         <remap from="image" to="/racer/camera1/depth/image_raw"/>
-    </node> <!-- we convert this laserscan back to a pointcloud for easier merging -->
+    </node>--> <!-- we convert this laserscan back to a pointcloud for easier merging -->
     <include file="$(find car_tf)/launch/car_transformer.launch">
         <arg name="topic_input" value="/scan_camera" />
         <arg name="topic_output" value="/scan/cam/cartesian" />

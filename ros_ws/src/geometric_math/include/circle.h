@@ -35,4 +35,8 @@ class Circle
     Point getClosestPoint(Point& point);
     std::vector<Point> calcIntersections(Circle& circle);
     std::vector<Point> calcTangents(Point& outside_point);
+    double getDistance(Point& outside_point);
+    bool pointIsInCircle(Point& p);
+
+    static Circle determineCircle(Point& a, Point& b, Point& c);
 };

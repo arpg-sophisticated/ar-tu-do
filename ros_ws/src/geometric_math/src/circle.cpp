@@ -87,3 +87,35 @@ std::vector<Point> Circle::calcTangents(Point& outside_point)
     std::sort(intersections.begin(), intersections.end(), [](Point& a, Point& b) { return a.y > b.y; });
     return intersections;
 }
+
+double Circle::getDistance(Point& outside_point)
+{
+    return fabs(sqrt(((outside_point.x - m_center.x) * (outside_point.x - m_center.x)) +
+                     ((outside_point.y - m_center.y) * (outside_point.y - m_center.y))) -
+                m_radius);
+}
+
+bool Circle::pointIsInCircle(Point& p)
+{
+    return GeometricFunctions::distance(m_center, p) <= m_radius;
+}
+
+Circle Circle::determineCircle(Point& b, Point& c, Point& d)
+{
+    double temp = c.x + c.x + c.y * c.y;
+    double bc = (b.x * b.x + b.y * b.y - temp) / 2.0;
+    double cd = (temp - d.x * d.x - d.y * d.y) / 2.0;
+    double det = (b.x - c.x) * (c.y - d.y) - (c.x - d.x) * (b.y - c.y);
+
+    if (std::abs(det) < 1.0e-10)
+        return Circle();
+
+    // Center of circle
+    Point center;
+    center.x = (bc * (c.y - d.y) - cd * (b.y - c.y)) / det;
+    center.y = ((b.x - c.x) * cd - (c.x - d.x) * bc) / det;
+
+    double radius = GeometricFunctions::distance(center, b);
+
+    return Circle(center, radius);
+}

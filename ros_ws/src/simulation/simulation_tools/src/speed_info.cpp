@@ -27,7 +27,7 @@ void SpeedInfo::publishMaxSpeed(std::vector<Point>& pointcloud)
     }
     else
     {
-        std::cerr << "processed_track not valid" << std::endl;
+        std::cerr << "speed info: processed_track not valid" << std::endl;
     }
 }
 
