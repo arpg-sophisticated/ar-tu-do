@@ -99,7 +99,7 @@ global speed_maxtime
 speed_maxtime = []
 # rpm factor derived from code
 global speed_rpmfactor
-speed_rpmfactor = 1299.224
+speed_rpmfactor = 3118.138
 
 # current maximum speed given from algorithm
 global maxspeed_current
