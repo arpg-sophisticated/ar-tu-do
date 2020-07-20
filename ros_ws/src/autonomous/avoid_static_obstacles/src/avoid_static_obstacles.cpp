@@ -24,7 +24,19 @@ void StaticObstacles::wall_callback(const pcl::PointCloud<pcl::PointXYZRGBL>::Co
     {
         std::pair<int, pcl::PointXYZRGBL> avoidInfo = getObstacleVoxel(closestObstacleID, wallPointcloud);
 
-        createLine(getClosestWallVoxel(avoidInfo.first, wallPointcloud), avoidInfo.second);
+        createLine(getClosestWallVoxel(avoidInfo.first, wallPointcloud), avoidInfo.second, wallPointcloud);
+    }
+    else
+    {
+        pcl::PointCloud<pcl::PointXYZRGBL>::Ptr obstacles_wall(new pcl::PointCloud<pcl::PointXYZRGBL>);
+
+        obstacles_wall->header.frame_id = m_frame;
+        for (size_t i = 0; i < wallPointcloud->points.size(); i++)
+        {
+            obstacles_wall->points.push_back(wallPointcloud->points[i]);
+        }
+        pcl_conversions::toPCL(ros::Time::now(), obstacles_wall->header.stamp);
+        m_newWall_publisher.publish(obstacles_wall);
     }
 }
 
@@ -147,7 +159,8 @@ float StaticObstacles::getDistance(pcl::PointXYZRGBL obstacle, pcl::PointXYZRGBL
     return std::sqrt(pow(obstacle.x - wall.x, 2) + pow(obstacle.y - wall.y, 2));
 }
 
-void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL obstacleNode)
+void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL obstacleNode,
+                                 const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wallPoints)
 {
     float m;
     float b;
@@ -166,6 +179,8 @@ void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL o
             pcl::PointXYZRGBL tmp;
             tmp.x = (i);
             tmp.y = (i)*m + b;
+            tmp.z = 0;
+            tmp.label = wallNode.label;
             listOfNewWall.push_back(tmp);
         }
     }
@@ -176,7 +191,17 @@ void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL o
             pcl::PointXYZRGBL tmp;
             tmp.x = (i);
             tmp.y = (i)*m + b;
+            tmp.z = 0;
+            tmp.label = wallNode.label;
             listOfNewWall.push_back(tmp);
+        }
+    }
+
+    for (auto& iter : wallPoints->points)
+    {
+        if (iter.label == 1 - wallNode.label)
+        {
+            listOfNewWall.push_back(iter);
         }
     }
 

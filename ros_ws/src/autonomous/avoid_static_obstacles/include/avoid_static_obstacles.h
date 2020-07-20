@@ -30,7 +30,8 @@ class StaticObstacles
     std::pair<float, pcl::PointXYZRGBL> getClosestDistanceToWall(
         int WallSide, int obstacleID, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wallPoints);
     float getDistance(pcl::PointXYZRGBL obstacle, pcl::PointXYZRGBL wall);
-    void createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL obstacleNode);
+    void createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL obstacleNode,
+                    const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wallPoints);
     pcl::PointXYZRGBL getClosestWallVoxel(int WallID, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wallPoints);
 
     std::pair<int, pcl::PointXYZRGBL> getObstacleVoxel(int ObstacleID,
