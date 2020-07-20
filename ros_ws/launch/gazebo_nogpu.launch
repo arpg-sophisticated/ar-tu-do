@@ -51,6 +51,9 @@
 
     <include file="$(find imu_velocity)/launch/car_imu_velocity.launch" />
 
+    <include file="$(find avoid_static_obstacles)/launch/avoid_static_obstacles.launch"/>
+
+
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
     </node>
     <node pkg="tf" type="static_transform_publisher" name="depth_rotation" args="0.18 0 0.14 -1.570796327 0 -1.570796327 /base_link /camera 10" />

@@ -90,6 +90,8 @@
         <arg name="topic_voxels" value="/scan/voxels" />
     </include>
 
+    <include file="$(find avoid_static_obstacles)/launch/avoid_static_obstacles.launch"/>
+
     <include file="$(find voxel_classifier)/launch/voxel_classifier.launch">
         <arg name="topic_input_voxels" value="/scan/voxels" />
         <arg name="topic_output_clusters" value="/scan/clusters" />
