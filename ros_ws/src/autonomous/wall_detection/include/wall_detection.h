@@ -32,6 +32,7 @@ class WallDetection
     float m_wall_radius;
 
     std::pair<int, int> determineWallIDs(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*>, float radius);
+    int findLargestCluster(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> clusters, int ignoreID);
     void publishWall(std::vector<pcl::PointXYZRGBL>* wallLeft, std::vector<pcl::PointXYZRGBL>* wallRight);
     void publishObstacles(std::unordered_map<int, std::vector<pcl::PointXYZRGBL>*> mapClusters,
                           std::pair<int, int> wallIDs);

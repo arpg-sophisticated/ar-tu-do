@@ -102,10 +102,6 @@ function toadHelpVideo {
     echo "       toad.sh video stitch DATASET"
     echo
     echo "           Converts and stitches videos from given DATASET"
-    echo
-    echo "       toad.sh video stitch DATASET"
-    echo
-    echo "           Converts and stitches videos from given DATASET"
 }
 
 # help message for car mode
