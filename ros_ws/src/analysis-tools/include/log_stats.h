@@ -126,5 +126,5 @@ class LogStats
     private:
     void controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& drive_parameters);
     void maxSpeedCallback(const std_msgs::Float64::ConstPtr& max_speed);
-    void gazeboStateTelemetryCallback(const drive_msgs::gazebo_state_telemetry::ConstPtr& gazebo_state_telemetry);
+    // void gazeboStateTelemetryCallback(const drive_msgs::gazebo_state_telemetry::ConstPtr& gazebo_state_telemetry);
 };

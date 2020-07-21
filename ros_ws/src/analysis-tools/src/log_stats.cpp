@@ -7,9 +7,9 @@ LogStats::LogStats()
                                                          &LogStats::controlledDriveParametersCallback, this);
     m_max_speed_subscriber =
         m_node_handle.subscribe<std_msgs::Float64>(TOPIC_MAX_SPEED, 1, &LogStats::maxSpeedCallback, this);
-    m_gazebo_state_telemetry_subscriber =
-        m_node_handle.subscribe<drive_msgs::gazebo_state_telemetry>(TOPIC_GAZEBO_STATE_TELEMETRY, 1,
-                                                                    &LogStats::gazeboStateTelemetryCallback, this);
+    // m_gazebo_state_telemetry_subscriber =
+    //    m_node_handle.subscribe<drive_msgs::gazebo_state_telemetry>(TOPIC_GAZEBO_STATE_TELEMETRY, 1,
+    //                                                                &LogStats::gazeboStateTelemetryCallback, this);
 
     m_hud_speed_publisher = m_node_handle.advertise<std_msgs::Float32>("hud_speed_value", 1);
     m_hud_maxspeed_publisher = m_node_handle.advertise<std_msgs::Float32>("hud_maxspeed_value", 1);
@@ -556,12 +556,13 @@ void LogStats::maxSpeedCallback(const std_msgs::Float64::ConstPtr& max_speed)
     m_maxspeed_value = max_speed->data;
 }
 
-void LogStats::gazeboStateTelemetryCallback(const drive_msgs::gazebo_state_telemetry::ConstPtr& gazebo_state_telemetry)
-{
-    // m_gazebo_wheel_speed = gazebo_state_telemetry->wheel_speed;
-    // m_gazebo_car_speed = gazebo_state_telemetry->car_speed;
-    // ... usw
-}
+// void LogStats::gazeboStateTelemetryCallback(const drive_msgs::gazebo_state_telemetry::ConstPtr&
+// gazebo_state_telemetry)
+//{
+// m_gazebo_wheel_speed = gazebo_state_telemetry->wheel_speed;
+// m_gazebo_car_speed = gazebo_state_telemetry->car_speed;
+// ... usw
+//}
 
 int main(int argc, char** argv)
 {
