@@ -24,15 +24,15 @@
     <!-- zed camera launch file -->
     <!-- Include racer with 720p camera -->
     <group if="$(arg videohd)">
-        <include file="./launch/zed_720.launch"/>
+	<!--<include file="./launch/zed_720.launch"/>-->
     </group>
     
     <!-- Include racer with VGA camera -->
     <group unless="$(arg videohd)">
-        <include file="./launch/zed.launch"/>
+	<!--<include file="./launch/zed.launch"/>-->
     </group>
 
-    <include file="$(find emergency_stop)/launch/emergency_stop.launch"/>
+    <!--<include file="$(find emergency_stop)/launch/emergency_stop.launch"/>-->
 
     <include file="$(find vesc_driver)/launch/vesc_driver_node.launch"/>
 
@@ -46,7 +46,7 @@
     <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch"/>
     
     <!-- former implementation of previous group -->
-    <!-- <include file="$(find wallfollowing2)/launch/autonomous_driving_physical.launch"/> -->
+    <!--<include file="$(find wallfollowing2)/launch/autonomous_driving_physical.launch"/>-->
     <!-- wallfollowing end -->
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
@@ -64,11 +64,11 @@
         <!-- rviz end - please enable only one -->
     </group>
 
-    <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node">
-        <rosparam file="$(find hardware)/razor_imu_config.yaml" command="load"/>
-    </node>
+    <!--<node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node">-->
+	    <!--	    <rosparam file="$(find hardware)/razor_imu_config.yaml" command="load"/>-->
+	    <!--    </node>-->
 
-    <include file="$(find imu_velocity)/launch/car_imu_velocity.launch" />
+    <!--<include file="$(find imu_velocity)/launch/car_imu_velocity.launch" /> -->
 
     <include file="$(find boxing)/launch/boxing.launch">
         <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
@@ -102,7 +102,7 @@
     </group>
 
     <!-- publishes the approximated maximal possible speed for a certain position on the track -->
-    <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
+    <!--<node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>-->
 
     <!-- needed for logging telemetry data and provide node for rviz -->
     <!-- prefix: log prefix (string), default: none -->
