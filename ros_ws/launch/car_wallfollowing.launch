@@ -105,11 +105,16 @@
     <!--<node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>-->
 
     <!-- needed for logging telemetry data and provide node for rviz -->
-    <!-- arguments -->
-    <!-- 1: log prefix (string), default: none -->
-    <!-- 2: length for min/max arrays (int), default: 100 -->
-    <!-- 3: smoothing value of acceleration (int), default: 5 -->
-    <!-- 4: whether its simulation or not (string: yes|no), default: no -->
-    <!-- 5: whether write statistics or not (string: yes|no), default: no -->
-    <!--<node pkg="simulation_tools" type="log_stats.py" name="log_stats" output="screen" args="wallfollowing 100 10 no yes"/>-->
+    <!-- prefix: log prefix (string), default: none -->
+    <!-- length: length for min/max arrays (int), default: 100 -->
+    <!-- smooth: smoothing value of acceleration (int), default: 5 -->
+    <!-- sim: whether its simulation or not (bool), default: false -->
+    <!-- write: whether write statistics or not (bool), default: false -->
+    <node pkg="analysis-tools" type="log_stats" name="log_stats" respawn="true" output="screen">
+        <param name="prefix" value="wallfollowing" />
+        <param name="length" value="100" />
+        <param name="smooth" value="10" />
+        <param name="sim" value="false" />
+        <param name="write" value="true" />
+    </node>
 </launch>
