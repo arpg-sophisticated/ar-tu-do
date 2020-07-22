@@ -448,7 +448,7 @@ function toadTelemetryReport {
         TITLE=$(echo $REPORTDATAFILE | cut -d ";" -f 3)
         for REPORTSET in $REPORTSETS; do
             SIZE=$(echo $REPORTSET | cut -d ";" -f 1)
-            head -$(($SIZE+1)) $REPORTDATADIR/$FILENAME > $REPORTTARGET/latex-data-$TITLE-$SIZE.dat
+            head -$(($SIZE+1)) $REPORTDATADIR/$FILENAME | sed 's/.*/\L&/' > $REPORTTARGET/latex-data-$TITLE-$SIZE.dat
         done      
     done  
 
