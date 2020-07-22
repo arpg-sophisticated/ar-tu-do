@@ -28,7 +28,6 @@ class SpeedController
     {
         return m_last_determined_speed;
     }
-    double convertRpmToSpeed(double rpm);
     double calcMaxCurveSpeed(double radius);
     double calcMaxSpeed(double distance, double target_speed);
     double calcBrakingDistance(double distance, double target_speed);

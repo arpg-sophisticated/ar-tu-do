@@ -231,8 +231,6 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
 
     double angle = m_steering_controller.determineSteeringAngle(processed_track, pid_params, steering_params,
                                                                 predicted_position, target_position, delta_time);
-    angle = std::min(angle, 0.2);
-    angle = std::max(-0.2, angle);
 
     std::vector<Point> rviz_predicted_car_points = { processed_track.car_position, predicted_position };
     m_rviz_geometry.showLineInRviz(3, rviz_predicted_car_points, ColorRGBA{ 1, 1, 1, 0.3 }, 0.005);

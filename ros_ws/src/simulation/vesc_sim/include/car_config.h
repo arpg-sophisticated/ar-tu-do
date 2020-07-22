@@ -80,7 +80,7 @@ namespace car_config
      * @brief Gear transmission inside the differential of the car.
      * This is an estimate, the exact value is not known.
      */
-    constexpr double TRANSMISSION = 20;
+    constexpr double TRANSMISSION = 48;
 
     constexpr double MAX_SERVO_POSITION = 1;
 

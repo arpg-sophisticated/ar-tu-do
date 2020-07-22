@@ -98,53 +98,52 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
     storage->car_position = { 0, 0 };
     // With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the
     // track.
+
+    storage->curve_type = CURVE_TYPE_STRAIGHT;
+
     double radius_proportions_left = storage->left_circle.getRadius() / storage->right_circle.getRadius();
     double radius_proportions_right = storage->right_circle.getRadius() / storage->left_circle.getRadius();
     if (radius_proportions_left > 1.2 && storage->right_circle.getCenter().x < 0)
     {
         storage->curve_entry = getCurveEntry(storage->left_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->left_wall);
-        std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
-                  << std::endl;
-        if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
-        {
-            storage->upper_wall = cropPointcloud(storage->right_wall, storage->curve_entry.y - 1.5);
-            std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
-            // storage->right_wall =
-            //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
-            // if len(right_wall) == 0:
-            //     right_wall = upper_wall[0: 1]
-            // try:
-            // storage->right_circle = CircleFit::hyperFit(storage->right_wall);
-            // except:
-            //     print right_wall, upper_wall
-            storage->curve_type = CURVE_TYPE_LEFT;
-        }
+        // std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
+        //           << std::endl;
+        // if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
+        // {
+        storage->upper_wall = cropPointcloud(storage->right_wall, storage->curve_entry.y - 1.5);
+        // std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
+        // storage->right_wall =
+        //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
+        // if len(right_wall) == 0:
+        //     right_wall = upper_wall[0: 1]
+        // try:
+        // storage->right_circle = CircleFit::hyperFit(storage->right_wall);
+        // except:
+        //     print right_wall, upper_wall
+        storage->curve_type = CURVE_TYPE_LEFT;
+        // }
     }
     else if (radius_proportions_right > 1.2 && storage->left_circle.getCenter().x > 0)
     {
         storage->curve_entry = getCurveEntry(storage->right_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->right_wall);
-        std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
-                  << std::endl;
-        if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
-        {
-            storage->upper_wall = cropPointcloud(storage->left_wall, storage->curve_entry.y - 1.5);
-            std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
-            // storage->left_wall =
-            //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
-            // if len(left_wall) == 0:
-            //     left_wall = upper_wall[-2: -1]
-            // try:
-            // storage->left_circle = CircleFit::hyperFit(storage->left_wall);
-            // except:
-            //     print left_wall, upper_wall
-            storage->curve_type = CURVE_TYPE_RIGHT;
-        }
-    }
-    else
-    {
-        storage->curve_type = CURVE_TYPE_STRAIGHT;
+        // std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
+        //           << std::endl;
+        // if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
+        // {
+        storage->upper_wall = cropPointcloud(storage->left_wall, storage->curve_entry.y - 1.5);
+        // std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
+        // storage->left_wall =
+        //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
+        // if len(left_wall) == 0:
+        //     left_wall = upper_wall[-2: -1]
+        // try:
+        // storage->left_circle = CircleFit::hyperFit(storage->left_wall);
+        // except:
+        //     print left_wall, upper_wall
+        storage->curve_type = CURVE_TYPE_RIGHT;
+        // }
     }
 
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)

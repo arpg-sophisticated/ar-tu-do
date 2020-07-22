@@ -21,7 +21,7 @@ double SteeringController::determineSteeringAngle(ProcessedTrack& processed_trac
     double predicted_steering_angle =
         std::atan(car_config::WHEELBASE /
                   std::sqrt((std::pow(min_turning_radius, 2) - std::pow(car_config::WHEELBASE / 2, 2)))) /
-        steering_params.max_steering_angle;
+        (steering_params.max_steering_angle * (GeometricFunctions::PI / 180));
     // predicted_steering_angle = average_center_x > 0 ? predicted_steering_angle : -predicted_steering_angle;
     // printf("predicted_steering_angle: %lf, steering_angle: %lf, min_turning_radius: %lf\n", predicted_steering_angle,
     // steering_angle, min_turning_radius); double min_steering_angle = predicted_steering_angle > 0 ?
