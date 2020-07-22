@@ -102,7 +102,7 @@
     </group>
 
     <!-- publishes the approximated maximal possible speed for a certain position on the track -->
-    <!--<node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>-->
+    <node pkg="analysis-tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
 
     <!-- needed for logging telemetry data and provide node for rviz -->
     <!-- arguments -->
