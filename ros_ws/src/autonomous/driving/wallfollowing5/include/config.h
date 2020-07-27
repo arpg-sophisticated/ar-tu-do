@@ -41,6 +41,11 @@ namespace Config
         double max_steering_angle;
     };
 
+    struct SpeedParams
+    {
+        double brake_safety_margin;
+    };
+
     // pid-parameters
     struct PIDParams
     {
