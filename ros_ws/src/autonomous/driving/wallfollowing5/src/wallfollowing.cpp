@@ -28,6 +28,8 @@ Wallfollowing::Wallfollowing()
         steering_params.min_possible_steering_angle = cfg.min_possible_steering_angle;
         steering_params.max_steering_angle = cfg.max_steering_angle;
 
+        speed_params.brake_safety_margin = cfg.brake_safety_margin;
+
         pid_params.p = cfg.pid_p;
         pid_params.i = cfg.pid_i;
         pid_params.d = cfg.pid_d;
@@ -195,7 +197,7 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
 void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_time)
 {
-    double speed = m_speed_controller.calcSpeed(processed_track);
+    double speed = m_speed_controller.calcSpeed(processed_track, speed_params);
 
     Point predicted_position;
     Point target_position;
