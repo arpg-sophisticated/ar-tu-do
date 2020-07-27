@@ -197,7 +197,7 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
 void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_time)
 {
-    double speed = m_speed_controller.calcSpeed(processed_track);
+    double speed = m_speed_controller.calcSpeed(processed_track, speed_params);
 
     Point predicted_position;
     Point target_position;

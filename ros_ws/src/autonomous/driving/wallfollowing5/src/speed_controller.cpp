@@ -29,7 +29,7 @@ double SpeedController::calcBrakingDistance(double distance, double target_speed
         (2 * PhysicalProperties::ACCELERATION + 2 * PhysicalProperties::ACCELERATION);
 }
 
-double SpeedController::calcSpeed(ProcessedTrack& processed_track, SpeedConfig& speed_config)
+double SpeedController::calcSpeed(ProcessedTrack& processed_track, Config::SpeedParams& speed_config)
 {
     double remaining_distance = processed_track.curve_entry.y;
     double radius = min(processed_track.left_circle.getRadius(), processed_track.right_circle.getRadius());

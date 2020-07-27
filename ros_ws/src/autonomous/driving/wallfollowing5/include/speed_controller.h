@@ -31,7 +31,7 @@ class SpeedController
     double calcMaxCurveSpeed(double radius);
     double calcMaxSpeed(double distance, double target_speed);
     double calcBrakingDistance(double distance, double target_speed);
-    double calcSpeed(ProcessedTrack& processed_track);
+    double calcSpeed(ProcessedTrack& processed_track, Config::SpeedParams& speed_config);
 
     void controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters);
 };
