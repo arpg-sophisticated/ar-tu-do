@@ -5,7 +5,7 @@ import os
 import rospy
 from parameters_q_learning_time_reward import *
 import torch
-from topics import TOPIC_DRIVE_PARAMETERS_WF2RL, TOPIC_GAZEBO_STATE_TELEMETRY
+from topics import TOPIC_DRIVE_PARAMETERS_WF2RL, TOPIC_CONTROLLED_DRIVE_PARAM
 from drive_msgs.msg import drive_param
 from drive_msgs.msg import gazebo_state_telemetry
 
@@ -37,9 +37,10 @@ class QLearningDrivingNode(ReinforcementLearningNode):
             drive_param,
             self.wallfollowing_drive_param_callback)
         rospy.Subscriber(
-            TOPIC_GAZEBO_STATE_TELEMETRY,
-            gazebo_state_telemetry,
-            self.speed_callback)
+            TOPIC_CONTROLLED_DRIVE_PARAM,
+            drive_param,
+            self.controlled_drive_param_callback,
+            queue_size=1)
 
      # override implemented function of
      # reinforcement_learning_node
@@ -64,6 +65,9 @@ class QLearningDrivingNode(ReinforcementLearningNode):
     def speed_callback(self, speed_message):
         self.current_speed = speed_message.wheel_speed
         #print("Speed: "+ str(self.current_speed))
+
+    def controlled_drive_param_callback(self, drive_param):
+        self.current_speed = drive_param.velocity
 
     # override implemented function of
     # ReinforcementLearningNode
