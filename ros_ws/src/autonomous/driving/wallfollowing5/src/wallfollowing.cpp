@@ -18,11 +18,14 @@ Wallfollowing::Wallfollowing()
 
     m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
         wallfollowing_params.usable_laser_range = cfg.usable_laser_range;
+        wallfollowing_params.usable_laser_range_wall_detection = cfg.usable_laser_range_wall_detection;
         wallfollowing_params.target_method = (Config::TargetMethod)cfg.target_method;
         wallfollowing_params.use_voxel = cfg.use_voxel;
         wallfollowing_params.safety_wall_distance = cfg.safety_wall_distance;
         wallfollowing_params.max_predicted_distance = cfg.max_predicted_distance;
         wallfollowing_params.emergency_slowdown = cfg.emergency_slowdown;
+        wallfollowing_params.advanced_trajectory = cfg.advanced_trajectory;
+        wallfollowing_params.advanced_trajectory_distance = cfg.advanced_trajectory_distance;
         wallfollowing_params.max_speed = cfg.max_speed;
 
         steering_params.min_possible_steering_angle = cfg.min_possible_steering_angle;
@@ -110,10 +113,16 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
     Point target_position = central_point;
 
+    double advanced_trajectory_factor =
+        std::min(processed_track.curve_entry.y / wallfollowing_params.advanced_trajectory_distance, 1.0);
+
     Point upper_point;
     if (processed_track.curve_type == CURVE_TYPE_LEFT)
     {
-        // target_position = Point{central_point.x + 0.0, central_point.y};
+        target_position =
+            Point{ central_point.x +
+                       track_width / 2.0 * wallfollowing_params.advanced_trajectory * advanced_trajectory_factor,
+                   central_point.y };
         if (predicted_position.y > processed_track.curve_entry.y)
         {
             upper_point = processed_track.upper_circle.getClosestPoint(predicted_position);
@@ -122,7 +131,10 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     }
     else if (processed_track.curve_type == CURVE_TYPE_RIGHT)
     {
-        // target_position = Point{central_point.x - 0.0, central_point.y}
+        target_position =
+            Point{ central_point.x -
+                       track_width / 2.0 * wallfollowing_params.advanced_trajectory * advanced_trajectory_factor,
+                   central_point.y };
         if (predicted_position.y > processed_track.curve_entry.y)
         {
             upper_point = processed_track.upper_circle.getClosestPoint(predicted_position);
