@@ -33,22 +33,22 @@ void SpeedInfo::publishMaxSpeed(std::vector<Point>& pointcloud)
 
 double SpeedInfo::calcMaxCurveSpeed(double radius)
 {
-    return sqrt(PhysicalProperties::DYNAMIC_FRICTION * 9.81 * radius);
+    return sqrt(PhysicalProperties::getDynamicFriction() * 9.81 * radius);
 }
 
 double SpeedInfo::calcMaxSpeed(double distance, double target_speed)
 {
-    return sqrt((2 * distance * PhysicalProperties::ACCELERATION * PhysicalProperties::ACCELERATION +
-                 m_current_speed * m_current_speed * PhysicalProperties::ACCELERATION +
-                 target_speed * target_speed * PhysicalProperties::ACCELERATION) /
-                (PhysicalProperties::ACCELERATION + PhysicalProperties::ACCELERATION));
+    double acceleration = PhysicalProperties::getAcceleration();
+    return sqrt((2 * distance * acceleration * acceleration + m_current_speed * m_current_speed * acceleration +
+                 target_speed * target_speed * acceleration) /
+                (acceleration + acceleration));
 }
 
 double SpeedInfo::calcBrakingDistance(double distance, double target_speed)
 {
-    return (2 * distance * PhysicalProperties::ACCELERATION + m_current_speed * m_current_speed -
-            target_speed * target_speed) /
-        (2 * PhysicalProperties::ACCELERATION + 2 * PhysicalProperties::ACCELERATION);
+    double acceleration = PhysicalProperties::getAcceleration();
+    return (2 * distance * acceleration + m_current_speed * m_current_speed - target_speed * target_speed) /
+        (2 * acceleration + 2 * acceleration);
 }
 
 double SpeedInfo::calcSpeed(ProcessedTrack& processed_track)

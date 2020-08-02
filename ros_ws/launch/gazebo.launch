@@ -106,7 +106,7 @@
     
     <!-- wallfollowing start - please enable only one -->
     <!-- current implementation -->
-    <include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>
+    <include file="$(find wallfollowing5)/launch/autonomous_driving.launch"/>
     
     <!-- former implementation of previous group -->
     <!--<include file="$(find wallfollowing2)/launch/autonomous_driving.launch"/>-->
@@ -125,6 +125,8 @@
     </include>
 
     <include file="$(find imu_velocity)/launch/car_imu_velocity.launch" />
+
+    <node pkg="car_config" type="dynamic_physical_properties" name="dynamic_physical_properties" respawn="true" output="screen"/>
 
     <node pkg="simulation_tools" type="crash_detector" name="crash_detector" output="screen">
     </node>

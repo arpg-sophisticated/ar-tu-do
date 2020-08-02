@@ -44,6 +44,8 @@
     <!-- wallfollowing start - please enable only one -->
     <!-- current implementation -->
     <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch"/>
+
+    <node pkg="car_config" type="dynamic_physical_properties" name="dynamic_physical_properties" respawn="true" output="screen"/>
     
     <!-- former implementation of previous group -->
     <!--<include file="$(find wallfollowing2)/launch/autonomous_driving_physical.launch"/>-->
