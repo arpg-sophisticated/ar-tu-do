@@ -6,6 +6,8 @@ Driving parameters tweaked for the physical car.
 TODO: The updated parameters will go here, for now they are the default parameters
 -->
 
+    
+    <arg name="topic_drive_param" default="/input/drive_param/autonomous"/>
 
     <!-- wall_following node -->
     <node
@@ -14,6 +16,7 @@ TODO: The updated parameters will go here, for now they are the default paramete
       type="wallfollowing.py"
       name="wallfollowing"
       output="screen" >
+      <param name="topic_drive_param" value="$(arg topic_drive_param)"/>
     </node>
 
     <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /wallfollowing $(find wallfollowing2)/cfg/physical.yaml" />
