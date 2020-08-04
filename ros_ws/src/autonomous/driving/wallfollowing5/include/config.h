@@ -20,7 +20,6 @@ namespace Config
     {
         // The size of the part of the laser scan that should be used by the algorithm, in degrees.
         double usable_laser_range;
-        double usable_laser_range_wall_detection;
 
         TargetMethod target_method;
 
@@ -36,6 +35,12 @@ namespace Config
         double advanced_trajectory_distance;
 
         double max_speed;
+    };
+
+    struct ProcessingParams
+    {
+        double usable_laser_range;
+        double usable_laser_range_wall_detection;
     };
 
     // steering-parameters

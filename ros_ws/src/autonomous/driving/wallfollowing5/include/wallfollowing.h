@@ -56,6 +56,7 @@ class Wallfollowing
 
     dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
     Config::WallfollowingParams wallfollowing_params;
+    Config::ProcessingParams processing_params;
     Config::SteeringParams steering_params;
     Config::SpeedParams speed_params;
     Config::PIDParams pid_params;

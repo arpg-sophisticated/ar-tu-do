@@ -8,6 +8,7 @@
 #include "circle_fit.h"
 #include "geometric_math.h"
 #include "rviz_geometry.h"
+#include "config.h"
 #include <functional>
 #include <vector>
 // clang-format on
@@ -33,6 +34,7 @@ struct ProcessedTrack
 
     CurveType curve_type;
     Point curve_entry;
+    double remaining_distance;
 
     Point car_position;
 };
@@ -43,7 +45,7 @@ class ProcessTrack
 
     private:
     std::vector<Point> cropPointcloud(std::vector<Point>& pointcloud, float minimum_y);
-    unsigned int findLeftRightBorder(std::vector<Point>& pointcloud);
+    unsigned int findLeftRightBorder(std::vector<Point>& pointcloud, Config::ProcessingParams& processing_params);
     Point calcNearestPointToPoint(Point& point, std::vector<Point>& pointcloud);
     bool isCurveEntryInFront(Point& curve_entry_point, Point& lowest_point, double threshold);
     Point getCurveEntry(std::vector<Point>& wall);
@@ -51,7 +53,8 @@ class ProcessTrack
     bool wallIsStraight(std::vector<Point>& wall);
 
     public:
-    bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud);
+    bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud,
+                      Config::ProcessingParams& processing_params);
     bool processTrack(ProcessedTrack* storage, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& pointcloud,
                       pcl::PointCloud<pcl::PointXYZ>::Ptr lidar_pointcloud);
 };

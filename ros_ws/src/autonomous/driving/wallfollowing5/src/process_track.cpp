@@ -45,11 +45,18 @@ bool ProcessTrack::isCurveEntryInFront(Point& curve_entry_point, Point& lowest_p
     return fabsf(val) > threshold;
 }
 
-unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud)
+unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud,
+                                               Config::ProcessingParams& processing_params)
 {
     double max_distance = 0;
     unsigned int max_index = 0;
-    for (unsigned int i = 0; i < pointcloud.size() - 1; i++)
+
+    unsigned int cropped_count = (double)pointcloud.size() / (double)processing_params.usable_laser_range *
+        processing_params.usable_laser_range_wall_detection;
+    unsigned int start_index = (pointcloud.size() - cropped_count) / 2;
+    unsigned int end_index = cropped_count + (pointcloud.size() - cropped_count) / 2 - 1;
+
+    for (unsigned int i = start_index; i < end_index; i++)
     {
         // maybe use pointcloud.at(...) with small performance penalty
         double distance = GeometricFunctions::distance(pointcloud[i], pointcloud[i + 1]);
@@ -152,6 +159,7 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
         if (CircleFit::pointcloudIsValid(storage->upper_wall))
         {
             storage->upper_circle = CircleFit::hyperFit(storage->upper_wall);
+            storage->remaining_distance = GeometricFunctions::distance(storage->car_position, storage->curve_entry);
         }
         else
         {
@@ -177,9 +185,10 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
     return true;
 }
 
-bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud)
+bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud,
+                                Config::ProcessingParams& processing_params)
 {
-    unsigned int wall_split_index = findLeftRightBorder(pointcloud);
+    unsigned int wall_split_index = findLeftRightBorder(pointcloud, processing_params);
     for (unsigned int i = 0; i < wall_split_index; i++)
     {
         storage->right_wall.push_back(pointcloud[i]);
