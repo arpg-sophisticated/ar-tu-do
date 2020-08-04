@@ -18,7 +18,6 @@ Wallfollowing::Wallfollowing()
 
     m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
         wallfollowing_params.usable_laser_range = cfg.usable_laser_range;
-        wallfollowing_params.usable_laser_range_wall_detection = cfg.usable_laser_range_wall_detection;
         wallfollowing_params.target_method = (Config::TargetMethod)cfg.target_method;
         wallfollowing_params.use_voxel = cfg.use_voxel;
         wallfollowing_params.safety_wall_distance = cfg.safety_wall_distance;
@@ -27,6 +26,9 @@ Wallfollowing::Wallfollowing()
         wallfollowing_params.advanced_trajectory = cfg.advanced_trajectory;
         wallfollowing_params.advanced_trajectory_distance = cfg.advanced_trajectory_distance;
         wallfollowing_params.max_speed = cfg.max_speed;
+
+        processing_params.usable_laser_range = cfg.usable_laser_range;
+        processing_params.usable_laser_range_wall_detection = cfg.usable_laser_range_wall_detection;
 
         steering_params.min_possible_steering_angle = cfg.min_possible_steering_angle;
         steering_params.max_steering_angle = cfg.max_steering_angle;
@@ -119,10 +121,13 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     Point upper_point;
     if (processed_track.curve_type == CURVE_TYPE_LEFT)
     {
-        target_position =
-            Point{ central_point.x +
-                       track_width / 2.0 * wallfollowing_params.advanced_trajectory * advanced_trajectory_factor,
-                   central_point.y };
+        if (processed_track.remaining_distance < wallfollowing_params.advanced_trajectory_distance)
+        {
+            target_position =
+                Point{ processed_track.curve_entry.x + track_width / 2.0 * wallfollowing_params.advanced_trajectory +
+                           track_width / 2.0,
+                       processed_track.curve_entry.y };
+        }
         if (predicted_position.y > processed_track.curve_entry.y)
         {
             upper_point = processed_track.upper_circle.getClosestPoint(predicted_position);
@@ -131,10 +136,13 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     }
     else if (processed_track.curve_type == CURVE_TYPE_RIGHT)
     {
-        target_position =
-            Point{ central_point.x -
-                       track_width / 2.0 * wallfollowing_params.advanced_trajectory * advanced_trajectory_factor,
-                   central_point.y };
+        if (processed_track.remaining_distance < wallfollowing_params.advanced_trajectory_distance)
+        {
+            target_position =
+                Point{ processed_track.curve_entry.x - track_width / 2.0 * wallfollowing_params.advanced_trajectory -
+                           track_width / 2.0,
+                       processed_track.curve_entry.y };
+        }
         if (predicted_position.y > processed_track.curve_entry.y)
         {
             upper_point = processed_track.upper_circle.getClosestPoint(predicted_position);
@@ -274,7 +282,7 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
 void Wallfollowing::handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time)
 {
     ProcessedTrack processed_track;
-    if (m_process_track.processTrack(&processed_track, pointcloud))
+    if (m_process_track.processTrack(&processed_track, pointcloud, processing_params))
     {
         followWalls(processed_track, delta_time);
     }
