@@ -60,7 +60,7 @@ unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud,
     {
         // maybe use pointcloud.at(...) with small performance penalty
         double distance = GeometricFunctions::distance(pointcloud[i], pointcloud[i + 1]);
-        if (distance > max_distance)
+        if (distance > max_distance && distance < 6)
         {
             max_distance = distance;
             max_index = i + 1;
