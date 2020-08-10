@@ -28,7 +28,7 @@ void CarController::driveParametersCallback(const drive_msgs::drive_param::Const
 
 void CarController::publishDriveParameters(float speed, float relative_angle)
 {
-    float rpm = convertSpeedToRpm(speed / 0.9);
+    float rpm = convertSpeedToRpm(speed);
     float angle = (relative_angle * car_config::MAX_SERVO_POSITION + car_config::MAX_SERVO_POSITION) / 2;
 
     this->publishSpeed(rpm);
@@ -36,6 +36,12 @@ void CarController::publishDriveParameters(float speed, float relative_angle)
 
     ROS_DEBUG_STREAM("running: "
                      << " | speed: " << speed << " | angle: " << angle);
+}
+
+int CarController::convertSpeedToRpm(float speed)
+{
+    // 0.9 is an experimental derived correction factor for the speed
+    return (speed / 0.9) * car_config::TRANSMISSION / car_config::ERPM_TO_SPEED;
 }
 
 void CarController::publishSpeed(float speed)
