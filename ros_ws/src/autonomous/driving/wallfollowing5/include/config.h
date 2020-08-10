@@ -41,6 +41,7 @@ namespace Config
     {
         double usable_laser_range;
         double usable_laser_range_wall_detection;
+        double radius_curve_entry_proportion;
     };
 
     // steering-parameters

@@ -87,7 +87,7 @@ Point ProcessTrack::getCurveEntry(std::vector<Point>& wall)
     return max_y_point;
 }
 
-bool ProcessTrack::processTrack(ProcessedTrack* storage)
+bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParams& processing_params)
 {
     if (!CircleFit::pointcloudIsValid(storage->left_wall))
     {
@@ -110,7 +110,8 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
 
     double radius_proportions_left = storage->left_circle.getRadius() / storage->right_circle.getRadius();
     double radius_proportions_right = storage->right_circle.getRadius() / storage->left_circle.getRadius();
-    if (radius_proportions_left > 1.2 && storage->right_circle.getCenter().x < 0)
+    if (radius_proportions_left > processing_params.radius_curve_entry_proportion &&
+        storage->right_circle.getCenter().x < 0)
     {
         storage->curve_entry = getCurveEntry(storage->left_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->left_wall);
@@ -131,7 +132,8 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage)
         storage->curve_type = CURVE_TYPE_LEFT;
         // }
     }
-    else if (radius_proportions_right > 1.2 && storage->left_circle.getCenter().x > 0)
+    else if (radius_proportions_right > processing_params.radius_curve_entry_proportion &&
+             storage->left_circle.getCenter().x > 0)
     {
         storage->curve_entry = getCurveEntry(storage->right_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->right_wall);
@@ -198,7 +200,7 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
         storage->left_wall.push_back(pointcloud[i]);
     }
 
-    return processTrack(storage);
+    return processTrack(storage, processing_params);
 }
 
 bool ProcessTrack::wallIsStraight(std::vector<Point>& wall)
@@ -217,7 +219,8 @@ bool ProcessTrack::wallIsStraight(std::vector<Point>& wall)
 
 bool ProcessTrack::processTrack(ProcessedTrack* storage,
                                 const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wall_pointcloud,
-                                pcl::PointCloud<pcl::PointXYZ>::Ptr laser_pointcloud)
+                                pcl::PointCloud<pcl::PointXYZ>::Ptr laser_pointcloud,
+                                Config::ProcessingParams& processing_params)
 {
     double voxelSize = 0.15;
     if (!laser_pointcloud)
@@ -266,5 +269,5 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage,
         }
     }
 
-    return processTrack(storage);
+    return processTrack(storage, processing_params);
 }

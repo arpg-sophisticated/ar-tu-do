@@ -49,12 +49,13 @@ class ProcessTrack
     Point calcNearestPointToPoint(Point& point, std::vector<Point>& pointcloud);
     bool isCurveEntryInFront(Point& curve_entry_point, Point& lowest_point, double threshold);
     Point getCurveEntry(std::vector<Point>& wall);
-    bool processTrack(ProcessedTrack* storage);
+    bool processTrack(ProcessedTrack* storage, Config::ProcessingParams& processing_params);
     bool wallIsStraight(std::vector<Point>& wall);
 
     public:
     bool processTrack(ProcessedTrack* storage, std::vector<Point>& pointcloud,
                       Config::ProcessingParams& processing_params);
     bool processTrack(ProcessedTrack* storage, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& pointcloud,
-                      pcl::PointCloud<pcl::PointXYZ>::Ptr lidar_pointcloud);
+                      pcl::PointCloud<pcl::PointXYZ>::Ptr lidar_pointcloud,
+                      Config::ProcessingParams& processing_params);
 };

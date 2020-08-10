@@ -29,6 +29,7 @@ Wallfollowing::Wallfollowing()
 
         processing_params.usable_laser_range = cfg.usable_laser_range;
         processing_params.usable_laser_range_wall_detection = cfg.usable_laser_range_wall_detection;
+        processing_params.radius_curve_entry_proportion = cfg.radius_curve_entry_proportion;
 
         steering_params.min_possible_steering_angle = cfg.min_possible_steering_angle;
         steering_params.max_steering_angle = cfg.max_steering_angle;
@@ -296,7 +297,8 @@ void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGB
                                           double delta_time)
 {
     ProcessedTrack processed_track;
-    if (m_lidar_pointcloud && m_process_track.processTrack(&processed_track, wall_pointcloud, m_lidar_pointcloud))
+    if (m_lidar_pointcloud &&
+        m_process_track.processTrack(&processed_track, wall_pointcloud, m_lidar_pointcloud, processing_params))
     {
         followWalls(processed_track, delta_time);
     }
