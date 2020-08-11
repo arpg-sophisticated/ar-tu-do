@@ -28,10 +28,11 @@ class SpeedController
     {
         return m_last_determined_speed;
     }
-    double calcMaxCurveSpeed(double radius);
-    double calcMaxSpeed(double distance, double target_speed);
-    double calcBrakingDistance(double distance, double target_speed);
-    double calcSpeed(ProcessedTrack& processed_track, Config::SpeedParams& speed_config);
+    double calcMaxCurveSpeed(double radius, double dynamic_friction);
+    double calcMaxSpeed(double distance, double target_speed, double acceleration);
+    double calcBrakingDistance(double distance, double target_speed, double acceleration);
+    double calcSpeed(ProcessedTrack& processed_track, Config::SpeedParams& speed_config, double acceleration,
+                     double dynamic_friction);
 
     void controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters);
 };

@@ -9,12 +9,12 @@ SteeringController::SteeringController()
 
 double SteeringController::determineSteeringAngle(ProcessedTrack& processed_track, Config::PIDParams& pid_params,
                                                   Config::SteeringParams& steering_params, Point& predicted_position,
-                                                  Point& target_position, double delta_time)
+                                                  Point& target_position, double acceleration, double delta_time)
 {
     double distance_to_target = GeometricFunctions::distance(processed_track.car_position, target_position);
     double error = (target_position.x - predicted_position.x) / distance_to_target;
     double steering_angle = m_pid_controller.updateAndGetCorrection(error, delta_time, pid_params);
-    double min_turning_radius = std::pow(m_current_speed + 0.01, 2) / PhysicalProperties::getAcceleration();
+    double min_turning_radius = std::pow(m_current_speed + 0.01, 2) / acceleration;
     min_turning_radius = std::max(car_config::WHEELBASE + 0.01, min_turning_radius);
 
     double predicted_steering_angle =

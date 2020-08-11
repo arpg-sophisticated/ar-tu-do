@@ -266,7 +266,10 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
 void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_time)
 {
-    double speed = m_speed_controller.calcSpeed(processed_track, speed_params);
+    double acceleration = PhysicalProperties::getAcceleration();
+    double dynamic_friction = PhysicalProperties::getDynamicFriction();
+
+    double speed = m_speed_controller.calcSpeed(processed_track, speed_params, acceleration, dynamic_friction);
 
     Point predicted_position;
     Point target_position;
@@ -304,8 +307,9 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
         target_position = determineTrackCenter(processed_track, predicted_position);
     }
 
-    double angle = m_steering_controller.determineSteeringAngle(processed_track, pid_params, steering_params,
-                                                                predicted_position, target_position, delta_time);
+    double angle =
+        m_steering_controller.determineSteeringAngle(processed_track, pid_params, steering_params, predicted_position,
+                                                     target_position, acceleration, delta_time);
 
     std::vector<Point> rviz_predicted_car_points = { processed_track.car_position, predicted_position };
     m_rviz_geometry.showLineInRviz(3, rviz_predicted_car_points, ColorRGBA{ 1, 1, 1, 0.3 }, 0.005);
