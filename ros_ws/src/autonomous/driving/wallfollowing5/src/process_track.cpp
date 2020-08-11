@@ -103,11 +103,11 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
     storage->right_circle = CircleFit::hyperFit(storage->right_wall);
 
     storage->car_position = { 0, 0 };
-    // With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the
-    // track.
 
     storage->curve_type = CURVE_TYPE_STRAIGHT;
 
+    // With radius_proportions can be checked whether the car is approaching a curve or is on a straight part of the
+    // track.
     double radius_proportions_left = storage->left_circle.getRadius() / storage->right_circle.getRadius();
     double radius_proportions_right = storage->right_circle.getRadius() / storage->left_circle.getRadius();
     if (radius_proportions_left > processing_params.radius_curve_entry_proportion &&
@@ -115,20 +115,12 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
     {
         storage->curve_entry = getCurveEntry(storage->left_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->left_wall);
-        // std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
-        //           << std::endl;
         // if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         // {
         storage->upper_wall = cropPointcloud(storage->right_wall, storage->curve_entry.y - 1.5);
-        // std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
         // storage->right_wall =
         //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
-        // if len(right_wall) == 0:
-        //     right_wall = upper_wall[0: 1]
-        // try:
         // storage->right_circle = CircleFit::hyperFit(storage->right_wall);
-        // except:
-        //     print right_wall, upper_wall
         storage->curve_type = CURVE_TYPE_LEFT;
         // }
     }
@@ -137,31 +129,22 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
     {
         storage->curve_entry = getCurveEntry(storage->right_wall);
         Point nearest_point_to_car = calcNearestPointToPoint(storage->car_position, storage->right_wall);
-        // std::cout << "curve_entry: " << storage->curve_entry.y << ", mod: " << storage->curve_entry.y - 1.5
-        //           << std::endl;
         // if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         // {
         storage->upper_wall = cropPointcloud(storage->left_wall, storage->curve_entry.y - 1.5);
-        // std::cout << "upper_wall size: " << storage->upper_wall.size() << std::endl;
         // storage->left_wall =
         //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
-        // if len(left_wall) == 0:
-        //     left_wall = upper_wall[-2: -1]
-        // try:
         // storage->left_circle = CircleFit::hyperFit(storage->left_wall);
-        // except:
-        //     print left_wall, upper_wall
         storage->curve_type = CURVE_TYPE_RIGHT;
         // }
     }
 
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)
     {
-        double remaining_distance = storage->curve_entry.y;
         if (CircleFit::pointcloudIsValid(storage->upper_wall))
         {
             storage->upper_circle = CircleFit::hyperFit(storage->upper_wall);
-            storage->remaining_distance = GeometricFunctions::distance(storage->car_position, storage->curve_entry);
+            // storage->remaining_distance = GeometricFunctions::distance(storage->car_position, storage->curve_entry);
         }
         else
         {
@@ -169,7 +152,8 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
             std::cout << "upper wall ist not valid" << std::endl;
         }
 
-        std::vector<Point> curve_entry_line = { Point{ -2, remaining_distance }, Point{ 2, remaining_distance } };
+        std::vector<Point> curve_entry_line = { Point{ -2, storage->curve_entry.y },
+                                                Point{ 2, storage->curve_entry.y } };
         m_rviz_geometry.showLineInRviz(6, curve_entry_line, ColorRGBA{ 0.2, 0.5, 0.8, 1 });
         m_rviz_geometry.showCircleInRviz(7, storage->upper_circle, storage->upper_wall, ColorRGBA{ 0, 1, 1, 1 });
     }
@@ -179,8 +163,6 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
         m_rviz_geometry.deleteMarker(7);
     }
 
-    // std::cout << "l_c: " << storage->left_circle.getCenter().x << ", " << storage->left_circle.getCenter().y
-    //           << " r_c: " << storage->right_circle.getCenter().x << std::endl;
     m_rviz_geometry.showCircleInRviz(0, storage->left_circle, storage->left_wall, ColorRGBA{ 0.5, 1, 1, 1 });
     m_rviz_geometry.showCircleInRviz(1, storage->right_circle, storage->right_wall, ColorRGBA{ 0, 1, 1, 1 });
 

@@ -92,7 +92,6 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, std::vector<Point>& poi
 
     if (storage->curve_type != CURVE_TYPE_STRAIGHT)
     {
-        double remaining_distance = storage->curve_entry.y;
         if (CircleFit::pointcloudIsValid(storage->upper_wall))
         {
             storage->upper_circle = CircleFit::hyperFit(storage->upper_wall);

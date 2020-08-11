@@ -34,7 +34,7 @@ struct ProcessedTrack
 
     CurveType curve_type;
     Point curve_entry;
-    double remaining_distance;
+    // double remaining_distance;
 
     Point car_position;
 };

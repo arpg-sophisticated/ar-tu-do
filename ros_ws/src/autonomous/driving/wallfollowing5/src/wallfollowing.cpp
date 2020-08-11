@@ -170,7 +170,7 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     Point upper_point;
     if (processed_track.curve_type == CURVE_TYPE_LEFT)
     {
-        if (processed_track.remaining_distance < wallfollowing_params.advanced_trajectory_distance)
+        if (processed_track.curve_entry.y < wallfollowing_params.advanced_trajectory_distance)
         {
             target_position =
                 Point{ processed_track.curve_entry.x + track_width / 2.0 * wallfollowing_params.advanced_trajectory +
@@ -185,7 +185,7 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     }
     else if (processed_track.curve_type == CURVE_TYPE_RIGHT)
     {
-        if (processed_track.remaining_distance < wallfollowing_params.advanced_trajectory_distance)
+        if (processed_track.curve_entry.y < wallfollowing_params.advanced_trajectory_distance)
         {
             target_position =
                 Point{ processed_track.curve_entry.x - track_width / 2.0 * wallfollowing_params.advanced_trajectory -
