@@ -25,6 +25,8 @@ namespace Config
 
         bool use_voxel;
 
+        bool use_obstacle_avoidence;
+
         double safety_wall_distance;
 
         double max_predicted_distance;

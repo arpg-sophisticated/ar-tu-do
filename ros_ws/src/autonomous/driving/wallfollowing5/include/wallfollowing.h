@@ -68,6 +68,8 @@ class Wallfollowing
     bool lineTooCloseToPointcloud(ProcessedTrack& processed_track, Line& line, std::vector<Point>& pointcloud);
     std::pair<Point, Point> determineTargetPathPoint(ProcessedTrack& processed_track, double min_distance,
                                                      double max_distance, double epsilon);
+    Point determineClosestPointToLine(ProcessedTrack& processed_track, Line& line, std::vector<Point>& pointcloud);
+    Point avoidObstacles(ProcessedTrack& processed_track, Point target_position);
 
     Point determinePredictedCarPosition(ProcessedTrack& processedTrack);
     Point determineTargetCarPosition(ProcessedTrack& processedTrack, Point& predicted_position);

@@ -20,6 +20,7 @@ Wallfollowing::Wallfollowing()
         wallfollowing_params.usable_laser_range = cfg.usable_laser_range;
         wallfollowing_params.target_method = (Config::TargetMethod)cfg.target_method;
         wallfollowing_params.use_voxel = cfg.use_voxel;
+        wallfollowing_params.use_obstacle_avoidence = cfg.use_obstacle_avoidence;
         wallfollowing_params.safety_wall_distance = cfg.safety_wall_distance;
         wallfollowing_params.max_predicted_distance = cfg.max_predicted_distance;
         wallfollowing_params.emergency_slowdown = cfg.emergency_slowdown;
@@ -70,6 +71,53 @@ bool Wallfollowing::lineTooCloseToPointcloud(ProcessedTrack& processed_track, Li
         }
     }
     return false;
+}
+
+Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track, Line& line,
+                                                 std::vector<Point>& pointcloud)
+{
+    Point result_point;
+    double min_distance = wallfollowing_params.safety_wall_distance;
+    double line_length = line.length();
+    for (auto& point : pointcloud)
+    {
+        double shortest_distance_to_line = GeometricFunctions::calcShortestDistanceToLine(point, line);
+        if (GeometricFunctions::distance(processed_track.car_position, point) < line_length // +SAFETY_DISTANCE
+            && shortest_distance_to_line < min_distance)
+        {
+            min_distance = shortest_distance_to_line;
+            result_point = point;
+        }
+    }
+    return result_point;
+}
+
+Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point target_position)
+{
+    Point result_target_position = target_position;
+    int avoided_obstacles = 0;
+    Line line = { processed_track.car_position, target_position };
+    Point closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.right_wall);
+    if (!closest_point_to_line.isZero())
+    {
+        Point left_point = processed_track.left_circle.getClosestPoint(closest_point_to_line);
+        result_target_position =
+            Point{ (left_point.x + closest_point_to_line.x) / 2, (left_point.y + closest_point_to_line.y) / 2 };
+        avoided_obstacles++;
+    }
+    closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.left_wall);
+    if (!closest_point_to_line.isZero())
+    {
+        Point right_point = processed_track.right_circle.getClosestPoint(closest_point_to_line);
+        result_target_position =
+            Point{ (right_point.x + closest_point_to_line.x) / 2, (right_point.y + closest_point_to_line.y) / 2 };
+        avoided_obstacles++;
+    }
+    if (avoided_obstacles > 1)
+    {
+        return target_position;
+    }
+    return result_target_position;
 }
 
 std::pair<Point, Point> Wallfollowing::determineTargetPathPoint(ProcessedTrack& processed_track, double min_distance,
@@ -227,6 +275,10 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
     {
         predicted_position = determinePredictedCarPosition(processed_track);
         target_position = determineTargetCarPosition(processed_track, predicted_position);
+        if (wallfollowing_params.use_obstacle_avoidence)
+        {
+            target_position = avoidObstacles(processed_track, target_position);
+        }
     }
     else if (wallfollowing_params.target_method == Config::CENTER_PATH)
     {
