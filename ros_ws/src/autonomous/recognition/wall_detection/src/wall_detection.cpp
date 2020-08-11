@@ -265,32 +265,32 @@ std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
     {
         for (auto itrVector = itr->second->begin(); itrVector != itr->second->end(); ++itrVector)
         {
-            double y = itrVector->y;
-            if (y < 0)
+            double x = itrVector->x;
+            if (x < 0)
                 continue;
-            if ((itrVector->x > maxLeft) && (y <= radius))
+            if ((itrVector->y > maxLeft) && (x <= radius))
             {
-                maxLeft = itrVector->x;
+                maxLeft = itrVector->y;
                 maxLeftID = itrVector->label;
             }
-            if ((itrVector->x < minRight) && (y <= radius))
+            if ((itrVector->y < minRight) && (x <= radius))
             {
-                minRight = itrVector->x;
+                minRight = itrVector->y;
                 minRightID = itrVector->label;
             }
         }
     }
 
-    if (maxLeftID == -1 && minRightID != -1)
-    {
-        // found a cluster for right but not for left. let's just choose the largest one for the left.
-        maxLeftID = findLargestCluster(mapToCheck, minRightID);
-    }
-    else if (minRightID == -1 && maxLeftID != -1)
-    {
-        // same but reverse
-        minRightID = findLargestCluster(mapToCheck, maxLeftID);
-    }
+    // if (maxLeftID == -1 && minRightID != -1)
+    // {
+    //     // found a cluster for right but not for left. let's just choose the largest one for the left.
+    //     maxLeftID = findLargestCluster(mapToCheck, minRightID);
+    // }
+    // else if (minRightID == -1 && maxLeftID != -1)
+    // {
+    //     // same but reverse
+    //     minRightID = findLargestCluster(mapToCheck, maxLeftID);
+    // }
 
     return std::pair<int64_t, int64_t>(minRightID, maxLeftID);
 }
