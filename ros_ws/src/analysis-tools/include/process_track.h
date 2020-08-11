@@ -35,8 +35,6 @@ class ProcessTrack
     private:
     std::vector<Point> cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select);
     unsigned int findLeftRightBorder(std::vector<Point>& pointcloud);
-    Point calcNearestPointToPoint(Point& point, std::vector<Point>& pointcloud);
-    bool isCurveEntryInFront(Point& curve_entry_point, Point& lowest_point, double threshold);
     Point getCurveEntry(std::vector<Point>& wall);
 
     public:
