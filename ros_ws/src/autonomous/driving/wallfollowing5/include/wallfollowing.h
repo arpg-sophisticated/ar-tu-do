@@ -56,7 +56,9 @@ class Wallfollowing
 
     dynamic_reconfigure::Server<wallfollowing5::wallfollowing5Config> m_dyn_cfg_server;
     Config::WallfollowingParams wallfollowing_params;
+    Config::ProcessingParams processing_params;
     Config::SteeringParams steering_params;
+    Config::SpeedParams speed_params;
     Config::PIDParams pid_params;
 
     public:
@@ -66,6 +68,8 @@ class Wallfollowing
     bool lineTooCloseToPointcloud(ProcessedTrack& processed_track, Line& line, std::vector<Point>& pointcloud);
     std::pair<Point, Point> determineTargetPathPoint(ProcessedTrack& processed_track, double min_distance,
                                                      double max_distance, double epsilon);
+    Point determineClosestPointToLine(ProcessedTrack& processed_track, Line& line, std::vector<Point>& pointcloud);
+    Point avoidObstacles(ProcessedTrack& processed_track, Point target_position);
 
     Point determinePredictedCarPosition(ProcessedTrack& processedTrack);
     Point determineTargetCarPosition(ProcessedTrack& processedTrack, Point& predicted_position);

@@ -80,8 +80,5 @@ class CarController
      * @param speed speed in m/s
      * @return revolutions per minute
      */
-    int convertSpeedToRpm(float speed)
-    {
-        return speed * car_config::TRANSMISSION / car_config::ERPM_TO_SPEED;
-    }
+    int convertSpeedToRpm(float speed);
 };
