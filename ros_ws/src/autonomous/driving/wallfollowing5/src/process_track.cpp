@@ -237,9 +237,9 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage,
                 {
                     std::vector<Point>* target;
                     if (voxel.label == 0)
-                        target = &storage->right_wall;
-                    else if (voxel.label == 1)
                         target = &storage->left_wall;
+                    else if (voxel.label == 1)
+                        target = &storage->right_wall;
                     voxel_to_target_map[voxel_id] = target;
                     if (target)
                     {
