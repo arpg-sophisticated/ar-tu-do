@@ -76,19 +76,20 @@ bool Wallfollowing::lineTooCloseToPointcloud(ProcessedTrack& processed_track, Li
 Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track, Line& line,
                                                  std::vector<Point>& pointcloud)
 {
-    Point result_point;
+    Point result_point = {0, 0};
     double min_distance = wallfollowing_params.safety_wall_distance;
     double line_length = line.length();
     for (auto& point : pointcloud)
     {
         double shortest_distance_to_line = GeometricFunctions::calcShortestDistanceToLine(point, line);
         if (GeometricFunctions::distance(processed_track.car_position, point) < line_length // +SAFETY_DISTANCE
-            && shortest_distance_to_line < min_distance)
+            && shortest_distance_to_line < min_distance && point.y > processed_track.car_position.y + 0.2)
         {
             min_distance = shortest_distance_to_line;
             result_point = point;
         }
     }
+    std::cout << min_distance << std::endl;
     return result_point;
 }
 
@@ -98,6 +99,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     int avoided_obstacles = 0;
     Line line = { processed_track.car_position, target_position };
     Point closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.right_wall);
+    std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
     if (!closest_point_to_line.isZero())
     {
         Point left_point = processed_track.left_circle.getClosestPoint(closest_point_to_line);
@@ -106,6 +108,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
         avoided_obstacles++;
     }
     closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.left_wall);
+    std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
     if (!closest_point_to_line.isZero())
     {
         Point right_point = processed_track.right_circle.getClosestPoint(closest_point_to_line);
