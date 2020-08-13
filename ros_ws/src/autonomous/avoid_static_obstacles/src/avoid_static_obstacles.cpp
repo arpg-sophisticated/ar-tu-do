@@ -69,7 +69,7 @@ int StaticObstacles::getFirstObstacle()
     {
         for (auto innerIter : *(iter.second))
         {
-            if (innerIter.x < closestObstacleDistance && innerIter.x < 5)
+            if (innerIter.x < closestObstacleDistance && innerIter.x > 0)
             {
                 closestObstacleDistance = innerIter.x;
                 closestObstacleID = innerIter.label;
@@ -84,17 +84,17 @@ std::pair<int, pcl::PointXYZRGBL> StaticObstacles::getObstacleVoxel(
     int obstacleID, const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& wallPoints)
 {
     std::pair<float, pcl::PointXYZRGBL> zeroID = getClosestDistanceToWall(0, obstacleID, wallPoints);
-    std::pair<float, pcl::PointXYZRGBL> oneID = getClosestDistanceToWall(0, obstacleID, wallPoints);
+    std::pair<float, pcl::PointXYZRGBL> oneID = getClosestDistanceToWall(1, obstacleID, wallPoints);
 
     if (oneID.first > zeroID.first)
     {
         pcl::PointXYZRGBL returnVoxel = oneID.second;
-        return { 0, returnVoxel };
+        return { 1, returnVoxel };
     }
     else
     {
         pcl::PointXYZRGBL returnVoxel = zeroID.second;
-        return { 1, returnVoxel };
+        return { 0, returnVoxel };
     }
 }
 
@@ -141,7 +141,7 @@ pcl::PointXYZRGBL StaticObstacles::getClosestWallVoxel(int WallID,
         origin.y = 0.0;
         origin.z = 1.0;
 
-        if (iter.label == WallID && std::abs(iter.x) <= CLOSESTVOXELINTERVALL)
+        if (iter.label == (1 - WallID) && std::abs(iter.x) <= CLOSESTVOXELINTERVALL)
         {
             if (getDistance(origin, iter) < closestDistanceValue)
             {
@@ -169,16 +169,16 @@ void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL o
 
     listOfNewWall.clear();
 
-    m = (obstacleNode.y - wallNode.y) / (obstacleNode.x - wallNode.x);
-    b = wallNode.y - m * wallNode.x;
+    m = (obstacleNode.x - wallNode.x) / (obstacleNode.y - wallNode.y);
+    b = wallNode.x - m * wallNode.y;
 
-    if (wallNode.x < obstacleNode.x)
+    if (wallNode.y < obstacleNode.y)
     {
-        for (float i = wallNode.x; i < obstacleNode.x; i = i + SCHRITTGROESSE)
+        for (float i = wallNode.y; i < obstacleNode.y; i = i + SCHRITTGROESSE)
         {
             pcl::PointXYZRGBL tmp;
-            tmp.x = (i);
-            tmp.y = (i)*m + b;
+            tmp.y = (i);
+            tmp.x = (i)*m + b;
             tmp.z = 0;
             tmp.label = wallNode.label;
             listOfNewWall.push_back(tmp);
@@ -186,11 +186,11 @@ void StaticObstacles::createLine(pcl::PointXYZRGBL wallNode, pcl::PointXYZRGBL o
     }
     else
     {
-        for (float i = wallNode.x; i > obstacleNode.x; i = i - SCHRITTGROESSE)
+        for (float i = wallNode.y; i > obstacleNode.y; i = i - SCHRITTGROESSE)
         {
             pcl::PointXYZRGBL tmp;
-            tmp.x = (i);
-            tmp.y = (i)*m + b;
+            tmp.y = (i);
+            tmp.x = (i)*m + b;
             tmp.z = 0;
             tmp.label = wallNode.label;
             listOfNewWall.push_back(tmp);
