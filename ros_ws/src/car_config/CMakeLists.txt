@@ -9,6 +9,15 @@ add_compile_options(-std=c++14)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  dynamic_reconfigure
+)
+
+#########################
+## Dynamic Reconfigure ##
+#########################
+
+generate_dynamic_reconfigure_options(
+  cfg/dynamic_physical_properties.cfg
 )
 
 ###################################
@@ -18,7 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Declare things to be passed to dependent projects
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp std_msgs
+  CATKIN_DEPENDS roscpp std_msgs dynamic_reconfigure
 )
 
 ## Errors and Warnings
@@ -34,3 +43,29 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(dynamic_physical_properties   
+  src/dynamic_physical_properties.cpp
+)
+
+target_link_libraries(dynamic_physical_properties ${catkin_LIBRARIES})
+add_dependencies(dynamic_physical_properties ${PROJECT_NAME}_gencfg)
+add_dependencies(dynamic_physical_properties ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_library(physical_properties
+  src/physical_properties.cpp
+)
+
+target_link_libraries(physical_properties ${catkin_LIBRARIES})
+add_dependencies(physical_properties ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+catkin_package(INCLUDE_DIRS include
+               LIBRARIES physical_properties)
+
+install(TARGETS physical_properties
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(DIRECTORY include/${PROJECT_NAME}/
+DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

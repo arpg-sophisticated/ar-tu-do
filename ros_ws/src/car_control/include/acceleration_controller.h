@@ -1,14 +1,10 @@
 #pragma once
-#include "physical_properties.h"
 #include <car_config.h>
 #include <drive_msgs/drive_param.h>
+#include <physical_properties.h>
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Time.h>
-
-const static float INITIAL_DYNAMIC_FRICTION = 0.47;
-const static float INITIAL_STATIC_FRICTION = 0.7;
-const static float CAR_ACCELERATION = 9.81 * INITIAL_DYNAMIC_FRICTION;
 
 const static bool EMERGENCY_STOP_ACTIVE = false;
 
@@ -38,18 +34,6 @@ class AccelerationController
     double m_target_speed = 0;
 
     double m_angle = 0;
-
-    float getDynamicFriction()
-    {
-        float friction;
-        return m_node_handle.getParam("/physical_properties/dynamic_friction", friction) ? friction : 0;
-    }
-
-    float getStaticFriction()
-    {
-        float friction;
-        return m_node_handle.getParam("/physical_properties/static_friction", friction) ? friction : 0;
-    }
 
     /**
      * Approaches m_target_speed over time with a certain acceleration given with CAR_ACCELERATION

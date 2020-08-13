@@ -59,11 +59,3 @@ add_executable(chase_cam
 )
 target_link_libraries(chase_cam ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(chase_cam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-# Declare speed info node executable
-add_executable(speed_info
-  src/speed_info.cpp
-  src/process_track.cpp
-)
-target_link_libraries(speed_info ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-add_dependencies(speed_info ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

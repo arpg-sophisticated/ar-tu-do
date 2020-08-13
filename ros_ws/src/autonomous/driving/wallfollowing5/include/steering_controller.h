@@ -26,7 +26,7 @@ class SteeringController
 
     double determineSteeringAngle(ProcessedTrack& processed_track, Config::PIDParams& pid_params,
                                   Config::SteeringParams& steering_params, Point& predicted_position,
-                                  Point& target_position, double delta_time);
+                                  Point& target_position, double acceleration, double delta_time);
     void showSteeringAngle();
 
     void controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters);
