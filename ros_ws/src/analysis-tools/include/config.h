@@ -13,5 +13,5 @@ namespace Config
     static const double HUD_PRECISION = 4U;
 
     // time in intervals to wait for writing values to logfile
-    static const unsigned int LOGENTRY_OFFSET = 10U;
+    static const unsigned int LOGENTRY_OFFSET = 100U;
 } // namespace Config
