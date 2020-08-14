@@ -424,7 +424,7 @@ void LogStats::publishHud()
                      << "Ato-: " << (*m_acceleration_mintime_it_min >= 0 ? "+" : "") << *m_acceleration_mintime_it_min
                      << " m/s^2" << std::endl
                      << "Dist: " << (m_distance_current >= 0 ? "+" : "") << m_distance_current << " m" << std::endl
-                     << "Iter:  " << m_logentry << "" << std::endl
+                     << "Iter:  " << std::max(0, ((int)(m_logentry - Config::LOGENTRY_OFFSET))) << "" << std::endl
                      << "AvgT:  " << m_mean_length << " (Vto+ Vav+ Ato+ Ato-)" << std::endl
                      << "AvgS:  " << m_smooth_count << " (Vsmo Asmo)" << std::endl;
 
@@ -499,56 +499,63 @@ void LogStats::publishHud()
 
 void LogStats::writeLogFile(std::string delimiter, std::string filename)
 {
-    // create file handlers
-    std::ofstream filestream(filename, std::ios_base::app);
-
-    // create logline
-    std::stringstream logline;
-    if (m_logentry == 0)
+    // only run if offset is reached
+    if (m_logentry >= Config::LOGENTRY_OFFSET)
     {
-        logline << "Datapoint" << delimiter << "AverageTime" << delimiter << "AverageSmooth" << delimiter << "Time"
-                << delimiter << "TimeDelta" << delimiter << "Speed" << delimiter << "SpeedDelta" << delimiter
-                << "SpeedAverage" << delimiter << "SpeedAverageTime" << delimiter << "SpeedMax" << delimiter
-                << "SpeedMaxTime" << delimiter << "Maxspeed" << delimiter << "MaxspeedDelta" << delimiter
-                << "MaxspeedAverage" << delimiter << "Angle" << delimiter << "AngleDelta" << delimiter << "Acceleration"
-                << delimiter << "AccelerationSmooth" << delimiter << "AccelerationDelta" << delimiter
-                << "AccelerationMin" << delimiter << "AccelerationMax" << delimiter << "AccelerationMinTime"
-                << delimiter << "AccelerationMaxTime" << delimiter << "Distance" << delimiter << "DistanceDelta"
-                << delimiter << "Turn" << delimiter << "TurnDelta" << delimiter << "RPM" << std::endl;
+
+        // create file handlers
+        std::ofstream filestream(filename, std::ios_base::app);
+
+        // create logline
+        std::stringstream logline;
+        if (m_logentry == Config::LOGENTRY_OFFSET)
+        {
+            logline << "Datapoint" << delimiter << "AverageTime" << delimiter << "AverageSmooth" << delimiter << "Time"
+                    << delimiter << "TimeDelta" << delimiter << "Speed" << delimiter << "SpeedDelta" << delimiter
+                    << "SpeedAverage" << delimiter << "SpeedAverageTime" << delimiter << "SpeedMax" << delimiter
+                    << "SpeedMaxTime" << delimiter << "Maxspeed" << delimiter << "MaxspeedDelta" << delimiter
+                    << "MaxspeedAverage" << delimiter << "Angle" << delimiter << "AngleDelta" << delimiter
+                    << "Acceleration" << delimiter << "AccelerationSmooth" << delimiter << "AccelerationDelta"
+                    << delimiter << "AccelerationMin" << delimiter << "AccelerationMax" << delimiter
+                    << "AccelerationMinTime" << delimiter << "AccelerationMaxTime" << delimiter << "Distance"
+                    << delimiter << "DistanceDelta" << delimiter << "Turn" << delimiter << "TurnDelta" << delimiter
+                    << "RPM" << std::endl;
+        }
+
+        std::deque<double>::iterator m_speed_maxtime_it_max =
+            std::max_element(m_speed_maxtime.begin(), m_speed_maxtime.end());
+        std::deque<double>::iterator m_acceleration_maxtime_it_max =
+            std::max_element(m_acceleration_maxtime.begin(), m_acceleration_maxtime.end());
+        std::deque<double>::iterator m_acceleration_mintime_it_min =
+            std::min_element(m_acceleration_mintime.begin(), m_acceleration_mintime.end());
+
+        double m_speed_avgtime_mean = 0.0f;
+        for (double value : m_speed_avgtime)
+        {
+            m_speed_avgtime_mean += (value / m_speed_avgtime.size());
+        }
+
+        double m_acceleration_smooth_mean = 0.0f;
+        for (double value : m_acceleration_smooth)
+        {
+            m_acceleration_smooth_mean += (value / m_acceleration_smooth.size());
+        }
+
+        logline << (m_logentry - Config::LOGENTRY_OFFSET) << delimiter << m_mean_length << delimiter << m_smooth_count
+                << delimiter << m_time_current << delimiter << m_time_delta << delimiter << m_speed_current << delimiter
+                << m_speed_delta << delimiter << m_speed_avg << delimiter << m_speed_avgtime_mean << delimiter
+                << m_speed_max << delimiter << *m_speed_maxtime_it_max << delimiter << m_maxspeed_current << delimiter
+                << m_maxspeed_delta << delimiter << m_maxspeed_avg << delimiter << m_angle_current << delimiter
+                << m_angle_delta << delimiter << m_acceleration_current << delimiter << m_acceleration_smooth_mean
+                << delimiter << m_acceleration_delta << delimiter << m_acceleration_min << delimiter
+                << m_acceleration_max << delimiter << *m_acceleration_maxtime_it_max << delimiter
+                << *m_acceleration_mintime_it_min << delimiter << m_distance_current << delimiter << m_distance_delta
+                << delimiter << m_turn_current << delimiter << m_turn_delta << delimiter
+                << m_speed_current * Config::RPM_FACTOR << std::endl;
+
+        filestream << logline.str();
+        filestream.close();
     }
-
-    std::deque<double>::iterator m_speed_maxtime_it_max =
-        std::max_element(m_speed_maxtime.begin(), m_speed_maxtime.end());
-    std::deque<double>::iterator m_acceleration_maxtime_it_max =
-        std::max_element(m_acceleration_maxtime.begin(), m_acceleration_maxtime.end());
-    std::deque<double>::iterator m_acceleration_mintime_it_min =
-        std::min_element(m_acceleration_mintime.begin(), m_acceleration_mintime.end());
-
-    double m_speed_avgtime_mean = 0.0f;
-    for (double value : m_speed_avgtime)
-    {
-        m_speed_avgtime_mean += (value / m_speed_avgtime.size());
-    }
-
-    double m_acceleration_smooth_mean = 0.0f;
-    for (double value : m_acceleration_smooth)
-    {
-        m_acceleration_smooth_mean += (value / m_acceleration_smooth.size());
-    }
-
-    logline << m_logentry << delimiter << m_mean_length << delimiter << m_smooth_count << delimiter << m_time_current
-            << delimiter << m_time_delta << delimiter << m_speed_current << delimiter << m_speed_delta << delimiter
-            << m_speed_avg << delimiter << m_speed_avgtime_mean << delimiter << m_speed_max << delimiter
-            << *m_speed_maxtime_it_max << delimiter << m_maxspeed_current << delimiter << m_maxspeed_delta << delimiter
-            << m_maxspeed_avg << delimiter << m_angle_current << delimiter << m_angle_delta << delimiter
-            << m_acceleration_current << delimiter << m_acceleration_smooth_mean << delimiter << m_acceleration_delta
-            << delimiter << m_acceleration_min << delimiter << m_acceleration_max << delimiter
-            << *m_acceleration_maxtime_it_max << delimiter << *m_acceleration_mintime_it_min << delimiter
-            << m_distance_current << delimiter << m_distance_delta << delimiter << m_turn_current << delimiter
-            << m_turn_delta << delimiter << m_speed_current * Config::RPM_FACTOR << std::endl;
-
-    filestream << logline.str();
-    filestream.close();
 }
 
 void LogStats::maxSpeedCallback(const std_msgs::Float64::ConstPtr& max_speed)
