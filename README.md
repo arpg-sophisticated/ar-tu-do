@@ -8,7 +8,7 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 
 <img src="doc/ARPG.gif" alt="drawing" width="830"/>
 
-## RViz
+## Simulation
 
 ![](doc/racing_example.gif "Racing with a wallfollowing algorithm")
 
