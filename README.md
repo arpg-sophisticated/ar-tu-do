@@ -6,11 +6,11 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 
 ## Video of final results and testing
 
-<img src="doc/ARPG.gif" alt="drawing" width="830"/>
+<img src="doc/ARPG.gif" alt="Final presentation video" width="850"/>
 
 ## Simulation
 
-![](doc/racing_example.gif "Racing with a wallfollowing algorithm")
+<img src="doc/racing_example.gif" alt="Racing with a wallfollowing algorithm" width="850"/>
 
 ## Newsflash
 
