@@ -4,10 +4,14 @@
 
 This repository contains software for 1/10th scale autonomous race cars to compete in the [F1/10 competition](http://f1tenth.org/). It is developed by the Autonomous Racing Project Group of [TU Dortmund](https://ls12-www.cs.tu-dortmund.de/daes/).
 
+## Some Impressions
+
 ![](doc/racing_example.gif "Racing with a wallfollowing algorithm")
 ![](doc/racing_example_real.gif "Racing with the real car in our lab")
 
-![](doc/ARPG.gif "Presentaion video of final results and testing" =850x)
+## Video of final results and testing
+
+![](doc/ARPG.gif =850x)
 
 ## Newsflash
 
