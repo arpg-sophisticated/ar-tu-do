@@ -7,7 +7,7 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 ## Documentation
 
 * For general information and documentation check out our [wiki page](https://github.com/arpg-sophisticated/ar-tu-do/wiki).
-* For source code documentation check out the auto-generated [Doxygen documentation](https://arpg-sophisticated.github.io).
+* For source code documentation check out the auto-generated [Doxygen documentation](https://arpg-sophisticated.github.io/doc/index.html).
 
 ## Video of final results and testing
 
@@ -43,6 +43,8 @@ Further features are:
 - Dead Man's Switch
 - Teleoperation via keyboard, Xbox and Playstation controller
 - Speedometer and Lap Timer
+
+We also added some more stuff not directly connected to the software, please check out the wiki for more information.
 
 ## Hardware
 
