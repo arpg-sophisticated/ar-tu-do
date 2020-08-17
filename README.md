@@ -60,3 +60,5 @@ Our car is based on a 1/10th scale RC car ([Traxxas Ford Fiesta](https://traxxas
 ## License
 
 This project (excluding git submodules) is under MIT and GPLv3 dual licensed - see the [MIT.LICENSE](MIT.LICENSE) and [GPLv3.LICENSE](GPLv3.LICENSE) file for details.
+
+<img src="doc/banner.png" alt="Racing with a wallfollowing algorithm" width="850"/>
