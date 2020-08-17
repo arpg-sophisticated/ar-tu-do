@@ -11,6 +11,8 @@ This repository contains software for 1/10th scale autonomous race cars to compe
 
 ## Video of final results and testing
 
+<img src="doc/ARPG.gif" alt="drawing" width="850"/>
+
 ![](doc/ARPG.gif =850x)
 
 ## Newsflash
