@@ -401,6 +401,8 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
+    message_continuity_check.handleMessageSeq("WF5: Laserscan: ", laserscan->header.seq);
+
     double scan_time = laserscan->header.stamp.toSec();
     double t_start = ros::Time::now().toSec();
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)
