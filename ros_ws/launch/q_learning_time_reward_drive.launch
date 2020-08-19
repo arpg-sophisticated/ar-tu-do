@@ -22,7 +22,7 @@
   </include>
 
   <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
-
+  <node pkg="car_config" type="dynamic_physical_properties" name="dynamic_physical_properties" respawn="true" output="screen"/>
   <include file="$(find car_control)/launch/car_control.launch">
       <arg name="mode_override" value="2"/>
   </include>
