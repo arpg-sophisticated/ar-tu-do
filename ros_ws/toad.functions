@@ -590,8 +590,8 @@ function toadTelemetryReport {
     echo " done"
 
     printf "Compiling report, please wait ..."
-    #cd $REPORTTARGET && pdflatex report.tex > /dev/null 2>&1
-    cd $REPORTTARGET && pdflatex report.tex
+    cd $REPORTTARGET && pdflatex report.tex > /dev/null 2>&1
+    #cd $REPORTTARGET && pdflatex report.tex
     echo " done"
     echo
     echo "Report created at $REPORTTARGET/report.pdf"
