@@ -21,6 +21,7 @@
 #include <wallfollowing5/wallfollowing5Config.h>
 #include <vector>
 #include <cmath>
+#include <messages_sanity_check.h>
 // clang-format on
 
 constexpr const char* TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous";
@@ -36,6 +37,8 @@ class Wallfollowing
     SteeringController m_steering_controller;
     ProcessTrack m_process_track;
     RvizGeometry m_rviz_geometry;
+
+    MessageContinuityCheck message_continuity_check;
 
     ros::NodeHandle m_node_handle;
     ros::Subscriber m_laserscan_subscriber;
