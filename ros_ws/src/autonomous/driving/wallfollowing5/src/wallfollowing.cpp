@@ -76,7 +76,7 @@ bool Wallfollowing::lineTooCloseToPointcloud(ProcessedTrack& processed_track, Li
 Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track, Line& line,
                                                  std::vector<Point>& pointcloud)
 {
-    Point result_point = {0, 0};
+    Point result_point = { 0, 0 };
     double min_distance = wallfollowing_params.safety_wall_distance;
     double line_length = line.length();
     for (auto& point : pointcloud)
@@ -401,6 +401,8 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
+    message_continuity_check.handleMessageSeq("WF5: Laserscan: ", laserscan->header.seq);
+
     double scan_time = laserscan->header.stamp.toSec();
     double t_start = ros::Time::now().toSec();
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)

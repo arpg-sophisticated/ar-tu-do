@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometric_math
   dynamic_reconfigure
   boxing
+  debug_tools
 )
 
 
@@ -39,7 +40,7 @@ generate_dynamic_reconfigure_options(
 ## Declare things to be passed to dependent projects
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim pcl_conversions pcl_ros geometric_math boxing dynamic_reconfigure
+  CATKIN_DEPENDS drive_msgs roscpp rospy std_msgs car_config vesc_sim pcl_conversions pcl_ros geometric_math boxing dynamic_reconfigure debug_tools
 )
 
 
