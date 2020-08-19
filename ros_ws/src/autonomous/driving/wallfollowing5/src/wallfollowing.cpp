@@ -76,7 +76,7 @@ bool Wallfollowing::lineTooCloseToPointcloud(ProcessedTrack& processed_track, Li
 Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track, Line& line,
                                                  std::vector<Point>& pointcloud)
 {
-    Point result_point = {0, 0};
+    Point result_point = { 0, 0 };
     double min_distance = wallfollowing_params.safety_wall_distance;
     double line_length = line.length();
     for (auto& point : pointcloud)
