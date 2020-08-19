@@ -90,7 +90,7 @@
         <arg name="topic_output_obstacles" value="/obstacles/obstacles" />
     </include>
 
-    <include file="$(find avoid_static_obstacles)/launch/avoid_static_obstacles.launch"/>
+    <!--<include file="$(find avoid_static_obstacles)/launch/avoid_static_obstacles.launch"/>-->
  
     <include file="$(find car_tf)/launch/car_transformer.launch" />
 
