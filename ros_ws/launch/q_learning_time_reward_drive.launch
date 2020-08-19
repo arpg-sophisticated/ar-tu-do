@@ -34,6 +34,14 @@
 
   <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
 
-  
+  <node pkg="analysis-tools" type="log_stats" name="log_stats" respawn="true" output="screen">
+        <param name="prefix" value="gazebo" />
+        <param name="length" value="100" />
+        <param name="smooth" value="10" />
+        <param name="sim" value="true" />
+        <param name="write" value="true" />
+    </node>
+  <node pkg="simulation_tools" type="speed_info" name="speed_info" respawn="true" output="screen"/>
+    
   <node respawn="true" pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
 </launch>
