@@ -22,7 +22,7 @@
   </include>
 
   <include file="$(find vesc_sim)/launch/vesc_sim.launch"/>
-
+  <node pkg="car_config" type="dynamic_physical_properties" name="dynamic_physical_properties" respawn="true" output="screen"/>
   <include file="$(find car_control)/launch/car_control.launch">
       <arg name="mode_override" value="2"/>
   </include>
@@ -31,6 +31,9 @@
   </include>
   <include file="$(find reinforcement_learning)/launch/drive_q_learning_time_reward.launch">
   </include>
+
+  <node name="lap_timer" pkg="simulation_tools" type="lap_timer.py" output="screen"/>
+
   
   <node respawn="true" pkg="gazebo_telemetry" type="gazebo_state_telemetry.py" name="gazebo_state_telemetry" output="screen"/>
 </launch>

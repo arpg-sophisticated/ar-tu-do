@@ -380,7 +380,7 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
     double angle = angle_start;
     for (int i = index_start; i < index_end; i++)
     {
-        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]))
+        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]) && laserscan->ranges[i] < 20)
         {
             Point p;
             p.x = -std::sin(angle) * laserscan->ranges[i];

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+<!-- Launches all necessary nodes that let the car drive autonomously. -->
+    <!-- wall_following node -->
+
+    <node
+      pkg="avoid_static_obstacles"
+      type="avoid_static_obstacles"
+      name="avoid_static_obstacles"
+      output="screen" 
+      respawn="true" />
+
+</launch>
