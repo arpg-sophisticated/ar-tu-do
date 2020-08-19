@@ -9,7 +9,91 @@
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
+
+\addplot[smooth,red,solid] table [y=speed,x=distance]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $v_{cur}(d)$}
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Werte
+\end{figure}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+]
+
+\addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=distance]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $v_{cur}(d)$}
+
+\end{axis}
+\end{tikzpicture}
+\caption \sffamily \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Werte, Glättung ___PH_SMOOTH___
+\end{figure}
+
+
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+]
+
+\addplot[smooth,red,solid] table [y=speed,x=distance]{___PH_FILENAME___.dat};
+\addplot[smooth,blue,solid] table [y=maxspeed,x=distance]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $v_{cur}(d)$}
+\addlegendentry{___PH_TITLE___ $v_{max}(d)$}
+
+\end{axis}
+\end{tikzpicture}
+	\caption \sffamily \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Werte (logarithmisch)
+\end{figure}
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+]
+
+\addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=distance]{___PH_FILENAME___.dat};
+\addplot[smooth,blue,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=maxspeed,x=distance]{___PH_FILENAME___.dat};
+\addlegendentry{___PH_TITLE___ $v_{cur}(d)$}
+\addlegendentry{___PH_TITLE___ $v_{max}(d)$}
+
+\end{axis}
+\end{tikzpicture}
+	\caption \sffamily \textbf{___PH_TITLE___:} Geschwindigkeit $v$ nach Distanz $d$ - ___PH_SIZE___ Werte (logarithmisch), Glättung ___PH_SMOOTH___
+\end{figure}
+
+
+
+\begin{figure}[H]
+\center
+\begin{tikzpicture}
+\begin{axis}[width=0.7\textwidth, height=0.35\paperheight, scaled ticks=true, tick label style={/pgf/number format/fixed, font=\footnotesize}, 
+%axis lines=middle, 
+%ymode=log,
+%ymin=0, 
+xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
+xtick distance=___PH_DIVD___,
+]
 
 \addplot[smooth,red,solid] table [y=speed,x=distance]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=maxspeed,x=distance]{___PH_FILENAME___.dat};
@@ -30,7 +114,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=distance]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=maxspeed,x=distance]{___PH_FILENAME___.dat};
@@ -53,7 +137,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=speed,x=time]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=maxspeed,x=time]{___PH_FILENAME___.dat};
@@ -74,7 +158,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speed,x=time]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=maxspeed,x=time]{___PH_FILENAME___.dat};
@@ -97,7 +181,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=acceleration,x=distance]{___PH_FILENAME___.dat};
 \addlegendentry{___PH_TITLE___ $a(d)$}
@@ -116,7 +200,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=distance]{___PH_FILENAME___.dat};
 \addlegendentry{___PH_TITLE___ $a(d)$}
@@ -137,7 +221,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=acceleration,x=time]{___PH_FILENAME___.dat};
 \addlegendentry{___PH_TITLE___ $a(t)$}
@@ -156,7 +240,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=time]{___PH_FILENAME___.dat};
 \addlegendentry{___PH_TITLE___ $a(t)$}
@@ -177,7 +261,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=speeddelta,x=distance]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=distance]{___PH_FILENAME___.dat};
@@ -198,7 +282,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speeddelta,x=distance]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=distance]{___PH_FILENAME___.dat};
@@ -221,7 +305,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=speeddelta,x=time]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=time]{___PH_FILENAME___.dat};
@@ -242,7 +326,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=speeddelta,x=time]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=time]{___PH_FILENAME___.dat};
@@ -265,7 +349,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=acceleration,x=distance]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=distance]{___PH_FILENAME___.dat};
@@ -286,7 +370,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $m$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVD___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=distance]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=distance]{___PH_FILENAME___.dat};
@@ -309,7 +393,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid] table [y=acceleration,x=time]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=time]{___PH_FILENAME___.dat};
@@ -330,7 +414,7 @@ xmin=1]
 %ymin=0, 
 xlabel=\footnotesize $s$, ylabel=\footnotesize $\frac{m}{s^2}$,
 xtick distance=___PH_DIVT___,
-xmin=1]
+]
 
 \addplot[smooth,red,solid,each nth point=___PH_SMOOTH___, filter discard warning=false, unbounded coords=discard] table [y=acceleration,x=time]{___PH_FILENAME___.dat};
 \addplot[smooth,blue,solid] table [y=angle,x=time]{___PH_FILENAME___.dat};
