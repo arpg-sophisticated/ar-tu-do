@@ -10,9 +10,9 @@ void MessageContinuityCheck::handleMessageSeq(std::string message_prefix, unsign
         {
             m_max_skipped_messages = skipped_messages_count;
         }
-        std::cout << message_prefix << "After seq=" << m_old_seq << " comes seq=" << seq
-                  << " all messages in between are skipped! max skipped: " << m_max_skipped_messages
-                  << " total: " << m_skipped_messages << "/" << seq << std::endl;
+        // std::cout << message_prefix << "After seq=" << m_old_seq << " comes seq=" << seq
+        //           << " all messages in between are skipped! max skipped: " << m_max_skipped_messages
+        //           << " total: " << m_skipped_messages << "/" << seq << std::endl;
     }
     m_old_seq = seq;
 }

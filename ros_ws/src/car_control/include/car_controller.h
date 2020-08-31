@@ -17,6 +17,7 @@ constexpr const char* TOPIC_FOCBOX_BRAKE = "commands/motor/brake";
 constexpr const char* TOPIC_DRIVE_PARAM = "/commands/controlled_drive_param";
 constexpr const char* TOPIC_DRIVE_MODE = "/commands/drive_mode";
 constexpr const char* TOPIC_EMERGENCY_STOP = "/commands/emergency_stop";
+constexpr const char* DRIVE_TOPIC = "/drive";
 
 class CarController
 {
@@ -33,10 +34,15 @@ class CarController
     ros::Publisher m_speed_publisher;
     ros::Publisher m_angle_publisher;
     ros::Publisher m_brake_publisher;
+    ros::Publisher drive_pub;
 
     bool m_drive_param_lock;
     bool m_emergency_stop_lock;
     DriveMode m_current_drive_mode;
+
+    // car parameters
+    double m_max_speed;
+    double m_max_steering_angle;
 
     /**
      * @brief deals with incomming drive param messages

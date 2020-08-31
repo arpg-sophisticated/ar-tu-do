@@ -1,4 +1,8 @@
 #include "car_controller.h"
+// Publish to a topic with this message type
+#include <ackermann_msgs/AckermannDriveStamped.h>
+// AckermannDriveStamped messages include this message type
+#include <ackermann_msgs/AckermannDrive.h>
 
 #include <boost/algorithm/clamp.hpp>
 
@@ -18,6 +22,12 @@ CarController::CarController()
     this->m_speed_publisher = this->m_node_handle.advertise<std_msgs::Float64>(TOPIC_FOCBOX_SPEED, 1);
     this->m_angle_publisher = this->m_node_handle.advertise<std_msgs::Float64>(TOPIC_FOCBOX_ANGLE, 1);
     this->m_brake_publisher = this->m_node_handle.advertise<std_msgs::Float64>(TOPIC_FOCBOX_BRAKE, 1);
+    // Make a publisher for drive messages
+    drive_pub = m_node_handle.advertise<ackermann_msgs::AckermannDriveStamped>(DRIVE_TOPIC, 10);
+
+    // get car parameters
+    m_node_handle.getParam("max_speed", m_max_speed);
+    m_node_handle.getParam("max_steering_angle", m_max_steering_angle);
 }
 
 void CarController::driveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters)
@@ -30,6 +40,13 @@ void CarController::publishDriveParameters(float speed, float relative_angle)
 {
     float rpm = convertSpeedToRpm(speed);
     float angle = (relative_angle * car_config::MAX_SERVO_POSITION + car_config::MAX_SERVO_POSITION) / 2;
+
+    ackermann_msgs::AckermannDriveStamped drive_st_msg;
+    ackermann_msgs::AckermannDrive drive_msg;
+    drive_msg.speed = speed;
+    drive_msg.steering_angle = relative_angle * -0.4189; // m_max_steering_angle doesn't work
+    drive_st_msg.drive = drive_msg;
+    drive_pub.publish(drive_st_msg);
 
     this->publishSpeed(rpm);
     this->publishAngle(angle);
