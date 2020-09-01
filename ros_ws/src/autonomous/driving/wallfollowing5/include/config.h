@@ -20,6 +20,7 @@ namespace Config
     {
         // The size of the part of the laser scan that should be used by the algorithm, in degrees.
         double usable_laser_range;
+        double max_laser_range;
 
         TargetMethod target_method;
 

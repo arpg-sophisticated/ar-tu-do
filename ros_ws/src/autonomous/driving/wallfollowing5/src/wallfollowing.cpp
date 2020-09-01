@@ -19,6 +19,7 @@ Wallfollowing::Wallfollowing()
     m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
         wallfollowing_params.usable_laser_range = cfg.usable_laser_range;
         wallfollowing_params.target_method = (Config::TargetMethod)cfg.target_method;
+        wallfollowing_params.max_laser_range = cfg.max_laser_range;
         wallfollowing_params.use_voxel = cfg.use_voxel;
         wallfollowing_params.use_obstacle_avoidence = cfg.use_obstacle_avoidence;
         wallfollowing_params.safety_wall_distance = cfg.safety_wall_distance;
@@ -46,8 +47,8 @@ Wallfollowing::Wallfollowing()
 
 Point Wallfollowing::determinePredictedCarPosition(ProcessedTrack& processedTrack)
 {
-    double prediction_distance =
-        std::min(0.1 + m_speed_controller.getLastDeterminedSpeed() * 0.35, wallfollowing_params.max_predicted_distance);
+    double prediction_distance = wallfollowing_params.max_predicted_distance;
+    // std::min(0.1 + m_speed_controller.getLastDeterminedSpeed() * 0.35, wallfollowing_params.max_predicted_distance);
     return Point{ 0, prediction_distance };
 }
 
@@ -380,7 +381,8 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
     double angle = angle_start;
     for (int i = index_start; i < index_end; i++)
     {
-        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]) && laserscan->ranges[i] < 15)
+        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]) &&
+            laserscan->ranges[i] < wallfollowing_params.max_laser_range)
         {
             Point p;
             p.x = -std::sin(angle) * laserscan->ranges[i];
