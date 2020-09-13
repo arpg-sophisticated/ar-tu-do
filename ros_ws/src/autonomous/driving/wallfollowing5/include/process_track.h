@@ -46,6 +46,7 @@ class ProcessTrack
     RvizGeometry m_rviz_geometry;
 
     private:
+    std::vector<Point> cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select);
     std::vector<Point> cropPointcloud(std::vector<Point>& pointcloud, float minimum_y);
     unsigned int findLeftRightBorder(std::vector<Point>& pointcloud, Config::ProcessingParams& processing_params);
     Point calcNearestPointToPoint(Point& point, std::vector<Point>& pointcloud);

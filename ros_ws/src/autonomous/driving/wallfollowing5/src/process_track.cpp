@@ -18,6 +18,19 @@ std::vector<Point> ProcessTrack::cropPointcloud(std::vector<Point>& pointcloud, 
     return cropped_pointcloud;
 }
 
+std::vector<Point> ProcessTrack::cropPointcloud(std::vector<Point>& pointcloud, std::function<bool(Point&)> select)
+{
+    std::vector<Point> cropped_pointcloud;
+    for (auto& p : pointcloud)
+    {
+        if (select(p))
+        {
+            cropped_pointcloud.push_back(p);
+        }
+    }
+    return cropped_pointcloud;
+}
+
 Point ProcessTrack::calcNearestPointToPoint(Point& point, std::vector<Point>& pointcloud)
 {
     double nearest_distance = 0;
@@ -118,9 +131,9 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
         // if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         // {
         storage->upper_wall = cropPointcloud(storage->right_wall, storage->curve_entry.y - 1.5);
-        // storage->right_wall =
-        //     cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
-        // storage->right_circle = CircleFit::hyperFit(storage->right_wall);
+        storage->right_wall =
+            cropPointcloud(storage->right_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
+        storage->right_circle = CircleFit::hyperFit(storage->right_wall);
         storage->curve_type = CURVE_TYPE_LEFT;
         // }
     }
@@ -132,9 +145,10 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
         // if (isCurveEntryInFront(storage->curve_entry, nearest_point_to_car, 1))
         // {
         storage->upper_wall = cropPointcloud(storage->left_wall, storage->curve_entry.y - 1.5);
-        // storage->left_wall =
-        //     cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
-        // storage->left_circle = CircleFit::hyperFit(storage->left_wall);
+
+        storage->left_wall =
+            cropPointcloud(storage->left_wall, [storage](Point& p) { return p.y <= storage->curve_entry.y; });
+        storage->left_circle = CircleFit::hyperFit(storage->left_wall);
         storage->curve_type = CURVE_TYPE_RIGHT;
         // }
     }

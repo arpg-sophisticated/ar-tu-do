@@ -41,4 +41,6 @@ namespace GeometricFunctions
     double toRadians(double degrees);
 
     double calcShortestDistanceToLine(Point& point, Line line);
+
+    int sgn(float val);
 }; // namespace GeometricFunctions

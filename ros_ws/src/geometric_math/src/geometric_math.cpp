@@ -21,3 +21,8 @@ double GeometricFunctions::calcShortestDistanceToLine(Point& point, Line line)
                     line.end.x * line.start.y - line.end.y * line.start.x) /
         line.length();
 }
+
+int GeometricFunctions::sgn(float val)
+{
+    return (0 < val) - (val < 0);
+}
