@@ -122,4 +122,6 @@
         <param name="sim" value="false" />
         <param name="write" value="true" />
     </node> -->
+
+    <!-- <include file="$(find f1tenth_gym_ros)/launch/gym_bridge_host.launch"/> -->
 </launch>
