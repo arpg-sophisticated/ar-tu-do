@@ -27,7 +27,18 @@ class BruteforceReward
     ros::Subscriber m_max_speed_subscriber;
     ros::Subscriber m_gazebo_state_telemetry_subscriber;
     ros::NodeHandle m_node_handle;
+
+    // counter for logentry
+    unsigned int m_logentry;
+
+    // current time
+    ros::Time m_time_start;
+    ros::Duration m_time_last;
+    ros::Duration m_time_delta;
+    ros::Duration m_time_interval;
     ros::Duration m_time_current;
+    
+    // several values
     double m_speed_current;
     std::deque<double> m_speed_current_average;
     int m_average;
