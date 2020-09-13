@@ -31,6 +31,7 @@ class BruteforceReward
     double m_speed_current;
     std::deque<double> m_speed_current_average;
     int m_average;
+    std::string m_resultsfile;
 
     public:
     BruteforceReward();

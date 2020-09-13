@@ -6,20 +6,25 @@ BruteforceReward::BruteforceReward()
         m_node_handle.subscribe<drive_msgs::drive_param>(TOPIC_CONTROLLED_DRIVE_PARAM, 1,
                                                          &BruteforceReward::controlledDriveParametersCallback, this);
     
+    std::string defaultresultsfile="/tmp/results.csv";
     m_node_handle.param("/bruteforce_reward/average", m_average, 1000);
+    m_node_handle.param("/bruteforce_reward/bfresults", m_resultsfile, defaultresultsfile);
     m_time_current = ros::Duration(0.0f);
     m_speed_current = 0.0f;
     std::stringstream logpath;
-    std::istringstream logpath_iss(ros::package::getPath("analysis-tools"));
-    logpath << logpath_iss.str() << "/../../bruteforce_reward.txt";
+    logpath << m_resultsfile;
     remove( logpath.str().c_str() );
+    std::ofstream filestream(logpath.str(), std::ios_base::app);
+    std::stringstream logline;
+    logline << "time;speed;avgcount;speed_avg" << std::endl;
+    filestream << logline.str();
+    filestream.close();
 }
 
 void BruteforceReward::controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters)
 {
     std::stringstream logpath;
-    std::istringstream logpath_iss(ros::package::getPath("analysis-tools"));
-    logpath << logpath_iss.str() << "/../../bruteforce_reward.txt";
+    logpath << m_resultsfile;
     std::ofstream filestream(logpath.str(), std::ios_base::app);
     
     m_time_current = ros::Duration(ros::Time::now() - ros::Time(0.0f));
