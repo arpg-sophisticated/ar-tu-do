@@ -2,12 +2,10 @@
 <launch>
 <!-- Launches all necessary nodes that let the car drive autonomously. -->
     <!-- wall_following node -->
+    <arg name="topic_drive_param" />
 
-    <node
-      pkg="wallfollowing5"
-      type="wallfollowing"
-      name="wallfollowing"
-      output="screen" 
-      respawn="true" />
+    <node pkg="wallfollowing5" type="wallfollowing" name="wallfollowing" output="screen" respawn="true">
+      <param name="topic_drive_param" type="string" value="$(arg topic_drive_param)" />
+    </node>
 
 </launch>

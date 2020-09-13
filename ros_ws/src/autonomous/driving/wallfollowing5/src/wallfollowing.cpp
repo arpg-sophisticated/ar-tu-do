@@ -1,6 +1,7 @@
 #include "wallfollowing.h"
 
 Wallfollowing::Wallfollowing()
+    : m_private_node_handle("~")
 {
     m_laserscan_subscriber =
         m_node_handle.subscribe<sensor_msgs::LaserScan>(TOPIC_LASER_SCAN, 1, &Wallfollowing::laserScanCallback, this);
@@ -14,7 +15,11 @@ Wallfollowing::Wallfollowing()
         m_node_handle.subscribe<sensor_msgs::PointCloud2>("/scan/lidar/cartesian", 1,
                                                           &Wallfollowing::lidarCartesianCallback, this);
 
-    m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(TOPIC_DRIVE_PARAMETERS, 1);
+    std::string topic_drive_param;
+    if (!this->m_private_node_handle.getParamCached("topic_drive_param", topic_drive_param))
+        topic_drive_param = TOPIC_DRIVE_PARAMETERS;
+
+    m_drive_parameters_publisher = m_node_handle.advertise<drive_msgs::drive_param>(topic_drive_param, 1);
 
     m_dyn_cfg_server.setCallback([&](wallfollowing5::wallfollowing5Config& cfg, uint32_t) {
         wallfollowing_params.usable_laser_range = cfg.usable_laser_range;

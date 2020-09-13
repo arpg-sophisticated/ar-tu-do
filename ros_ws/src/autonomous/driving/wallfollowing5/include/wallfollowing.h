@@ -41,6 +41,7 @@ class Wallfollowing
     MessageContinuityCheck message_continuity_check;
 
     ros::NodeHandle m_node_handle;
+    ros::NodeHandle m_private_node_handle;
     ros::Subscriber m_laserscan_subscriber;
     ros::Subscriber m_voxel_subscriber;
     ros::Subscriber m_walls_subscriber;
