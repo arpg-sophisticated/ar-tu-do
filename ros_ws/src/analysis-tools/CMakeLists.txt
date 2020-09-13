@@ -50,6 +50,14 @@ add_executable(log_stats
 target_link_libraries(log_stats ${catkin_LIBRARIES})
 add_dependencies(log_stats ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+
+add_executable(bruteforce_reward   
+  src/bruteforce_reward.cpp
+)
+
+target_link_libraries(bruteforce_reward ${catkin_LIBRARIES})
+add_dependencies(bruteforce_reward ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 # Declare speed info node executable
 add_executable(speed_info
   src/speed_info.cpp
