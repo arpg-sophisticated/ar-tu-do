@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+	<arg name="topic_drive_param" value="/input/drive_param/autonomous" />
     
       <arg name="map" default="$(find f1tenth_simulator)/maps/berlin.yaml"/>
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map)"/>
@@ -62,7 +63,10 @@
     
     <!-- wallfollowing start - please enable only one -->
     <!-- current implementation -->
-    <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch"/>
+    <!--    <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch"/>-->
+    <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch">
+        <arg name="topic_drive_param" value="/input/drive_param/autonomous" />
+    </include>
 
     <node pkg="car_config" type="dynamic_physical_properties" name="dynamic_physical_properties" respawn="true" output="screen"/>
     
