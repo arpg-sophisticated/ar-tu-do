@@ -21,9 +21,10 @@ BruteforceReward::BruteforceReward()
     remove( logpath.str().c_str() );
     std::ofstream filestream(logpath.str(), std::ios_base::app);
     std::stringstream logline;
-    logline << "id;time;speed;avgcount;speed_avg" << std::endl;
+    logline << "id;time;speed;avgcount;speed_avg;command" << std::endl;
     filestream << logline.str();
     filestream.close();
+    m_command = "ok";
 }
 
 void BruteforceReward::controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& parameters)
@@ -52,7 +53,7 @@ void BruteforceReward::controlledDriveParametersCallback(const drive_msgs::drive
       }
 
       std::stringstream logline;
-      logline << m_logentry << ";" << m_time_current << ";" << m_speed_current << ";" << m_average << ";" << m_speed_current_average_value << std::endl;
+      logline << m_logentry << ";" << m_time_current << ";" << m_speed_current << ";" << m_average << ";" << m_speed_current_average_value << ";" << m_command << std::endl;
       filestream << logline.str();
       filestream.close();
       m_time_delta = ros::Duration(0.0f);
