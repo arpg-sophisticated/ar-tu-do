@@ -38,9 +38,13 @@ void AccelerationController::approachSpeedControlled(const ros::TimerEvent& even
         m_current_speed += delta_speed;
     }
 
-    if (m_current_speed > 0)
+    if (m_current_speed > 0 && m_target_speed > 0)
     {
         m_current_speed = std::max(0.5, m_current_speed);
+    }
+    else if (m_current_speed < 0.5)
+    {
+        m_current_speed = 0
     }
 
     drive_msgs::drive_param message;
