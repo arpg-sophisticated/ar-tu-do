@@ -16,6 +16,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <sensor_msgs/LaserScan.h>
+#include <std_msgs/Bool.h>
 
 #include "f1tenth_simulator/ackermann_kinematics.hpp"
 #include "f1tenth_simulator/pose_2d.hpp"
@@ -92,6 +93,10 @@ class RacecarSimulator
 
     // publisher for map with obstacles
     ros::Publisher map_pub;
+
+    // publisher for collision detection
+    char* TOPIC_COLLISION_DETECTED = "/collision_detected";
+    ros::Publisher collision_pub;
 
     // keep an original map for obstacles
     nav_msgs::OccupancyGrid original_map;
@@ -220,6 +225,9 @@ class RacecarSimulator
 
         // Make a publisher for ground truth pose
         pose_pub = n.advertise<geometry_msgs::PoseStamped>(gt_pose_topic, 1);
+
+        // Make a publisher for collision detection
+        collision_pub = n.advertise<std_msgs::Bool>(TOPIC_COLLISION_DETECTED, 1);
 
         // Start a timer to output the pose
         update_pose_timer = n.createTimer(ros::Duration(update_pose_rate), &RacecarSimulator::update_pose, this);
@@ -390,6 +398,10 @@ class RacecarSimulator
                         TTC = true;
 
                         ROS_INFO("Collision detected");
+
+                        std_msgs::Bool collision_msg;
+                        collision_msg.data = true;
+                        collision_pub.publish(collision_msg);
                     }
                 }
             }

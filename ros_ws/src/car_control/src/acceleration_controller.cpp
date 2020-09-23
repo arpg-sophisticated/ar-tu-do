@@ -44,7 +44,7 @@ void AccelerationController::approachSpeedControlled(const ros::TimerEvent& even
     }
     else if (m_current_speed < 0.5)
     {
-        m_current_speed = 0
+        m_current_speed = 0;
     }
 
     drive_msgs::drive_param message;
