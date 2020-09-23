@@ -11,6 +11,7 @@
 #include <ros/package.h>
 #include <ros/ros.h>
 #include <sstream>
+#include <std_msgs/Bool.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float64.h>
@@ -19,6 +20,7 @@
 constexpr const char* TOPIC_CONTROLLED_DRIVE_PARAM = "/commands/controlled_drive_param";
 constexpr const char* TOPIC_MAX_SPEED = "/speed_info/max_speed";
 constexpr const char* TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry";
+constexpr const char* TOPIC_COLLISION_DETECTED = "/collision_detected";
 
 class BruteforceReward
 {
@@ -26,6 +28,7 @@ class BruteforceReward
     ros::Subscriber m_controlled_drive_parameters_subscriber;
     ros::Subscriber m_max_speed_subscriber;
     ros::Subscriber m_gazebo_state_telemetry_subscriber;
+    ros::Subscriber m_collision_detected_subscriber;
     ros::NodeHandle m_node_handle;
 
     // counter for logentry
@@ -37,7 +40,7 @@ class BruteforceReward
     ros::Duration m_time_delta;
     ros::Duration m_time_interval;
     ros::Duration m_time_current;
-    
+
     // several values
     double m_speed_current;
     std::deque<double> m_speed_current_average;
@@ -51,4 +54,5 @@ class BruteforceReward
     private:
     void controlledDriveParametersCallback(const drive_msgs::drive_param::ConstPtr& drive_parameters);
     void maxSpeedCallback(const std_msgs::Float64::ConstPtr& max_speed);
+    void collisionCallback(const std_msgs::Bool::ConstPtr& collision);
 };
