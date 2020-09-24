@@ -165,22 +165,25 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 {
     Point left_point = processed_track.left_circle.getClosestPoint(predicted_position);
     Point right_point = processed_track.right_circle.getClosestPoint(predicted_position);
-    Point imaginary_point;
-    if (processed_track.left_circle.getRadius() < processed_track.right_circle.getRadius())
+    if (wallfollowing_params.use_imaginary_track_center)
     {
-        int sign = processed_track.right_circle.pointIsInCircle(predicted_position) ? -1 : 1;
-        Circle imaginary_circle(processed_track.right_circle.getCenter(),
-                                processed_track.right_circle.getRadius() + 2 * sign);
-        Point imaginary_point = imaginary_circle.getClosestPoint(predicted_position);
-        left_point = imaginary_point;
-    }
-    else
-    {
-        int sign = processed_track.left_circle.pointIsInCircle(predicted_position) ? -1 : 1;
-        Circle imaginary_circle(processed_track.left_circle.getCenter(),
-                                processed_track.left_circle.getRadius() + 2 * sign);
-        Point imaginary_point = imaginary_circle.getClosestPoint(predicted_position);
-        right_point = imaginary_point;
+        Point imaginary_point;
+        if (processed_track.left_circle.getRadius() < processed_track.right_circle.getRadius())
+        {
+            int sign = processed_track.right_circle.pointIsInCircle(predicted_position) ? -1 : 1;
+            Circle imaginary_circle(processed_track.right_circle.getCenter(),
+                                    processed_track.right_circle.getRadius() + 2 * sign);
+            Point imaginary_point = imaginary_circle.getClosestPoint(predicted_position);
+            left_point = imaginary_point;
+        }
+        else
+        {
+            int sign = processed_track.left_circle.pointIsInCircle(predicted_position) ? -1 : 1;
+            Circle imaginary_circle(processed_track.left_circle.getCenter(),
+                                    processed_track.left_circle.getRadius() + 2 * sign);
+            Point imaginary_point = imaginary_circle.getClosestPoint(predicted_position);
+            right_point = imaginary_point;
+        }
     }
 
     Point central_point = Point{ (left_point.x + right_point.x) / 2, (left_point.y + right_point.y) / 2 };

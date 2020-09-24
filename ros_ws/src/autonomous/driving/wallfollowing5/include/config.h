@@ -28,6 +28,8 @@ namespace Config
 
         bool use_obstacle_avoidence;
 
+        bool use_imaginary_track_center = false;
+
         double safety_wall_distance;
 
         double max_predicted_distance;
