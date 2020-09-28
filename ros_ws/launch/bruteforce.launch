@@ -1,35 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+  <!-- default topic for drive parameters -->
   <arg name="topic_drive_param" value="/input/drive_param/autonomous" />
-    
+  
+  <!-- which map to load -->  
   <arg name="map" default="$(find f1tenth_simulator)/maps/berlin.yaml"/>
+  
+  <!-- load map server with given map -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map)"/>
 
-  <!-- Launch the racecar model -->
+  <!-- launch the racecar model -->
   <include file="$(find f1tenth_simulator)/launch/racecar_model.launch"/>
 
-  <!-- Begin the simulator with the parameters from params.yaml -->
+  <!-- begin the simulator with the parameters from params.yaml -->
   <node pkg="f1tenth_simulator" name="f1tenth_simulator" type="simulator" output="screen">
     <rosparam command="load" file="$(find f1tenth_simulator)/params.yaml"/>
   </node>
 
-  <!-- Launch the mux node with the parameters from params.yaml -->
+  <!-- launch the mux node with the parameters from params.yaml -->
   <node pkg="f1tenth_simulator" name="mux_controller" type="mux" output="screen">
     <rosparam command="load" file="$(find f1tenth_simulator)/params.yaml"/>
   </node>
-    
-  <arg name="joystick_type" default="xbox360"/>
-  <arg name="record" default="false"/>
-  <arg name="videohd" default="false"/>
+  
+  <!-- Default path for results if not passed -->
   <arg name="bfresults" default="/tmp/results.csv"/>
+  
+  <!-- Default path for configuration if not passed -->
   <arg name="bfconf" default="/tmp/default.yaml"/>
 
   <!-- RVIZ Display
       1 show normal drive mode
       2 show f1tenth simlator default perspective
+      3 show both
       0 disable rviz display for bath simulation mode
   -->
   <arg name="show_rviz" default="0"/>
+  <group if="$(eval arg('show_rviz') == 3)">
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
+    <node pkg="rviz" type="rviz" name="rviz2" args="-d $(find f1tenth_simulator)/launch/simulator.rviz" output="screen"/>
+  </group>
+  <group if="$(eval arg('show_rviz') == 2)">
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find f1tenth_simulator)/launch/simulator.rviz" output="screen"/>
+  </group>
+  <group if="$(eval arg('show_rviz') == 1)">
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
+  </group>
 
   <!-- Mode Override
       1 forces manual driving
@@ -38,57 +53,59 @@
   -->
   <arg name="mode_override" default="2"/>
 
+  <!-- load robot description -->
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racer_description)/urdf/racer.xacro'"/>
 
+  <!-- load car controller, pass mode -->
   <include file="$(find car_control)/launch/car_control.launch">
       <arg name="mode_override" value="$(arg mode_override)"/>
   </include>
 
-  <include file="$(find vesc_driver)/launch/vesc_driver_node.launch"/>
+  <!--<include file="$(find vesc_driver)/launch/vesc_driver_node.launch"/>-->
 
-  <rosparam command="load" file="$(find vesc_sim)/config/car_config.yaml"/>
+  <!--<rosparam command="load" file="$(find vesc_sim)/config/car_config.yaml"/>-->
 
-  <!--<include file="$(find vesc_ackermann)/launch/vesc_to_odom_node.launch"/>-->
-
+  <!-- load wallfollowing -->
   <include file="$(find wallfollowing5)/launch/autonomous_driving_physical.launch">
     <arg name="topic_drive_param" value="/input/drive_param/autonomous" />
   </include>
 
+  <!-- load physical properties of track and car -->
   <node pkg="car_config" type="dynamic_physical_properties" name="dynamic_physical_properties" respawn="true" output="screen"/>
   
+  <!-- publishes state of the robot -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
 
+  <!-- publishes state of the wheels -->
   <include file="$(find hardware)/launch/static_wheel_publisher.launch"/>
-  
-  <group if="$(eval arg('show_rviz') == 2)">
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
-    <node pkg="rviz" type="rviz" name="rviz2" args="-d $(find f1tenth_simulator)/launch/simulator.rviz" output="screen"/>
-  </group>
-  <group if="$(eval arg('show_rviz') == 1)">
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
-  </group>
 
+  <!-- load boxing -->
   <include file="$(find boxing)/launch/boxing.launch">
     <arg name="topic_input_cloud" value="/scan/lidar/cartesian" />
     <arg name="topic_input_colored_cloud" value="/racer/camera1/depth/points" />
     <arg name="topic_voxels" value="/scan/voxels" />
   </include>
 
+  <!-- load voxel classifiers -->
   <include file="$(find voxel_classifier)/launch/voxel_classifier.launch">
     <arg name="topic_input_voxels" value="/scan/voxels" />
     <arg name="topic_output_clusters" value="/scan/clusters" />
   </include>
 
+  <!-- load wall detection based on clustering -->
   <include file="$(find wall_detection)/launch/wall_detection.launch">
     <arg name="topic_input_clusters" value="/scan/clusters" />
     <arg name="topic_output_walls" value="/obstacles/walls" />
     <arg name="topic_output_obstacles" value="/obstacles/obstacles" />
   </include>
 
+  <!-- load obstacle avoidance code -->
   <!--<include file="$(find avoid_static_obstacles)/launch/avoid_static_obstacles.launch"/>-->
  
+  <!-- static transformer -->
   <include file="$(find car_tf)/launch/car_transformer.launch" />
 
+  <!-- load analysis tools for generating results and give feedback to control script -->
   <node pkg="analysis-tools" type="bruteforce_reward" name="bruteforce_reward" respawn="true" output="screen">
     <param name="average" value="1000" />
     <param name="bfresults" value="$(arg bfresults)" />
