@@ -101,7 +101,7 @@ void WallDetection::wallDetection_callback(const pcl::PointCloud<pcl::PointXYZRG
     }
     else
     {
-        std::cerr << "Did not find walls!" << std::endl;
+        // std::cerr << "Did not find walls!" << std::endl;
     }
     // publish all other clusters
     publishObstacles(clustersUsed, ignoreIDs);
