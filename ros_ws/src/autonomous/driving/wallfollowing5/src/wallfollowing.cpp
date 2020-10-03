@@ -95,7 +95,7 @@ Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track
             result_point = point;
         }
     }
-    std::cout << min_distance << std::endl;
+    // std::cout << min_distance << std::endl;
     return result_point;
 }
 
@@ -105,7 +105,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     int avoided_obstacles = 0;
     Line line = { processed_track.car_position, target_position };
     Point closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.right_wall);
-    std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
+    // std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
     if (!closest_point_to_line.isZero())
     {
         Point left_point = processed_track.left_circle.getClosestPoint(closest_point_to_line);
@@ -114,7 +114,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
         avoided_obstacles++;
     }
     closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.left_wall);
-    std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
+    // std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
     if (!closest_point_to_line.isZero())
     {
         Point right_point = processed_track.right_circle.getClosestPoint(closest_point_to_line);

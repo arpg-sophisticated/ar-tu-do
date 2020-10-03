@@ -397,7 +397,7 @@ class RacecarSimulator
                         no_collision = false;
                         TTC = true;
 
-                        ROS_INFO("Collision detected");
+                        // ROS_INFO("Collision detected");
 
                         std_msgs::Bool collision_msg;
                         collision_msg.data = true;

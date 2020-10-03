@@ -54,7 +54,7 @@ bool ProcessTrack::isCurveEntryInFront(Point& curve_entry_point, Point& lowest_p
         return true;
     }
     double val = (lowest_point.y - curve_entry_point.y) / (lowest_point.x - curve_entry_point.x);
-    std::cout << "Value: " << val << " abs(val): " << fabsf(val) << std::endl;
+    // std::cout << "Value: " << val << " abs(val): " << fabsf(val) << std::endl;
     return fabsf(val) > threshold;
 }
 
@@ -163,7 +163,7 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
         else
         {
             storage->curve_type = CURVE_TYPE_STRAIGHT;
-            //std::cout << "upper wall ist not valid" << std::endl;
+            // std::cout << "upper wall ist not valid" << std::endl;
         }
 
         std::vector<Point> curve_entry_line = { Point{ -2, storage->curve_entry.y },
