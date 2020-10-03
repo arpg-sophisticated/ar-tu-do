@@ -9,6 +9,8 @@
   <!-- Default path for configuration if not passed -->
   <arg name="bfconf" default="/tmp/default.yaml"/>
 
+  <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /wallfollowing $(arg bfconf)" />
+
   <!-- RVIZ Display
       1 show normal drive mode
       2 show f1tenth simlator default perspective
