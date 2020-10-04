@@ -47,6 +47,9 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racer_world)/launch/rviz_config.rviz"/>
   </group>
 
+  <!-- timelimit to kill simulation -->
+  <arg name="bftimelimit" default="120"/>
+
   <!-- Mode Override
       1 forces manual driving
       2 forces autonomous driving
