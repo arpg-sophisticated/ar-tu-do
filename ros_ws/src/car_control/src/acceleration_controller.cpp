@@ -42,7 +42,7 @@ void AccelerationController::approachSpeedControlled(const ros::TimerEvent& even
     {
         m_current_speed = std::max(0.5, m_current_speed);
     }
-    else if (m_current_speed < 0.5)
+    else if (m_current_speed < 0.5 && m_current_speed >= 0)
     {
         m_current_speed = 0;
     }
