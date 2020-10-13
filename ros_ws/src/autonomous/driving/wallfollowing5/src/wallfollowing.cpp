@@ -165,24 +165,27 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 {
     Point left_point = processed_track.left_circle.getClosestPoint(predicted_position);
     Point right_point = processed_track.right_circle.getClosestPoint(predicted_position);
-    if (wallfollowing_params.use_imaginary_track_center)
+    if (!left_point.is_valid() || !right_point.is_valid()) // (wallfollowing_params.use_imaginary_track_center)
     {
         Point imaginary_point;
-        if (processed_track.left_circle.getRadius() < processed_track.right_circle.getRadius())
+        if (!left_point
+                 .is_valid()) //(processed_track.left_circle.getRadius() < processed_track.right_circle.getRadius())
         {
             int sign = processed_track.right_circle.pointIsInCircle(predicted_position) ? -1 : 1;
             Circle imaginary_circle(processed_track.right_circle.getCenter(),
-                                    processed_track.right_circle.getRadius() + 2 * sign);
+                                    processed_track.right_circle.getRadius() + 4 * sign);
             Point imaginary_point = imaginary_circle.getClosestPoint(predicted_position);
             left_point = imaginary_point;
+            std::cout << "use imaginary left point" << std::endl;
         }
         else
         {
             int sign = processed_track.left_circle.pointIsInCircle(predicted_position) ? -1 : 1;
             Circle imaginary_circle(processed_track.left_circle.getCenter(),
-                                    processed_track.left_circle.getRadius() + 2 * sign);
+                                    processed_track.left_circle.getRadius() + 4 * sign);
             Point imaginary_point = imaginary_circle.getClosestPoint(predicted_position);
             right_point = imaginary_point;
+            std::cout << "use imaginary right point" << std::endl;
         }
     }
 
@@ -395,7 +398,36 @@ void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGB
     }
 }
 
-void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan)
+double Wallfollowing::getFarthestAwayDistanceInFront(const sensor_msgs::LaserScan::ConstPtr& laserscan,
+                                                     double angle_corridor)
+{
+    int n = laserscan->ranges.size();
+    double skip_angle_range =
+        ((laserscan->angle_max - laserscan->angle_min) - GeometricFunctions::toRadians(angle_corridor)) / 2;
+    double angle_start = laserscan->angle_min + skip_angle_range;
+    int index_start = skip_angle_range / laserscan->angle_increment;
+    int index_end = n - index_start;
+    double angle = angle_start;
+
+    double max_distance = 2;
+    for (int i = index_start; i < index_end; i++)
+    {
+        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]))
+        {
+            double distance = laserscan->ranges[i];
+            max_distance = std::max(max_distance, distance);
+        }
+        angle += laserscan->angle_increment;
+    }
+    if (max_distance == 2)
+    {
+        max_distance = 5;
+    }
+    return max_distance;
+}
+
+void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan,
+                                       double max_laser_range)
 {
     int n = laserscan->ranges.size();
     double skip_angle_range = ((laserscan->angle_max - laserscan->angle_min) -
@@ -408,7 +440,7 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
     for (int i = index_start; i < index_end; i++)
     {
         if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]) &&
-            laserscan->ranges[i] < wallfollowing_params.max_laser_range)
+            laserscan->ranges[i] < max_laser_range)
         {
             Point p;
             p.x = -std::sin(angle) * laserscan->ranges[i];
@@ -438,7 +470,8 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
         m_laser_delta_time = scan_time - m_last_scan_time;
         // std::cout << delta_time << std::endl;
         m_laser_pointcloud.clear();
-        getScanAsCartesian(&m_laser_pointcloud, laserscan);
+        double farthest_distance = getFarthestAwayDistanceInFront(laserscan, 2);
+        getScanAsCartesian(&m_laser_pointcloud, laserscan, farthest_distance);
         if (!wallfollowing_params.use_voxel)
         {
             handleLaserPointcloud(m_laser_pointcloud, m_laser_delta_time);
