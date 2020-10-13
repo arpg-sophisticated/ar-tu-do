@@ -108,7 +108,7 @@ Circle Circle::determineCircle(Point& b, Point& c, Point& d)
     double det = (b.x - c.x) * (c.y - d.y) - (c.x - d.x) * (b.y - c.y);
 
     if (std::abs(det) < 1.0e-10)
-        return Circle();
+        return Circle(false);
 
     // Center of circle
     Point center;
