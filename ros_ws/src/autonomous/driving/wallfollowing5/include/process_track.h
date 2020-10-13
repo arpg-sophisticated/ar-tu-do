@@ -41,7 +41,8 @@ struct ProcessedTrack
 
 class ProcessTrack
 {
-    double const MAX_SENSIBLE_TRACK_WIDTH = 6;
+    double const MAX_SENSIBLE_TRACK_WIDTH = 7;
+    double const MIN_SENSIBLE_TRACK_WIDTH = 1;
 
     RvizGeometry m_rviz_geometry;
 

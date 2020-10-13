@@ -73,13 +73,13 @@ unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud,
     {
         // maybe use pointcloud.at(...) with small performance penalty
         double distance = GeometricFunctions::distance(pointcloud[i], pointcloud[i + 1]);
-        if (distance > max_distance && distance < MAX_SENSIBLE_TRACK_WIDTH)
+        if (distance > max_distance && distance > MIN_SENSIBLE_TRACK_WIDTH && distance < MAX_SENSIBLE_TRACK_WIDTH)
         {
             max_distance = distance;
             max_index = i + 1;
         }
     }
-    if (pointcloud.size() > 1)
+    if (pointcloud.size() > 1 && max_index > 0)
     {
         std::vector<Point> wall_seperation_points = { pointcloud[max_index - 1], pointcloud[max_index] };
         m_rviz_geometry.showLineInRviz(15, wall_seperation_points, ColorRGBA{ 0, 1, 0, 0.7 }, 0.005);
@@ -102,20 +102,32 @@ Point ProcessTrack::getCurveEntry(std::vector<Point>& wall)
 
 bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParams& processing_params)
 {
-    if (!CircleFit::pointcloudIsValid(storage->left_wall))
-    {
-        std::cerr << "Left Wall invalid" << std::endl;
-        return false;
-    }
-    if (!CircleFit::pointcloudIsValid(storage->right_wall))
-    {
-        std::cerr << "Right Wall invalid" << std::endl;
-        return false;
-    }
-    storage->left_circle = CircleFit::hyperFit(storage->left_wall);
-    storage->right_circle = CircleFit::hyperFit(storage->right_wall);
-
     storage->car_position = { 0, 0 };
+
+    if (CircleFit::pointcloudIsValid(storage->left_wall) && CircleFit::pointcloudIsValid(storage->right_wall))
+    {
+        storage->left_circle = CircleFit::hyperFit(storage->left_wall);
+        storage->right_circle = CircleFit::hyperFit(storage->right_wall);
+    }
+    else if (CircleFit::pointcloudIsValid(storage->left_wall) && !CircleFit::pointcloudIsValid(storage->right_wall))
+    {
+        storage->left_circle = CircleFit::hyperFit(storage->left_wall);
+        int sign = storage->left_circle.pointIsInCircle(storage->car_position) ? -1 : 1;
+        storage->right_circle = Circle(storage->left_circle.getCenter(), storage->left_circle.getRadius() + 4 * sign);
+        std::cerr << "Right Wall invalid" << std::endl;
+    }
+    else if (CircleFit::pointcloudIsValid(storage->right_wall) && !CircleFit::pointcloudIsValid(storage->left_wall))
+    {
+        storage->right_circle = CircleFit::hyperFit(storage->right_wall);
+        int sign = storage->right_circle.pointIsInCircle(storage->car_position) ? -1 : 1;
+        storage->left_circle = Circle(storage->right_circle.getCenter(), storage->right_circle.getRadius() + 4 * sign);
+        std::cerr << "Left Wall invalid" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Right and Left Wall invalid" << std::endl;
+        return false;
+    }
 
     storage->curve_type = CURVE_TYPE_STRAIGHT;
 
