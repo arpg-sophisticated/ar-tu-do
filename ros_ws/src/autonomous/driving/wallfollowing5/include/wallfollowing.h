@@ -78,6 +78,7 @@ class Wallfollowing
     Point determinePredictedCarPosition(ProcessedTrack& processedTrack);
     Point determineTargetCarPosition(ProcessedTrack& processedTrack, Point& predicted_position);
     void followWalls(ProcessedTrack& processedTrack, double delta_time);
+    double getFarthestAwayDistanceInFront(const sensor_msgs::LaserScan::ConstPtr& laserscan, double angle_corridor);
     void getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan,
                             double max_laser_range);
     void handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time);

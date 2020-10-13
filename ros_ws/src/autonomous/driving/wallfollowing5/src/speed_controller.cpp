@@ -30,7 +30,7 @@ double SpeedController::calcBrakingDistance(double distance, double target_speed
 double SpeedController::calcSpeed(ProcessedTrack& processed_track, Config::SpeedParams& speed_config,
                                   double acceleration, double dynamic_friction)
 {
-    double remaining_distance = processed_track.curve_entry.y;
+    double remaining_distance = std::min(processed_track.curve_entry.y, 25.0f);
     double radius = min(processed_track.left_circle.getRadius(), processed_track.right_circle.getRadius());
     double speed = calcMaxCurveSpeed(radius, dynamic_friction);
     if (processed_track.curve_type != CURVE_TYPE_STRAIGHT)
