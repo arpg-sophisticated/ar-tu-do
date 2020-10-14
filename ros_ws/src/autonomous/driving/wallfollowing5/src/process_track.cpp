@@ -63,6 +63,7 @@ unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud,
 {
     double max_distance = 0;
     unsigned int max_index = 0;
+    unsigned int fallback_index = 0;
 
     unsigned int cropped_count = (double)pointcloud.size() / (double)processing_params.usable_laser_range *
         processing_params.usable_laser_range_wall_detection;
@@ -73,11 +74,22 @@ unsigned int ProcessTrack::findLeftRightBorder(std::vector<Point>& pointcloud,
     {
         // maybe use pointcloud.at(...) with small performance penalty
         double distance = GeometricFunctions::distance(pointcloud[i], pointcloud[i + 1]);
-        if (distance > max_distance && distance > MIN_SENSIBLE_TRACK_WIDTH && distance < MAX_SENSIBLE_TRACK_WIDTH)
+        if (distance > max_distance && distance > MIN_SENSIBLE_TRACK_WIDTH)
         {
-            max_distance = distance;
-            max_index = i + 1;
+            if (distance < MAX_SENSIBLE_TRACK_WIDTH)
+            {
+                max_distance = distance;
+                max_index = i + 1;
+            }
+            else
+            {
+                fallback_index = i + 1;
+            }
         }
+    }
+    if (max_index == 0)
+    {
+        max_index = fallback_index;
     }
     if (pointcloud.size() > 1 && max_index > 0)
     {
