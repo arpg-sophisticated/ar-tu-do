@@ -470,7 +470,7 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
         m_laser_delta_time = scan_time - m_last_scan_time;
         // std::cout << delta_time << std::endl;
         m_laser_pointcloud.clear();
-        double farthest_distance = getFarthestAwayDistanceInFront(laserscan, 2);
+        double farthest_distance = getFarthestAwayDistanceInFront(laserscan, 20);
         getScanAsCartesian(&m_laser_pointcloud, laserscan, farthest_distance);
         if (!wallfollowing_params.use_voxel)
         {
