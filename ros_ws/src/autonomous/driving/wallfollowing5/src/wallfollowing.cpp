@@ -105,27 +105,63 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     int avoided_obstacles = 0;
     Line line = { processed_track.car_position, target_position };
     Point closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.right_wall);
+
+    Point result_target_position_left_path, result_target_position_right_path;
     // std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
+
     if (!closest_point_to_line.isZero())
     {
         Point left_point = processed_track.left_circle.getClosestPoint(closest_point_to_line);
-        result_target_position =
+        result_target_position_left_path =
             Point{ (left_point.x + closest_point_to_line.x) / 2, (left_point.y + closest_point_to_line.y) / 2 };
         avoided_obstacles++;
     }
+
     closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.left_wall);
     // std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
     if (!closest_point_to_line.isZero())
     {
         Point right_point = processed_track.right_circle.getClosestPoint(closest_point_to_line);
-        result_target_position =
+        result_target_position_right_path =
             Point{ (right_point.x + closest_point_to_line.x) / 2, (right_point.y + closest_point_to_line.y) / 2 };
         avoided_obstacles++;
     }
-    if (avoided_obstacles > 1)
+
+    if (avoided_obstacles > 0)
     {
-        return target_position;
+        if (m_previous_obstacle_avoid_active.count() > 0)
+        {
+            if (m_previous_obstacle_avoid_path == PATH_LEFT)
+                result_target_position = result_target_position_left_path;
+            else if (m_previous_obstacle_avoid_path == PATH_RIGHT)
+                result_target_position = result_target_position_right_path;
+            std::cout << m_previous_obstacle_avoid_path << std::endl;
+        }
+        else
+        {
+            // decide
+            Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
+            Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
+            if (left_trajectory.length() <= right_trajectory.length())
+            {
+                std::cout << "Choosing left" << std::endl;
+                m_previous_obstacle_avoid_path = PATH_LEFT;
+                result_target_position = result_target_position_left_path;
+            }
+            else
+            {
+                std::cout << "Choosing right" << std::endl;
+                m_previous_obstacle_avoid_path = PATH_RIGHT;
+                result_target_position = result_target_position_right_path;
+            }
+        }
+        m_previous_obstacle_avoid_active.set(0, 1);
     }
+    std::cout << m_previous_obstacle_avoid_active << std::endl;
+    m_previous_obstacle_avoid_active <<= 1;
+
+    m_previous_avoided_obstacles = avoided_obstacles;
+
     return result_target_position;
 }
 

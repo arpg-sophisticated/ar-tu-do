@@ -22,6 +22,7 @@
 #include <vector>
 #include <cmath>
 #include <messages_sanity_check.h>
+#include <bitset>
 // clang-format on
 
 constexpr const char* TOPIC_DRIVE_PARAMETERS = "/input/drive_param/autonomous";
@@ -29,6 +30,14 @@ constexpr const char* TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry";
 constexpr const char* TOPIC_LASER_SCAN = "/scan";
 constexpr const char* TOPIC_VOXEL = "/scan/voxels";
 constexpr const char* TOPIC_WALLS = "/obstacles/walls";
+
+constexpr const size_t STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH = 128; // ticks
+
+enum ObstacleAvoidPath
+{
+    PATH_LEFT,
+    PATH_RIGHT
+};
 
 class Wallfollowing
 {
@@ -53,6 +62,10 @@ class Wallfollowing
     double m_view_dist_average = 0;
 
     double m_laser_delta_time = 0;
+
+    int m_previous_avoided_obstacles = 0;
+    std::bitset<STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH> m_previous_obstacle_avoid_active = 0;
+    ObstacleAvoidPath m_previous_obstacle_avoid_path;
 
     std::vector<Point> m_laser_pointcloud;
 
