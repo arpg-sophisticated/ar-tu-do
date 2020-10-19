@@ -19,6 +19,10 @@ double PIDController::updateAndGetCorrection(double error, double delta_time)
 
 double PIDController::updateAndGetCorrection(double error, double delta_time, Config::PIDParams& pid_params)
 {
+    if (std::isnan(error) || std::isinf(error) || std::isnan(delta_time) || std::isinf(delta_time))
+    {
+        return 0;
+    }
     m_integral += error * delta_time;
     if (m_integral > pid_params.anti_windup)
     {
@@ -27,10 +31,6 @@ double PIDController::updateAndGetCorrection(double error, double delta_time, Co
     else if (m_integral < -pid_params.anti_windup)
     {
         m_integral = -pid_params.anti_windup;
-    }
-    if (std::isnan(m_integral) || std::isinf(m_integral))
-    {
-        m_integral = 0;
     }
 
     double derivative = (error - m_previous_error) / delta_time;
