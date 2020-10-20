@@ -34,6 +34,8 @@ WallDetection::WallDetection()
     m_dyn_cfg_server.setCallback([&](wall_detection::wall_detectionConfig& cfg, uint32_t) {
         m_wall_radius = cfg.wall_search_radius;
         m_wall_search_distance_backwards = cfg.wall_search_distance_backwards;
+        m_maximum_obstacle_width = cfg.maximum_obstacle_width;
+        m_maximum_obstacle_height = cfg.maximum_obstacle_height;
         m_use_prediction_for_walls = cfg.use_prediction_for_walls;
         m_use_prediction_for_obstacles = cfg.use_prediction_for_obstacles;
         m_distance_threshold = cfg.distance_from_circle_threshold;
@@ -180,15 +182,66 @@ void WallDetection::publishObstacles(std::unordered_map<uint32_t, std::vector<pc
 
     msg->header.frame_id = m_frame;
 
+    std::unordered_map<uint32_t, float> maxX;
+    std::unordered_map<uint32_t, float> minX;
+    std::unordered_map<uint32_t, float> maxY;
+    std::unordered_map<uint32_t, float> minY;
+
+    for (auto pair : mapClusters)
+    {
+        uint32_t id = pair.first;
+        for (auto& point : *pair.second)
+        {
+            if (maxX.count(id) == 0)
+            {
+                maxX[id] = point.x;
+            }
+            else if (point.x > maxX[id])
+            {
+                maxX[id] = point.x;
+            }
+
+            if (minX.count(id) == 0)
+            {
+                minX[id] = point.x;
+            }
+            else if (point.x < minX[id])
+            {
+                minX[id] = point.x;
+            }
+
+            if (maxY.count(id) == 0)
+            {
+                maxY[id] = point.y;
+            }
+            else if (point.x > maxY[id])
+            {
+                maxY[id] = point.y;
+            }
+
+            if (minY.count(id) == 0)
+            {
+                minY[id] = point.y;
+            }
+            else if (point.x < minY[id])
+            {
+                minY[id] = point.y;
+            }
+        }
+    }
+
     for (auto itr = mapClusters.begin(); itr != mapClusters.end(); ++itr)
     {
-        if (std::find(ignoreIDs.begin(), ignoreIDs.end(), itr->first) ==
-            ignoreIDs.end()) // ignoreIDs does not contain this id
+        uint32_t id = itr->first;
+        if (std::find(ignoreIDs.begin(), ignoreIDs.end(), id) == ignoreIDs.end()) // ignoreIDs does not contain this id
         {
-            for (size_t i = 0; i < itr->second->size(); i++)
-            {
-                msg->push_back((*itr->second)[i]);
-            }
+            float width = maxX[id] - minX[id];
+            float height = maxY[id] - minY[id];
+            if (width < m_maximum_obstacle_width && height < m_maximum_obstacle_height)
+                for (size_t i = 0; i < itr->second->size(); i++)
+                {
+                    msg->push_back((*itr->second)[i]);
+                }
         }
     }
     pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
