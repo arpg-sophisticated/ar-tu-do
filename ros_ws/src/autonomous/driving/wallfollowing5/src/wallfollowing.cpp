@@ -473,6 +473,8 @@ double Wallfollowing::getFarthestAwayDistanceInFront(const sensor_msgs::LaserSca
     double max_distance = 2;
     for (int i = index_start; i < index_end; i++)
     {
+        bool found = false;
+
         if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]))
         {
             if (wallfollowing_params.use_obstacle_avoidence)
@@ -480,7 +482,6 @@ double Wallfollowing::getFarthestAwayDistanceInFront(const sensor_msgs::LaserSca
                 Point p;
                 p.x = -std::sin(angle) * laserscan->ranges[i];
                 p.y = std::cos(angle) * laserscan->ranges[i];
-                bool found = false;
                 for (auto oP : m_obstacle_pointcloud)
                 {
                     Line l = { oP, p };
@@ -491,12 +492,13 @@ double Wallfollowing::getFarthestAwayDistanceInFront(const sensor_msgs::LaserSca
                         break;
                     }
                 }
-                if (found)
-                    continue;
             }
 
-            double distance = laserscan->ranges[i];
-            max_distance = std::max(max_distance, distance);
+            if (!found)
+            {
+                double distance = laserscan->ranges[i];
+                max_distance = std::max(max_distance, distance);
+            }
         }
         angle += laserscan->angle_increment;
     }
@@ -527,9 +529,10 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
             p.x = -std::sin(angle) * laserscan->ranges[i];
             p.y = std::cos(angle) * laserscan->ranges[i];
 
+            bool found = false;
+
             if (wallfollowing_params.use_obstacle_avoidence)
             {
-                bool found = false;
                 for (auto oP : m_obstacle_pointcloud)
                 {
                     Line l = { oP, p };
@@ -540,11 +543,9 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
                         break;
                     }
                 }
-                if (found)
-                    continue;
             }
-
-            storage->push_back(p);
+            if (!found)
+                storage->push_back(p);
         }
         angle += laserscan->angle_increment;
     }
