@@ -632,8 +632,6 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         if (!p.is_valid())
             continue;
 
-        m_obstacle_pointcloud.push_back(p);
-
         if (p.y >= .5 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
         {
             closestY = p.y;
@@ -656,6 +654,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
         if (!p.is_valid())
             continue;
+        m_obstacle_pointcloud.push_back(p);
 
         if (p.x > max_x)
         {
