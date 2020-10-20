@@ -122,8 +122,8 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             std::vector<Point> left_gap = { left_point, m_current_obstacle_left_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
-                std::cout << "m_current_obstacle_left_point: " << m_current_obstacle_left_point.x << ", "
-                          << m_current_obstacle_left_point.y << std::endl;
+                // std::cout << "m_current_obstacle_left_point: " << m_current_obstacle_left_point.x << ", "
+                //           << m_current_obstacle_left_point.y << std::endl;
                 result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
                                                           (left_point.y + m_current_obstacle_left_point.y) / 2 };
                 left = true;
@@ -143,8 +143,8 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             std::vector<Point> right_gap = { right_point, m_current_obstacle_right_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
-                std::cout << "m_current_obstacle_right_point: " << m_current_obstacle_right_point.x << ", "
-                          << m_current_obstacle_right_point.y << std::endl;
+                // std::cout << "m_current_obstacle_right_point: " << m_current_obstacle_right_point.x << ", "
+                //           << m_current_obstacle_right_point.y << std::endl;
                 result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
                                                            (right_point.y + m_current_obstacle_right_point.y) / 2 };
                 right = true;
@@ -160,7 +160,11 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
 
     if (left && right)
     {
-        if (m_previous_obstacle_avoid_active.count() > 0)
+        if (m_previous_obstacle_avoid_active.count() > 0 &&
+            (m_previous_obstacle_avoid_path == PATH_LEFT &&
+                 GeometricFunctions::distance(m_current_obstacle_left_point, processed_track.car_position) > 2 ||
+             m_previous_obstacle_avoid_path == PATH_RIGHT &&
+                 GeometricFunctions::distance(m_current_obstacle_right_point, processed_track.car_position) > 2))
         {
             if (m_previous_obstacle_avoid_path == PATH_LEFT)
                 result_target_position = result_target_position_left_path;
@@ -653,10 +657,8 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         if (!p.is_valid())
             continue;
 
-        std::cout << "1: p.x: " << p.x << " max_x: " << max_x << std::endl;
         if (p.x > max_x)
         {
-            std::cout << "2: p.x: " << p.x << " max_x: " << max_x << std::endl;
             m_current_obstacle_right_point = p;
             max_x = p.x;
         }
