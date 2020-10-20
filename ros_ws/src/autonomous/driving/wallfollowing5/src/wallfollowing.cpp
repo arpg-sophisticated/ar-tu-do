@@ -107,7 +107,6 @@ Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track
 Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point target_position)
 {
     Point result_target_position = target_position;
-    Line line = { processed_track.car_position, target_position };
 
     Point result_target_position_left_path, result_target_position_right_path;
     bool left = false, right = false;
@@ -118,7 +117,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
         {
             Point left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
             Line width = { left_point, m_current_obstacle_left_point };
-            if (line.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
+            if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
                 result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
                                                           (left_point.y + m_current_obstacle_left_point.y) / 2 };
@@ -130,7 +129,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
         {
             Point right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
             Line width = { right_point, m_current_obstacle_right_point };
-            if (line.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
+            if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
                 result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
                                                            (right_point.y + m_current_obstacle_right_point.y) / 2 };
