@@ -31,6 +31,8 @@ class WallDetection
     dynamic_reconfigure::Server<wall_detection::wall_detectionConfig> m_dyn_cfg_server;
     float m_wall_radius;
     double m_wall_search_distance_backwards;
+    double m_maximum_obstacle_width;
+    double m_maximum_obstacle_height;
     double m_distance_threshold = 0.4;
     uint32_t m_score_threshold = 3;
     double m_minimum_confidence = 0.3;
