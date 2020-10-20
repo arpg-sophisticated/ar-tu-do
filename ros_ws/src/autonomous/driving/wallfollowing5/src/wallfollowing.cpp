@@ -112,12 +112,18 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     bool left = false, right = false;
     m_rviz_geometry.deleteMarker(440);
     m_rviz_geometry.deleteMarker(441);
+    bool obstacleInCurve = m_current_obstacle_closest_y > processed_track.curve_entry.y;
 
     if (m_current_obstacle_found)
     {
         if (!m_current_obstacle_left_point.isZero() /* && processed_track.left_valid*/)
         {
-            Point left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
+            Point left_point;
+            if (obstacleInCurve && processed_track.curve_type == CURVE_TYPE_RIGHT)
+                left_point = processed_track.upper_circle.getClosestPoint(m_current_obstacle_left_point);
+            else
+                left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
+
             Line width = { left_point, m_current_obstacle_left_point };
             std::vector<Point> left_gap = { left_point, m_current_obstacle_left_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
@@ -138,7 +144,12 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
 
         if (!m_current_obstacle_right_point.isZero() /* && processed_track.right_valid*/)
         {
-            Point right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
+            Point right_point;
+            if (obstacleInCurve && processed_track.curve_type == CURVE_TYPE_LEFT)
+                right_point = processed_track.upper_circle.getClosestPoint(m_current_obstacle_right_point);
+            else
+                right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
+
             Line width = { right_point, m_current_obstacle_right_point };
             std::vector<Point> right_gap = { right_point, m_current_obstacle_right_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
@@ -174,27 +185,47 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
         else
         {
             // decide
-            Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
-            Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
-            std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
-            double right_angle = std::asin(result_target_position_right_path.y / right_trajectory.length());
-            double left_angle = std::acos(result_target_position_left_path.y / left_trajectory.length());
-            std::cout << "LeftAngle: " << left_angle << " RightAngle: " << right_angle << "; ";
 
-            double average_distance = (result_target_position_left_path.y + result_target_position_right_path.y) / 2;
-
-            if ((average_distance > 2 && std::abs(left_angle) <= std::abs(right_angle)) ||
-                (average_distance < 2 && left_trajectory.length() <= right_trajectory.length()))
+            if (!obstacleInCurve || processed_track.curve_type == CURVE_TYPE_STRAIGHT)
             {
-                std::cout << "Choosing left" << std::endl;
-                m_previous_obstacle_avoid_path = PATH_LEFT;
-                result_target_position = result_target_position_left_path;
+                Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
+                Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
+                std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
+                double right_angle = std::acos(result_target_position_right_path.y / right_trajectory.length());
+                double left_angle = std::acos(result_target_position_left_path.y / left_trajectory.length());
+                std::cout << "LeftAngle: " << left_angle << " RightAngle: " << right_angle << "; ";
+                double average_distance =
+                    (result_target_position_left_path.y + result_target_position_right_path.y) / 2;
+
+                if ((average_distance > 4 && std::abs(left_angle) <= std::abs(right_angle)) ||
+                    (average_distance <= 4 && left_trajectory.length() <= right_trajectory.length()))
+                // if(std::abs(left_angle) <= std::abs(right_angle))
+                {
+                    std::cout << "Choosing left" << std::endl;
+                    m_previous_obstacle_avoid_path = PATH_LEFT;
+                    result_target_position = result_target_position_left_path;
+                }
+                else
+                {
+                    std::cout << "Choosing right" << std::endl;
+                    m_previous_obstacle_avoid_path = PATH_RIGHT;
+                    result_target_position = result_target_position_right_path;
+                }
             }
             else
             {
-                std::cout << "Choosing right" << std::endl;
-                m_previous_obstacle_avoid_path = PATH_RIGHT;
-                result_target_position = result_target_position_right_path;
+                if (processed_track.curve_type == CURVE_TYPE_LEFT)
+                {
+                    std::cout << "Choosing right based on curve" << std::endl;
+                    m_previous_obstacle_avoid_path = PATH_RIGHT;
+                    result_target_position = result_target_position_right_path;
+                }
+                else
+                {
+                    std::cout << "Choosing left based on curve" << std::endl;
+                    m_previous_obstacle_avoid_path = PATH_LEFT;
+                    result_target_position = result_target_position_left_path;
+                }
             }
         }
         m_previous_obstacle_avoid_active.set(0, 1);
@@ -642,7 +673,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
             continue;
 
         m_speed_factor = 1;
-        if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance &&
+        if (p.y >= 0.25 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance &&
             std::abs(p.x) < TRACK_WIDTH)
         {
             closestY = p.y;
@@ -651,7 +682,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
             current_obstacle_id = obstaclePoint.label;
             m_speed_factor = 0.5;
         }
-        else if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance * 2 &&
+        else if (p.y >= 0.25 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance * 2 &&
                  std::abs(p.x) < TRACK_WIDTH)
         {
             m_speed_factor = 0.5;
@@ -660,6 +691,8 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
 
     if (current_obstacle_id == -1)
         return;
+
+    m_current_obstacle_closest_y = closestY;
 
     float min_x = 1000000;
     float max_x = -1000000;

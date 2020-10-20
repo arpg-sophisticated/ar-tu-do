@@ -75,6 +75,7 @@ class Wallfollowing
     int m_previous_avoided_obstacles = 0;
     std::bitset<STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH> m_previous_obstacle_avoid_active = 0;
     ObstacleAvoidPath m_previous_obstacle_avoid_path;
+    double m_current_obstacle_closest_y = 0;
 
     std::vector<Point> m_laser_pointcloud;
     std::vector<Point> m_obstacle_pointcloud;
