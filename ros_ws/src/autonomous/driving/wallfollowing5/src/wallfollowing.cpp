@@ -179,7 +179,12 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
             double right_angle = std::asin(result_target_position_right_path.y / right_trajectory.length());
             double left_angle = std::acos(result_target_position_left_path.y / left_trajectory.length());
-            if (std::abs(left_angle) <= std::abs(right_angle))
+            std::cout << "LeftAngle: " << left_angle << " RightAngle: " << right_angle << "; ";
+
+            double average_distance = (result_target_position_left_path.y + result_target_position_right_path.y) / 2;
+
+            if ((average_distance > 2 && std::abs(left_angle) <= std::abs(right_angle)) ||
+                (average_distance < 2 && left_trajectory.length() <= right_trajectory.length()))
             {
                 std::cout << "Choosing left" << std::endl;
                 m_previous_obstacle_avoid_path = PATH_LEFT;

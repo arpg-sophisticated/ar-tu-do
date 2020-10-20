@@ -149,9 +149,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 68.70304870605469
+      Max Intensity: 42.63493728637695
       Min Color: 0; 0; 0
-      Min Intensity: 1.4490785598754883
+      Min Intensity: 1.9449435472488403
       Name: LaserScan (Lidar)
       Position Transformer: XYZ
       Queue Size: 2
@@ -205,7 +205,6 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
-        "": true
         Acc m/s^2: true
         Angle °: true
         Camera (Depth): true
@@ -239,7 +238,6 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
-        "": true
         Acc m/s^2: true
         Angle °: true
         Camera (Video): true
@@ -621,7 +619,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 3
+      Max Intensity: 4
       Min Color: 0; 0; 0
       Min Intensity: 1
       Name: Wall Voxels
@@ -709,10 +707,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9302031993865967
+      Pitch: 0.3752037286758423
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.218412160873413
+      Yaw: 3.0084123611450195
     Saved: ~
 Window Geometry:
   Camera (Depth):
