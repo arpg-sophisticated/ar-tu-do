@@ -32,6 +32,7 @@ WallDetection::WallDetection()
 
     m_dyn_cfg_server.setCallback([&](wall_detection::wall_detectionConfig& cfg, uint32_t) {
         m_wall_radius = cfg.wall_search_radius;
+        m_wall_search_distance_backwards = cfg.wall_search_distance_backwards;
         m_use_prediction_for_walls = cfg.use_prediction_for_walls;
         m_use_prediction_for_obstacles = cfg.use_prediction_for_obstacles;
         m_distance_threshold = cfg.distance_from_circle_threshold;
@@ -266,7 +267,7 @@ std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
         for (auto itrVector = itr->second->begin(); itrVector != itr->second->end(); ++itrVector)
         {
             double x = itrVector->x;
-            if (x < 0)
+            if (x < -m_wall_search_distance_backwards)
                 continue;
             if ((itrVector->y > maxLeft) && (x <= radius))
             {
