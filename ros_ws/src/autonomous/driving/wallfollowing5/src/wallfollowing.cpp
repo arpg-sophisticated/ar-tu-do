@@ -119,6 +119,8 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             Line width = { left_point, m_current_obstacle_left_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
+                std::cout << "m_current_obstacle_left_point: " << m_current_obstacle_left_point.x << ", "
+                          << m_current_obstacle_left_point.y << std::endl;
                 result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
                                                           (left_point.y + m_current_obstacle_left_point.y) / 2 };
                 left = true;
@@ -131,6 +133,8 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             Line width = { right_point, m_current_obstacle_right_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
+                std::cout << "m_current_obstacle_right_point: " << m_current_obstacle_right_point.x << ", "
+                          << m_current_obstacle_right_point.y << std::endl;
                 result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
                                                            (right_point.y + m_current_obstacle_right_point.y) / 2 };
                 right = true;
@@ -617,8 +621,8 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
     if (current_obstacle_id == -1)
         return;
 
-    float min_x = std::numeric_limits<float>::max();
-    float max_x = std::numeric_limits<float>::min();
+    float min_x = 1000000;
+    float max_x = -1000000;
 
     for (auto& obstaclePoint : *obstacles)
     {
@@ -626,8 +630,10 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
             continue;
         Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
 
+        std::cout << "1: p.x: " << p.x << " max_x: " << max_x << std::endl;
         if (p.x > max_x)
         {
+            std::cout << "2: p.x: " << p.x << " max_x: " << max_x << std::endl;
             m_current_obstacle_right_point = p;
             max_x = p.x;
         }
