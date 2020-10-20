@@ -27,6 +27,8 @@ namespace Config
         bool use_voxel;
 
         bool use_obstacle_avoidence;
+        double obstacle_avoidance_distance;
+        double obstacle_avoidance_minimum_track_width;
 
         bool use_imaginary_track_center = false;
 

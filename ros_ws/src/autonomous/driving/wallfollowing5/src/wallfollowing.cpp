@@ -30,6 +30,8 @@ Wallfollowing::Wallfollowing()
         wallfollowing_params.max_laser_range = cfg.max_laser_range;
         wallfollowing_params.use_voxel = cfg.use_voxel;
         wallfollowing_params.use_obstacle_avoidence = cfg.use_obstacle_avoidence;
+        wallfollowing_params.obstacle_avoidance_distance = cfg.obstacle_avoidance_distance;
+        wallfollowing_params.obstacle_avoidance_minimum_track_width = cfg.obstacle_avoidance_minimum_track_width;
         wallfollowing_params.safety_wall_distance = cfg.safety_wall_distance;
         wallfollowing_params.max_predicted_distance = cfg.max_predicted_distance;
         wallfollowing_params.emergency_slowdown = cfg.emergency_slowdown;
@@ -115,17 +117,25 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
         if (!m_current_obstacle_left_point.isZero())
         {
             Point left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
-            result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
-                                                      (left_point.y + m_current_obstacle_left_point.y) / 2 };
-            left = true;
+            Line width = { left_point, m_current_obstacle_left_point };
+            if (line.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
+            {
+                result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
+                                                          (left_point.y + m_current_obstacle_left_point.y) / 2 };
+                left = true;
+            }
         }
 
         if (!m_current_obstacle_right_point.isZero())
         {
             Point right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
-            result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
-                                                       (right_point.y + m_current_obstacle_right_point.y) / 2 };
-            right = true;
+            Line width = { right_point, m_current_obstacle_right_point };
+            if (line.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
+            {
+                result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
+                                                           (right_point.y + m_current_obstacle_right_point.y) / 2 };
+                right = true;
+            }
         }
     }
 
@@ -551,7 +561,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         if (!p.is_valid())
             continue;
 
-        if (p.y >= 0 && p.y < closestY && p.y < 5)
+        if (p.y >= 0 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
         { // TODO: HARDCODED PARAMETER, pls fix.
             closestY = p.y;
             m_current_obstacle_found = true;
