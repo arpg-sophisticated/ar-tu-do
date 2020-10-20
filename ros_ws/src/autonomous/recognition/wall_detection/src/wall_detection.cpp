@@ -1,4 +1,5 @@
 #include "wall_detection.h"
+#include "geometric_math.h"
 #include "walls.h"
 #include <circle_fit.h>
 #include <dynamic_reconfigure/server.h>
@@ -266,32 +267,35 @@ std::pair<int64_t, int64_t> WallDetection::determineWallIDs(
     {
         for (auto itrVector = itr->second->begin(); itrVector != itr->second->end(); ++itrVector)
         {
-            double x = itrVector->x;
+            double x = itrVector->x, y = itrVector->y;
+
             if (x < -m_wall_search_distance_backwards)
                 continue;
-            if ((itrVector->y > maxLeft) && (x <= radius))
+            Point p = { x, y };
+            Point zero = { 0, 0 };
+            if ((y > maxLeft) && GeometricFunctions::distance(p, zero) < radius)
             {
-                maxLeft = itrVector->y;
+                maxLeft = y;
                 maxLeftID = itrVector->label;
             }
-            if ((itrVector->y < minRight) && (x <= radius))
+            if ((y < minRight) && GeometricFunctions::distance(p, zero) < radius)
             {
-                minRight = itrVector->y;
+                minRight = y;
                 minRightID = itrVector->label;
             }
         }
     }
 
-    // if (maxLeftID == -1 && minRightID != -1)
-    // {
-    //     // found a cluster for right but not for left. let's just choose the largest one for the left.
-    //     maxLeftID = findLargestCluster(mapToCheck, minRightID);
-    // }
-    // else if (minRightID == -1 && maxLeftID != -1)
-    // {
-    //     // same but reverse
-    //     minRightID = findLargestCluster(mapToCheck, maxLeftID);
-    // }
+    /*if (maxLeftID == -1 && minRightID != -1)
+    {
+        // found a cluster for right but not for left. let's just choose the largest one for the left.
+        maxLeftID = findLargestCluster(mapToCheck, minRightID);
+    }
+    else if (minRightID == -1 && maxLeftID != -1)
+    {
+        // same but reverse
+        minRightID = findLargestCluster(mapToCheck, maxLeftID);
+    }*/
 
     return std::pair<int64_t, int64_t>(minRightID, maxLeftID);
 }

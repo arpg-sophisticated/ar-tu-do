@@ -12,6 +12,7 @@ Panels:
         - /Imu1/Acceleration properties1
         - /ZED (Depth Cloud)1/Auto Size1
         - /ZED (Depth Cloud)1/Occlusion Compensation1
+        - /Wall Voxels2
       Splitter Ratio: 0.5305555462837219
     Tree Height: 874
   - Class: rviz/Selection
@@ -148,9 +149,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 61.64631271362305
+      Max Intensity: 68.70304870605469
       Min Color: 0; 0; 0
-      Min Intensity: 0.5567188262939453
+      Min Intensity: 1.4490785598754883
       Name: LaserScan (Lidar)
       Position Transformer: XYZ
       Queue Size: 2
@@ -204,6 +205,7 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
+        "": true
         Acc m/s^2: true
         Angle °: true
         Camera (Depth): true
@@ -237,6 +239,7 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
+        "": true
         Acc m/s^2: true
         Angle °: true
         Camera (Video): true
@@ -618,9 +621,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 7
+      Max Intensity: 3
       Min Color: 0; 0; 0
-      Min Intensity: 4
+      Min Intensity: 1
       Name: Wall Voxels
       Position Transformer: XYZ
       Queue Size: 10
@@ -629,6 +632,36 @@ Visualization Manager:
       Size (m): 0.15000000596046448
       Style: Boxes
       Topic: /obstacles/obstacles
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: label
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 1
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Wall Voxels
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.15000000596046448
+      Style: Spheres
+      Topic: /obstacles/walls
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -661,7 +694,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 24.014801025390625
+      Distance: 5.885567665100098
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
