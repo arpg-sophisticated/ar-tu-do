@@ -161,10 +161,10 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     if (left && right)
     {
         if (m_previous_obstacle_avoid_active.count() > 0 &&
-            (m_previous_obstacle_avoid_path == PATH_LEFT &&
-                 GeometricFunctions::distance(m_current_obstacle_left_point, processed_track.car_position) > 2 ||
-             m_previous_obstacle_avoid_path == PATH_RIGHT &&
-                 GeometricFunctions::distance(m_current_obstacle_right_point, processed_track.car_position) > 2))
+            ((m_previous_obstacle_avoid_path == PATH_LEFT &&
+              GeometricFunctions::distance(m_current_obstacle_left_point, processed_track.car_position) > 2) ||
+             (m_previous_obstacle_avoid_path == PATH_RIGHT &&
+              GeometricFunctions::distance(m_current_obstacle_right_point, processed_track.car_position) > 2)))
         {
             if (m_previous_obstacle_avoid_path == PATH_LEFT)
                 result_target_position = result_target_position_left_path;
@@ -177,7 +177,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
             Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
             std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
-            if (left_trajectory.length() <= right_trajectory.length())
+            if (std::abs(result_target_position_left_path.x) <= std::abs(result_target_position_right_path.x))
             {
                 std::cout << "Choosing left" << std::endl;
                 m_previous_obstacle_avoid_path = PATH_LEFT;
@@ -614,7 +614,7 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
 
 void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& obstacles)
 {
-    float closestY = std::numeric_limits<float>::max();
+    float closestY = 1000000;
 
     m_current_obstacle_found = false;
 
@@ -634,7 +634,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
 
         m_obstacle_pointcloud.push_back(p);
 
-        if (p.y >= .5 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
+        if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
         {
             closestY = p.y;
             m_current_obstacle_found = true;
