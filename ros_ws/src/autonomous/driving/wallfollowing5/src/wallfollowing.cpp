@@ -10,6 +10,9 @@ Wallfollowing::Wallfollowing()
     m_walls_subscriber =
         m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(TOPIC_WALLS, 1, &Wallfollowing::wallsCallback,
                                                                     this);
+    m_obstacles_subscriber =
+        m_node_handle.subscribe<pcl::PointCloud<pcl::PointXYZRGBL>>(TOPIC_OBSTACLES, 1,
+                                                                    &Wallfollowing::obstaclesCallback, this);
 
     m_lidar_cartesian_subscriber =
         m_node_handle.subscribe<sensor_msgs::PointCloud2>("/scan/lidar/cartesian", 1,
@@ -103,28 +106,27 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
 {
     Point result_target_position = target_position;
     Line line = { processed_track.car_position, target_position };
-    Point closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.right_wall);
 
     Point result_target_position_left_path, result_target_position_right_path;
     bool left = false, right = false;
-    // std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
 
-    if (!closest_point_to_line.isZero())
+    if (m_current_obstacle_found)
     {
-        Point left_point = processed_track.left_circle.getClosestPoint(closest_point_to_line);
-        result_target_position_left_path =
-            Point{ (left_point.x + closest_point_to_line.x) / 2, (left_point.y + closest_point_to_line.y) / 2 };
-        left = true;
-    }
+        if (!m_current_obstacle_left_point.isZero())
+        {
+            Point left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
+            result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
+                                                      (left_point.y + m_current_obstacle_left_point.y) / 2 };
+            left = true;
+        }
 
-    closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.left_wall);
-    // std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
-    if (!closest_point_to_line.isZero())
-    {
-        Point right_point = processed_track.right_circle.getClosestPoint(closest_point_to_line);
-        result_target_position_right_path =
-            Point{ (right_point.x + closest_point_to_line.x) / 2, (right_point.y + closest_point_to_line.y) / 2 };
-        right = true;
+        if (!m_current_obstacle_right_point.isZero())
+        {
+            Point right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
+            result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
+                                                       (right_point.y + m_current_obstacle_right_point.y) / 2 };
+            right = true;
+        }
     }
 
     if (left && right)
@@ -531,6 +533,57 @@ void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& la
         // std::endl;
     }
     m_last_scan_time = scan_time;
+}
+
+void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& obstacles)
+{
+    float closestY = std::numeric_limits<float>::max();
+
+    m_current_obstacle_found = false;
+
+    if (obstacles->size() == 0)
+        return;
+    Point currentObstacle;
+    int32_t current_obstacle_id = -1;
+    for (auto& obstaclePoint : *obstacles)
+    {
+        Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
+        if (!p.is_valid())
+            continue;
+
+        if (p.y >= 0 && p.y < closestY && p.y < 5)
+        { // TODO: HARDCODED PARAMETER, pls fix.
+            closestY = p.y;
+            m_current_obstacle_found = true;
+            currentObstacle = p;
+            current_obstacle_id = obstaclePoint.label;
+        }
+    }
+
+    if (current_obstacle_id == -1)
+        return;
+
+    float min_x = std::numeric_limits<float>::max();
+    float max_x = std::numeric_limits<float>::min();
+
+    for (auto& obstaclePoint : *obstacles)
+    {
+        if (obstaclePoint.label != current_obstacle_id)
+            continue;
+        Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
+
+        if (p.x > max_x)
+        {
+            m_current_obstacle_right_point = p;
+            max_x = p.x;
+        }
+
+        if (p.x < min_x)
+        {
+            m_current_obstacle_left_point = p;
+            min_x = p.x;
+        }
+    }
 }
 
 void Wallfollowing::wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls)

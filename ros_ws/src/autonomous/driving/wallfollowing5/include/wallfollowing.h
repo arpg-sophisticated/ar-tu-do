@@ -30,6 +30,7 @@ constexpr const char* TOPIC_GAZEBO_STATE_TELEMETRY = "/gazebo/state_telemetry";
 constexpr const char* TOPIC_LASER_SCAN = "/scan";
 constexpr const char* TOPIC_VOXEL = "/scan/voxels";
 constexpr const char* TOPIC_WALLS = "/obstacles/walls";
+constexpr const char* TOPIC_OBSTACLES = "/obstacles/obstacles";
 
 constexpr const size_t STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH = 128; // ticks
 
@@ -54,6 +55,7 @@ class Wallfollowing
     ros::Subscriber m_laserscan_subscriber;
     ros::Subscriber m_voxel_subscriber;
     ros::Subscriber m_walls_subscriber;
+    ros::Subscriber m_obstacles_subscriber;
     ros::Subscriber m_lidar_cartesian_subscriber;
     ros::Publisher m_drive_parameters_publisher;
 
@@ -62,6 +64,10 @@ class Wallfollowing
     double m_view_dist_average = 0;
 
     double m_laser_delta_time = 0;
+
+    bool m_current_obstacle_found;
+    Point m_current_obstacle_left_point;
+    Point m_current_obstacle_right_point;
 
     int m_previous_avoided_obstacles = 0;
     std::bitset<STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH> m_previous_obstacle_avoid_active = 0;
@@ -100,6 +106,7 @@ class Wallfollowing
     void publishDriveParameters(double angle, double velocity);
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan);
     void wallsCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& walls);
+    void obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr& obstacles);
     void voxelCallback(const sensor_msgs::PointCloud2::ConstPtr& voxel_msg);
     void lidarCartesianCallback(const sensor_msgs::PointCloud2::ConstPtr& pointCloud);
 };
