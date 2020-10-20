@@ -26,6 +26,14 @@ LaserscanTransformer::LaserscanTransformer()
 
 void LaserscanTransformer::scanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
+    if (!m_listener.waitForTransform(laserscan->header.frame_id, m_base_link,
+                                     laserscan->header.stamp +
+                                         ros::Duration().fromSec(laserscan->ranges.size() * laserscan->time_increment),
+                                     ros::Duration(1.0)))
+    {
+        return;
+    }
+
     sensor_msgs::PointCloud2 pointcloud;
     m_projector.transformLaserScanToPointCloud(m_base_link, *laserscan, pointcloud, m_listener);
     m_pointcloud_publisher.publish(pointcloud);
