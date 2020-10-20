@@ -533,7 +533,7 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
                 for (auto oP : m_obstacle_pointcloud)
                 {
                     Line l = { oP, p };
-                    if (l.length() <= .8)
+                    if (l.length() <= .4)
                     {
                         // in voxel?
                         found = true;
