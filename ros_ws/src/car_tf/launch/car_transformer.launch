@@ -5,7 +5,7 @@ Launches all necessary nodes that transform various frames
 -->
     <arg name="topic_input" default="/scan" />
     <arg name="topic_output" default="/scan/lidar/cartesian" />
-    <arg name="base_link" default="base_link" />
+    <arg name="base_link" default="ego_racecar/base_link" />
     <!-- tf_laserscan_to_pointcloud node -->
     <node
       respawn="true"

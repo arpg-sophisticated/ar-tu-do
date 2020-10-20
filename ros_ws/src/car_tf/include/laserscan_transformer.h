@@ -11,7 +11,7 @@
 
 constexpr const char* TOPIC_LASER_SCAN = "/scan";
 constexpr const char* TOPIC_LASER_SCAN_POINTCLOUD = "/scan/lidar/cartesian";
-constexpr const char* MODEL_BASE_LINK = "base_link";
+constexpr const char* MODEL_BASE_LINK = "ego_racecar/laser";
 
 /**
  * @brief This converter class converts a 2D laser scan

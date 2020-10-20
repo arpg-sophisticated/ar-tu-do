@@ -19,7 +19,7 @@ constexpr const char* TOPIC_INPUT_COLORED_CLOUD = "/racer/camera1/depth/points";
 constexpr const char* TOPIC_VISUALIZATION = "/wall_separation_visualization";
 constexpr const char* TOPIC_VOXEL_ = "/scan/voxels";
 
-constexpr const char* LIDAR_FRAME = "laser";
+constexpr const char* LIDAR_FRAME = "ego_racecar/laser";
 
 typedef unsigned __int128 uint128_t;
 

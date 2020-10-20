@@ -177,7 +177,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
             Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
             std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
-            double right_angle = std::asin(result_target_position_right_path.y / right_trajectory.length());
+            double right_angle = std::acos(result_target_position_right_path.y / right_trajectory.length());
             double left_angle = std::acos(result_target_position_left_path.y / left_trajectory.length());
             std::cout << "LeftAngle: " << left_angle << " RightAngle: " << right_angle << "; ";
 
