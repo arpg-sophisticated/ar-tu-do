@@ -589,12 +589,12 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
 
     m_current_obstacle_found = false;
 
+    m_obstacle_pointcloud.clear();
+
     if (obstacles->size() == 0)
         return;
     Point currentObstacle;
     int32_t current_obstacle_id = -1;
-
-    m_obstacle_pointcloud.clear();
 
     for (auto& obstaclePoint : *obstacles)
     {
