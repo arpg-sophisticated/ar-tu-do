@@ -34,5 +34,7 @@ class LaserscanTransformer
     laser_geometry::LaserProjection m_projector;
     tf::TransformListener m_listener;
 
+    std::string m_base_link;
+
     void scanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan);
 };

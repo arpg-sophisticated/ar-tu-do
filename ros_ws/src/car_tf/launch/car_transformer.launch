@@ -5,6 +5,7 @@ Launches all necessary nodes that transform various frames
 -->
     <arg name="topic_input" default="/scan" />
     <arg name="topic_output" default="/scan/lidar/cartesian" />
+    <arg name="base_link" default="base_link" />
     <!-- tf_laserscan_to_pointcloud node -->
     <node
       respawn="true"
@@ -14,6 +15,7 @@ Launches all necessary nodes that transform various frames
         output="screen" >
         <param name="topic_input" type="string" value="$(arg topic_input)" />
         <param name="topic_output" type="string" value="$(arg topic_output)" />
+        <param name="base_link" type="string" value="$(arg base_link)" />
     </node>
 	
 </launch>
