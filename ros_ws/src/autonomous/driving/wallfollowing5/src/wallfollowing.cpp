@@ -161,10 +161,14 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     else if (left)
     {
         result_target_position = result_target_position_left_path;
+        m_previous_obstacle_avoid_path = PATH_LEFT;
+        m_previous_obstacle_avoid_active.set(0, 1);
     }
     else if (right)
     {
         result_target_position = result_target_position_right_path;
+        m_previous_obstacle_avoid_path = PATH_RIGHT;
+        m_previous_obstacle_avoid_active.set(0, 1);
     }
 
     m_previous_obstacle_avoid_active <<= 1;
