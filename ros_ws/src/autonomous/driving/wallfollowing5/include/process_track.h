@@ -27,6 +27,8 @@ struct ProcessedTrack
     std::vector<Point> left_wall;
     std::vector<Point> right_wall;
     std::vector<Point> upper_wall;
+    bool left_valid;
+    bool right_valid;
 
     Circle left_circle;
     Circle right_circle;

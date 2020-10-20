@@ -114,7 +114,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
 
     if (m_current_obstacle_found)
     {
-        if (!m_current_obstacle_left_point.isZero())
+        if (!m_current_obstacle_left_point.isZero() && processed_track.left_valid)
         {
             Point left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
             Line width = { left_point, m_current_obstacle_left_point };
@@ -126,7 +126,7 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             }
         }
 
-        if (!m_current_obstacle_right_point.isZero())
+        if (!m_current_obstacle_right_point.isZero() && processed_track.right_valid)
         {
             Point right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
             Line width = { right_point, m_current_obstacle_right_point };
@@ -475,6 +475,26 @@ double Wallfollowing::getFarthestAwayDistanceInFront(const sensor_msgs::LaserSca
     {
         if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]))
         {
+            if (wallfollowing_params.use_obstacle_avoidence)
+            {
+                Point p;
+                p.x = -std::sin(angle) * laserscan->ranges[i];
+                p.y = std::cos(angle) * laserscan->ranges[i];
+                bool found = false;
+                for (auto oP : m_obstacle_pointcloud)
+                {
+                    Line l = { oP, p };
+                    if (l.length() <= 0.3)
+                    {
+                        // in voxel?
+                        found = true;
+                        break;
+                    }
+                }
+                if (found)
+                    continue;
+            }
+
             double distance = laserscan->ranges[i];
             max_distance = std::max(max_distance, distance);
         }
@@ -513,7 +533,7 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
                 for (auto oP : m_obstacle_pointcloud)
                 {
                     Line l = { oP, p };
-                    if (l.length() <= 0.3)
+                    if (l.length() <= .8)
                     {
                         // in voxel?
                         found = true;

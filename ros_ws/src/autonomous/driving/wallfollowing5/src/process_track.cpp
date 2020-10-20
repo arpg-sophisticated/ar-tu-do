@@ -120,6 +120,7 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
     {
         storage->left_circle = CircleFit::hyperFit(storage->left_wall);
         storage->right_circle = CircleFit::hyperFit(storage->right_wall);
+        storage->right_valid = storage->left_valid = true;
     }
     else if (CircleFit::pointcloudIsValid(storage->left_wall) && !CircleFit::pointcloudIsValid(storage->right_wall))
     {
@@ -127,6 +128,8 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
         int sign = storage->left_circle.pointIsInCircle(storage->car_position) ? -1 : 1;
         storage->right_circle = Circle(storage->left_circle.getCenter(), storage->left_circle.getRadius() + 4 * sign);
         std::cerr << "Right Wall invalid" << std::endl;
+        storage->left_valid = true;
+        storage->right_valid = false;
     }
     else if (CircleFit::pointcloudIsValid(storage->right_wall) && !CircleFit::pointcloudIsValid(storage->left_wall))
     {
@@ -134,10 +137,14 @@ bool ProcessTrack::processTrack(ProcessedTrack* storage, Config::ProcessingParam
         int sign = storage->right_circle.pointIsInCircle(storage->car_position) ? -1 : 1;
         storage->left_circle = Circle(storage->right_circle.getCenter(), storage->right_circle.getRadius() + 4 * sign);
         std::cerr << "Left Wall invalid" << std::endl;
+        storage->left_valid = false;
+        storage->right_valid = false;
     }
     else
     {
         std::cerr << "Right and Left Wall invalid" << std::endl;
+        storage->left_valid = false;
+        storage->right_valid = false;
         return false;
     }
 
