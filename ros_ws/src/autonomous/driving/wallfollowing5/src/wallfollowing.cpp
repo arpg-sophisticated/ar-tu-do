@@ -177,7 +177,9 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
             Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
             Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
             std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
-            if (std::abs(result_target_position_left_path.x) <= std::abs(result_target_position_right_path.x))
+            double right_angle = std::asin(result_target_position_right_path.y / right_trajectory.length());
+            double left_angle = std::acos(result_target_position_left_path.y / left_trajectory.length());
+            if (std::abs(left_angle) <= std::abs(right_angle))
             {
                 std::cout << "Choosing left" << std::endl;
                 m_previous_obstacle_avoid_path = PATH_LEFT;
@@ -448,10 +450,7 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
         }
         speed *= emergency_slowdown;
     }
-    if (m_previous_obstacle_avoid_active.count() > 4)
-    {
-        speed = speed * 0.5;
-    }
+    speed = speed * m_speed_factor;
 
     speed = std::max(1.5, speed);
     speed = std::min(speed, wallfollowing_params.max_speed);
@@ -637,6 +636,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         if (!p.is_valid())
             continue;
 
+        m_speed_factor = 1;
         if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance &&
             std::abs(p.x) < TRACK_WIDTH)
         {
@@ -644,6 +644,12 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
             m_current_obstacle_found = true;
             currentObstacle = p;
             current_obstacle_id = obstaclePoint.label;
+            m_speed_factor = 0.5;
+        }
+        else if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance * 2 &&
+                 std::abs(p.x) < TRACK_WIDTH)
+        {
+            m_speed_factor = 0.5;
         }
     }
 

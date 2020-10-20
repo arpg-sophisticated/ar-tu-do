@@ -70,6 +70,7 @@ class Wallfollowing
     bool m_current_obstacle_found;
     Point m_current_obstacle_left_point;
     Point m_current_obstacle_right_point;
+    double m_speed_factor = 1;
 
     int m_previous_avoided_obstacles = 0;
     std::bitset<STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH> m_previous_obstacle_avoid_active = 0;
