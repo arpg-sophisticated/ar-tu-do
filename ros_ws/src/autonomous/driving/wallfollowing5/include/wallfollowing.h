@@ -32,7 +32,7 @@ constexpr const char* TOPIC_VOXEL = "/scan/voxels";
 constexpr const char* TOPIC_WALLS = "/obstacles/walls";
 constexpr const char* TOPIC_OBSTACLES = "/obstacles/obstacles";
 
-constexpr const size_t STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH = 32; // ticks
+constexpr const size_t STATEFUL_OBSTACLE_AVOID_HISTORY_LENGTH = 256; // ticks
 
 enum ObstacleAvoidPath
 {

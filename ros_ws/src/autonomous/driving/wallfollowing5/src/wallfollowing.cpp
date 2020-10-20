@@ -110,50 +110,65 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
 
     Point result_target_position_left_path, result_target_position_right_path;
     bool left = false, right = false;
+    m_rviz_geometry.deleteMarker(440);
+    m_rviz_geometry.deleteMarker(441);
 
     if (m_current_obstacle_found)
     {
-        if (!m_current_obstacle_left_point.isZero() && processed_track.left_valid)
+        if (!m_current_obstacle_left_point.isZero() /* && processed_track.left_valid*/)
         {
             Point left_point = processed_track.left_circle.getClosestPoint(m_current_obstacle_left_point);
             Line width = { left_point, m_current_obstacle_left_point };
+            std::vector<Point> left_gap = { left_point, m_current_obstacle_left_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
                 result_target_position_left_path = Point{ (left_point.x + m_current_obstacle_left_point.x) / 2,
                                                           (left_point.y + m_current_obstacle_left_point.y) / 2 };
                 left = true;
+                m_rviz_geometry.showLineInRviz(440, left_gap, ColorRGBA{ 0, 0, 1, 1 });
+            }
+            else
+            {
+                m_rviz_geometry.showLineInRviz(440, left_gap, ColorRGBA{ 1, 0, 0, 1 });
+                std::cout << "Left gap too small: " << width.length() << std::endl;
             }
         }
 
-        if (!m_current_obstacle_right_point.isZero() && processed_track.right_valid)
+        if (!m_current_obstacle_right_point.isZero() /* && processed_track.right_valid*/)
         {
             Point right_point = processed_track.right_circle.getClosestPoint(m_current_obstacle_right_point);
             Line width = { right_point, m_current_obstacle_right_point };
+            std::vector<Point> right_gap = { right_point, m_current_obstacle_right_point };
             if (width.length() > wallfollowing_params.obstacle_avoidance_minimum_track_width)
             {
                 result_target_position_right_path = Point{ (right_point.x + m_current_obstacle_right_point.x) / 2,
                                                            (right_point.y + m_current_obstacle_right_point.y) / 2 };
                 right = true;
+                m_rviz_geometry.showLineInRviz(441, right_gap, ColorRGBA{ 0, 0, 1, 1 });
+            }
+            else
+            {
+                m_rviz_geometry.showLineInRviz(441, right_gap, ColorRGBA{ 1, 0, 0, 1 });
+                std::cout << "Right gap too small: " << width.length() << std::endl;
             }
         }
     }
 
     if (left && right)
     {
-        std::cout << "two path decision" << std::endl;
         if (m_previous_obstacle_avoid_active.count() > 0)
         {
             if (m_previous_obstacle_avoid_path == PATH_LEFT)
                 result_target_position = result_target_position_left_path;
             else if (m_previous_obstacle_avoid_path == PATH_RIGHT)
                 result_target_position = result_target_position_right_path;
-            std::cout << m_previous_obstacle_avoid_path << std::endl;
         }
         else
         {
             // decide
             Line left_trajectory = { processed_track.car_position, result_target_position_left_path };
             Line right_trajectory = { processed_track.car_position, result_target_position_right_path };
+            std::cout << "Left: " << left_trajectory.length() << " Right: " << right_trajectory.length() << "; ";
             if (left_trajectory.length() <= right_trajectory.length())
             {
                 std::cout << "Choosing left" << std::endl;
@@ -171,12 +186,14 @@ Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point targe
     }
     else if (left)
     {
+        std::cout << "Only left" << std::endl;
         result_target_position = result_target_position_left_path;
         m_previous_obstacle_avoid_path = PATH_LEFT;
         m_previous_obstacle_avoid_active.set(0, 1);
     }
     else if (right)
     {
+        std::cout << "Only right" << std::endl;
         result_target_position = result_target_position_right_path;
         m_previous_obstacle_avoid_path = PATH_RIGHT;
         m_previous_obstacle_avoid_active.set(0, 1);
@@ -472,23 +489,27 @@ double Wallfollowing::getFarthestAwayDistanceInFront(const sensor_msgs::LaserSca
     double max_distance = 2;
     for (int i = index_start; i < index_end; i++)
     {
-        bool found = false;
 
         if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]))
         {
+            bool found = false;
             if (wallfollowing_params.use_obstacle_avoidence)
             {
                 Point p;
                 p.x = -std::sin(angle) * laserscan->ranges[i];
                 p.y = std::cos(angle) * laserscan->ranges[i];
-                for (auto oP : m_obstacle_pointcloud)
+                if (wallfollowing_params.use_obstacle_avoidence)
                 {
-                    Line l = { oP, p };
-                    if (l.length() <= 0.3)
+                    double voxelSize = .8;
+                    float x = p.x - remainderf(p.x, voxelSize);
+                    float y = p.y - remainderf(p.y, voxelSize);
+                    for (auto oP : m_obstacle_pointcloud)
                     {
-                        // in voxel?
-                        found = true;
-                        break;
+                        if (fabsf(x - oP.x) < voxelSize && fabsf(y - oP.y) < voxelSize)
+                        {
+                            found = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -529,15 +550,15 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
             p.y = std::cos(angle) * laserscan->ranges[i];
 
             bool found = false;
-
             if (wallfollowing_params.use_obstacle_avoidence)
             {
+                double voxelSize = .8;
+                float x = p.x - remainderf(p.x, voxelSize);
+                float y = p.y - remainderf(p.y, voxelSize);
                 for (auto oP : m_obstacle_pointcloud)
                 {
-                    Line l = { oP, p };
-                    if (l.length() <= .4)
+                    if (fabsf(x - oP.x) < voxelSize && fabsf(y - oP.y) < voxelSize)
                     {
-                        // in voxel?
                         found = true;
                         break;
                     }
@@ -605,7 +626,7 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
 
         m_obstacle_pointcloud.push_back(p);
 
-        if (p.y >= 0 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
+        if (p.y >= .5 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
         {
             closestY = p.y;
             m_current_obstacle_found = true;
@@ -625,6 +646,8 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         if (obstaclePoint.label != current_obstacle_id)
             continue;
         Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
+        if (!p.is_valid())
+            continue;
 
         if (p.x > max_x)
         {
