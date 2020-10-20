@@ -448,6 +448,11 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
         }
         speed *= emergency_slowdown;
     }
+    if (m_previous_obstacle_avoid_active.count() > 4)
+    {
+        speed = speed * 0.5;
+    }
+
     speed = std::max(1.5, speed);
     speed = std::min(speed, wallfollowing_params.max_speed);
 
@@ -632,7 +637,8 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         if (!p.is_valid())
             continue;
 
-        if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
+        if (p.y >= 0.75 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance &&
+            std::abs(p.x) < TRACK_WIDTH)
         {
             closestY = p.y;
             m_current_obstacle_found = true;
@@ -654,7 +660,10 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
         if (!p.is_valid())
             continue;
-        m_obstacle_pointcloud.push_back(p);
+        if (std::abs(p.x) < TRACK_WIDTH)
+        {
+            m_obstacle_pointcloud.push_back(p);
+        }
 
         if (p.x > max_x)
         {
