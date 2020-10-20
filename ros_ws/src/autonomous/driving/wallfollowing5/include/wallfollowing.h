@@ -74,6 +74,7 @@ class Wallfollowing
     ObstacleAvoidPath m_previous_obstacle_avoid_path;
 
     std::vector<Point> m_laser_pointcloud;
+    std::vector<Point> m_obstacle_pointcloud;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr m_lidar_pointcloud;
 

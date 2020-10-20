@@ -506,6 +506,24 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
             Point p;
             p.x = -std::sin(angle) * laserscan->ranges[i];
             p.y = std::cos(angle) * laserscan->ranges[i];
+
+            if (wallfollowing_params.use_obstacle_avoidence)
+            {
+                bool found = false;
+                for (auto oP : m_obstacle_pointcloud)
+                {
+                    Line l = { oP, p };
+                    if (l.length() <= 0.3)
+                    {
+                        // in voxel?
+                        found = true;
+                        break;
+                    }
+                }
+                if (found)
+                    continue;
+            }
+
             storage->push_back(p);
         }
         angle += laserscan->angle_increment;
@@ -555,14 +573,20 @@ void Wallfollowing::obstaclesCallback(const pcl::PointCloud<pcl::PointXYZRGBL>::
         return;
     Point currentObstacle;
     int32_t current_obstacle_id = -1;
+
+    m_obstacle_pointcloud.clear();
+
     for (auto& obstaclePoint : *obstacles)
     {
         Point p = Point{ -obstaclePoint.y, obstaclePoint.x };
+
         if (!p.is_valid())
             continue;
 
+        m_obstacle_pointcloud.push_back(p);
+
         if (p.y >= 0 && p.y < closestY && p.y < wallfollowing_params.obstacle_avoidance_distance)
-        { // TODO: HARDCODED PARAMETER, pls fix.
+        {
             closestY = p.y;
             m_current_obstacle_found = true;
             currentObstacle = p;
