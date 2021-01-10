@@ -51,7 +51,8 @@ PROJECT_BRIEF          = "f1tenth Project Group of Technical University Dortmund
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = $(TRAVIS_BUILD_DIR)/doc/logo.png
+PROJECT_LOGO           = doc/logo.png
+#PROJECT_LOGO           = $(TRAVIS_BUILD_DIR)/doc/logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -790,7 +791,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = $(TRAVIS_BUILD_DIR)/docs/master
+#INPUT                  = $(TRAVIS_BUILD_DIR)/docs/master
+INPUT                  = ros_ws
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

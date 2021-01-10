@@ -1,7 +1,7 @@
-#pragma once
+#include "ros/ros.h"
 
 namespace PhysicalProperties
 {
-    static const float DYNAMIC_FRICTION = 0.54;
-    static const float ACCELERATION = 9.81f * DYNAMIC_FRICTION;
+    float getDynamicFriction();
+    float getAcceleration();
 }; // namespace PhysicalProperties

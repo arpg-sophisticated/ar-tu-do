@@ -38,6 +38,12 @@ void CarController::publishDriveParameters(float speed, float relative_angle)
                      << " | speed: " << speed << " | angle: " << angle);
 }
 
+int CarController::convertSpeedToRpm(float speed)
+{
+    // 0.9 is an experimental derived correction factor for the speed
+    return (speed / 0.9) * car_config::TRANSMISSION / car_config::ERPM_TO_SPEED;
+}
+
 void CarController::publishSpeed(float speed)
 {
     std_msgs::Float64 speed_message;
@@ -73,7 +79,7 @@ void CarController::stop()
     this->publishSpeed(0);
 
     std_msgs::Float64 brake_message;
-    brake_message.data = 0;
+    brake_message.data = 4;
     this->m_brake_publisher.publish(brake_message);
 }
 

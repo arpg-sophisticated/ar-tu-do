@@ -75,7 +75,7 @@ class QLearningDrivingNode(ReinforcementLearningNode):
                 str(action_index))
 
         angle, velocity = self.actions[action_index]
-        print(str(angle) + ", " + str(velocity))
+        # print(str(angle) + ", " + str(velocity))
         message = drive_param()
         # add WFdrivemessages
         if(addWFMessage):

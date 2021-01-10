@@ -27,5 +27,6 @@
   <exec_depend>libpcl-all</exec_depend>
   <depend>boxing</depend>
   <depend>dynamic_reconfigure</depend>
+  <depend>debug_tools</depend>
 
 </package>

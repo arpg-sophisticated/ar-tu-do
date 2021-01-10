@@ -6,6 +6,7 @@ Driving parameters tweaked for the physical car.
 TODO: The updated parameters will go here, for now they are the default parameters
 -->
 
+    <arg name="topic_drive_param" default="/input/drive_param/autonomous"/>
 
     <!-- wall_following node -->
     <node

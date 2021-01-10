@@ -20,13 +20,22 @@ Wallfollowing::Wallfollowing()
         wallfollowing_params.usable_laser_range = cfg.usable_laser_range;
         wallfollowing_params.target_method = (Config::TargetMethod)cfg.target_method;
         wallfollowing_params.use_voxel = cfg.use_voxel;
+        wallfollowing_params.use_obstacle_avoidence = cfg.use_obstacle_avoidence;
         wallfollowing_params.safety_wall_distance = cfg.safety_wall_distance;
         wallfollowing_params.max_predicted_distance = cfg.max_predicted_distance;
         wallfollowing_params.emergency_slowdown = cfg.emergency_slowdown;
+        wallfollowing_params.advanced_trajectory = cfg.advanced_trajectory;
+        wallfollowing_params.advanced_trajectory_distance = cfg.advanced_trajectory_distance;
         wallfollowing_params.max_speed = cfg.max_speed;
+
+        processing_params.usable_laser_range = cfg.usable_laser_range;
+        processing_params.usable_laser_range_wall_detection = cfg.usable_laser_range_wall_detection;
+        processing_params.radius_curve_entry_proportion = cfg.radius_curve_entry_proportion;
 
         steering_params.min_possible_steering_angle = cfg.min_possible_steering_angle;
         steering_params.max_steering_angle = cfg.max_steering_angle;
+
+        speed_params.brake_safety_margin = cfg.brake_safety_margin;
 
         pid_params.p = cfg.pid_p;
         pid_params.i = cfg.pid_i;
@@ -62,6 +71,56 @@ bool Wallfollowing::lineTooCloseToPointcloud(ProcessedTrack& processed_track, Li
         }
     }
     return false;
+}
+
+Point Wallfollowing::determineClosestPointToLine(ProcessedTrack& processed_track, Line& line,
+                                                 std::vector<Point>& pointcloud)
+{
+    Point result_point = { 0, 0 };
+    double min_distance = wallfollowing_params.safety_wall_distance;
+    double line_length = line.length();
+    for (auto& point : pointcloud)
+    {
+        double shortest_distance_to_line = GeometricFunctions::calcShortestDistanceToLine(point, line);
+        if (GeometricFunctions::distance(processed_track.car_position, point) < line_length // +SAFETY_DISTANCE
+            && shortest_distance_to_line < min_distance && point.y > processed_track.car_position.y + 0.2)
+        {
+            min_distance = shortest_distance_to_line;
+            result_point = point;
+        }
+    }
+    std::cout << min_distance << std::endl;
+    return result_point;
+}
+
+Point Wallfollowing::avoidObstacles(ProcessedTrack& processed_track, Point target_position)
+{
+    Point result_target_position = target_position;
+    int avoided_obstacles = 0;
+    Line line = { processed_track.car_position, target_position };
+    Point closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.right_wall);
+    std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
+    if (!closest_point_to_line.isZero())
+    {
+        Point left_point = processed_track.left_circle.getClosestPoint(closest_point_to_line);
+        result_target_position =
+            Point{ (left_point.x + closest_point_to_line.x) / 2, (left_point.y + closest_point_to_line.y) / 2 };
+        avoided_obstacles++;
+    }
+    closest_point_to_line = determineClosestPointToLine(processed_track, line, processed_track.left_wall);
+    std::cout << closest_point_to_line.x << ", " << closest_point_to_line.y << std::endl;
+    if (!closest_point_to_line.isZero())
+    {
+        Point right_point = processed_track.right_circle.getClosestPoint(closest_point_to_line);
+        result_target_position =
+            Point{ (right_point.x + closest_point_to_line.x) / 2, (right_point.y + closest_point_to_line.y) / 2 };
+        avoided_obstacles++;
+    }
+    if (avoided_obstacles > 1)
+    {
+        return target_position;
+    }
+    return result_target_position;
 }
 
 std::pair<Point, Point> Wallfollowing::determineTargetPathPoint(ProcessedTrack& processed_track, double min_distance,
@@ -108,10 +167,19 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
     Point target_position = central_point;
 
+    double advanced_trajectory_factor =
+        std::min(processed_track.curve_entry.y / wallfollowing_params.advanced_trajectory_distance, 1.0);
+
     Point upper_point;
     if (processed_track.curve_type == CURVE_TYPE_LEFT)
     {
-        // target_position = Point{central_point.x + 0.0, central_point.y};
+        if (processed_track.curve_entry.y < wallfollowing_params.advanced_trajectory_distance)
+        {
+            target_position =
+                Point{ processed_track.curve_entry.x + track_width / 2.0 * wallfollowing_params.advanced_trajectory +
+                           track_width / 2.0,
+                       processed_track.curve_entry.y };
+        }
         if (predicted_position.y > processed_track.curve_entry.y)
         {
             upper_point = processed_track.upper_circle.getClosestPoint(predicted_position);
@@ -120,7 +188,13 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
     }
     else if (processed_track.curve_type == CURVE_TYPE_RIGHT)
     {
-        // target_position = Point{central_point.x - 0.0, central_point.y}
+        if (processed_track.curve_entry.y < wallfollowing_params.advanced_trajectory_distance)
+        {
+            target_position =
+                Point{ processed_track.curve_entry.x - track_width / 2.0 * wallfollowing_params.advanced_trajectory -
+                           track_width / 2.0,
+                       processed_track.curve_entry.y };
+        }
         if (predicted_position.y > processed_track.curve_entry.y)
         {
             upper_point = processed_track.upper_circle.getClosestPoint(predicted_position);
@@ -195,7 +269,10 @@ Point Wallfollowing::determineTargetCarPosition(ProcessedTrack& processed_track,
 
 void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_time)
 {
-    double speed = m_speed_controller.calcSpeed(processed_track);
+    double acceleration = PhysicalProperties::getAcceleration();
+    double dynamic_friction = PhysicalProperties::getDynamicFriction();
+
+    double speed = m_speed_controller.calcSpeed(processed_track, speed_params, acceleration, dynamic_friction);
 
     Point predicted_position;
     Point target_position;
@@ -204,6 +281,10 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
     {
         predicted_position = determinePredictedCarPosition(processed_track);
         target_position = determineTargetCarPosition(processed_track, predicted_position);
+        if (wallfollowing_params.use_obstacle_avoidence)
+        {
+            target_position = avoidObstacles(processed_track, target_position);
+        }
     }
     else if (wallfollowing_params.target_method == Config::CENTER_PATH)
     {
@@ -229,8 +310,9 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
         target_position = determineTrackCenter(processed_track, predicted_position);
     }
 
-    double angle = m_steering_controller.determineSteeringAngle(processed_track, pid_params, steering_params,
-                                                                predicted_position, target_position, delta_time);
+    double angle =
+        m_steering_controller.determineSteeringAngle(processed_track, pid_params, steering_params, predicted_position,
+                                                     target_position, acceleration, delta_time);
 
     std::vector<Point> rviz_predicted_car_points = { processed_track.car_position, predicted_position };
     m_rviz_geometry.showLineInRviz(3, rviz_predicted_car_points, ColorRGBA{ 1, 1, 1, 0.3 }, 0.005);
@@ -260,7 +342,7 @@ void Wallfollowing::followWalls(ProcessedTrack& processed_track, double delta_ti
 void Wallfollowing::handleLaserPointcloud(std::vector<Point>& pointcloud, double delta_time)
 {
     ProcessedTrack processed_track;
-    if (m_process_track.processTrack(&processed_track, pointcloud))
+    if (m_process_track.processTrack(&processed_track, pointcloud, processing_params))
     {
         followWalls(processed_track, delta_time);
     }
@@ -274,7 +356,8 @@ void Wallfollowing::handleWallsPointcloud(const pcl::PointCloud<pcl::PointXYZRGB
                                           double delta_time)
 {
     ProcessedTrack processed_track;
-    if (m_lidar_pointcloud && m_process_track.processTrack(&processed_track, wall_pointcloud, m_lidar_pointcloud))
+    if (m_lidar_pointcloud &&
+        m_process_track.processTrack(&processed_track, wall_pointcloud, m_lidar_pointcloud, processing_params))
     {
         followWalls(processed_track, delta_time);
     }
@@ -297,7 +380,7 @@ void Wallfollowing::getScanAsCartesian(std::vector<Point>* storage, const sensor
     double angle = angle_start;
     for (int i = index_start; i < index_end; i++)
     {
-        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]))
+        if (!std::isnan(laserscan->ranges[i]) && !std::isinf(laserscan->ranges[i]) && laserscan->ranges[i] < 15)
         {
             Point p;
             p.x = -std::sin(angle) * laserscan->ranges[i];
@@ -318,6 +401,8 @@ void Wallfollowing::publishDriveParameters(double angle, double velocity)
 
 void Wallfollowing::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
+    message_continuity_check.handleMessageSeq("WF5: Laserscan: ", laserscan->header.seq);
+
     double scan_time = laserscan->header.stamp.toSec();
     double t_start = ros::Time::now().toSec();
     if (std::abs(scan_time - m_last_scan_time) > 0.0001 && scan_time > m_last_scan_time)

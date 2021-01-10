@@ -42,10 +42,10 @@ class SpeedInfo
         return m_last_determined_speed;
     }
     void publishMaxSpeed(std::vector<Point>& pointcloud);
-    double calcMaxCurveSpeed(double radius);
-    double calcMaxSpeed(double distance, double target_speed);
-    double calcBrakingDistance(double distance, double target_speed);
-    double calcSpeed(ProcessedTrack& processed_track);
+    double calcMaxCurveSpeed(double radius, double dynamic_friction);
+    double calcMaxSpeed(double distance, double target_speed, double acceleration);
+    double calcBrakingDistance(double distance, double target_speed, double acceleration);
+    double calcSpeed(ProcessedTrack& processed_track, double acceleration, double dynamic_friction);
     void getScanAsCartesian(std::vector<Point>* storage, const sensor_msgs::LaserScan::ConstPtr& laserscan);
 
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan);

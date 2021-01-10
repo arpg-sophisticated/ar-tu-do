@@ -13,6 +13,11 @@ struct Point
     {
         return !std::isnan(x) && !std::isinf(x) && !std::isnan(y) && !std::isinf(y);
     }
+
+    bool isZero()
+    {
+        return x == 0 && y == 0;
+    }
 };
 
 struct Line

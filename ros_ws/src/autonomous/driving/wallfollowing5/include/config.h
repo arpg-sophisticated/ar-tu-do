@@ -19,19 +19,31 @@ namespace Config
     struct WallfollowingParams
     {
         // The size of the part of the laser scan that should be used by the algorithm, in degrees.
-        float usable_laser_range = 240;
+        double usable_laser_range;
 
-        TargetMethod target_method = TRACK_CENTER;
+        TargetMethod target_method;
 
-        bool use_voxel = false;
+        bool use_voxel;
 
-        float safety_wall_distance = 1.2 * car_config::REAR_WHEEL_DISTANCE;
+        bool use_obstacle_avoidence;
 
-        double max_predicted_distance = 1.0;
+        double safety_wall_distance;
 
-        bool emergency_slowdown = true;
+        double max_predicted_distance;
 
-        double max_speed = 2.5;
+        bool emergency_slowdown;
+
+        double advanced_trajectory;
+        double advanced_trajectory_distance;
+
+        double max_speed;
+    };
+
+    struct ProcessingParams
+    {
+        double usable_laser_range;
+        double usable_laser_range_wall_detection;
+        double radius_curve_entry_proportion;
     };
 
     // steering-parameters
@@ -39,6 +51,11 @@ namespace Config
     {
         double min_possible_steering_angle;
         double max_steering_angle;
+    };
+
+    struct SpeedParams
+    {
+        double brake_safety_margin;
     };
 
     // pid-parameters

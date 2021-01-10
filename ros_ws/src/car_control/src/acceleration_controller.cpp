@@ -13,11 +13,6 @@ AccelerationController::AccelerationController()
     m_emergency_stop_publisher = m_node_handle.advertise<std_msgs::Time>(TOPIC_EMERGENCY_STOP, 1);
 
     m_timer = m_node_handle.createTimer(ros::Duration(0.01), &AccelerationController::approachSpeedControlled, this);
-
-    // add physical properties to the parameter server so that they can be used in other nodes and could be changed
-    m_node_handle.setParam("/physical_properties/dynamic_friction", INITIAL_DYNAMIC_FRICTION);
-    m_node_handle.setParam("/physical_properties/static_friction", INITIAL_STATIC_FRICTION);
-    m_node_handle.setParam("/physical_properties/acceleration", CAR_ACCELERATION);
 }
 
 void AccelerationController::approachSpeedControlled(const ros::TimerEvent& event)
@@ -27,12 +22,13 @@ void AccelerationController::approachSpeedControlled(const ros::TimerEvent& even
     double delta_speed;
     if (diff_speed >= 0)
     {
-        delta_speed = CAR_ACCELERATION * duration.toSec();
+        delta_speed = PhysicalProperties::getAcceleration() * duration.toSec();
     }
     else
     {
-        delta_speed = -CAR_ACCELERATION * duration.toSec();
+        delta_speed = -PhysicalProperties::getAcceleration() * duration.toSec();
     }
+
     if (std::abs(delta_speed) > std::abs(diff_speed))
     {
         m_current_speed = m_target_speed;
